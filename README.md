@@ -98,3 +98,4 @@ tests/            pytest suite
 ## Environment variables
 
 See `.env.example` (`SECRET_KEY`, `DATABASE_PATH`, `ASSETS_PATH`, `HOST`, `PORT`, `MAX_UPLOAD_MB`).
+
