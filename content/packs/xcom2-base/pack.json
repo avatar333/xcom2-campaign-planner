@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "slug": "xcom2-base",
+  "name": "XCOM 2",
+  "kind": "base",
+  "version": "1.0.0",
+  "description": "Base XCOM 2 game: vanilla strategy layer, weapons, armor, research and facilities (pre-War of the Chosen).",
+  "license": "fact-data-only; see docs/DATA_SOURCING.md and docs/DATA_SOURCING.md",
+  "attribution_text": "Firaxis Games / 2K Games (facts only, no bundled assets -- ADR-0008)",
+  "homepage_url": "https://www.ufopaedia.org/index.php/XCOM_2",
+  "requires": [],
+  "extends": [],
+  "conflicts": [],
+  "ingestion_notes": "Authored from UFOpaedia XCOM 2 pages (ufopaedia.org) and Fextralife XCOM 2 wiki cross-references, November 2026. No official SDK/INI access was available during authoring; numeric values are cited to the specific wiki page that stated them, and fields the sources did not state are intentionally left out rather than guessed (docs/DATA_SOURCING.md). See docs/DATA_SOURCING.md for the per-fact source list."
+}

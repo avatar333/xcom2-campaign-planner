@@ -17,31 +17,68 @@
 
 {{ ui.section_header("Enabled / Attached Sources", attached_sources | length ~ " attached") }}
 {% if attached_sources %}
-  <table class="data-table" style="margin-bottom:1.5rem;">
-    <thead><tr><th>Precedence</th><th>Source</th><th>Kind</th><th>Status</th><th></th></tr></thead>
-    <tbody>
-    {% for assoc, source in attached_sources | sort(attribute="precedence") %}
-      <tr>
-        <td>{{ assoc.precedence }}</td>
-        <td>
-          {{ source.name if source else "Unknown source" }}
-          {% if source and source.is_builtin %}{{ ui.badge("Built-in", "neutral") }}{% endif %}
-        </td>
-        <td>{{ (source.kind if source else "") | replace("_", " ") | title }}</td>
-        <td>{{ ui.badge("Enabled" if assoc.enabled else "Disabled", "ready" if assoc.enabled else "unknown") }}</td>
-        <td class="list-row-actions">
-          <form method="post" action="{{ url_for('campaigns.toggle_source', campaign_id=campaign.id, source_id=assoc.content_source_id) }}">
-            <button class="btn btn--sm" type="submit">{{ "Disable" if assoc.enabled else "Enable" }}</button>
-          </form>
-          <form method="post" action="{{ url_for('campaigns.remove_source', campaign_id=campaign.id, source_id=assoc.content_source_id) }}">
-            <button class="btn btn--sm btn--danger" type="submit">Remove</button>
-          </form>
-        </td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
-  <p class="text-small text-muted" style="margin-bottom:1.5rem;">Precedence currently follows attach order (first attached = lowest). Drag-and-drop reordering is planned for the full catalog UI; to change precedence today, remove and re-attach sources in the order you want them to win.</p>
+  <div
+    x-data="{
+      order: [{% for assoc, source in attached_sources | sort(attribute='precedence') %}{{ assoc.content_source_id }}{{ ',' if not loop.last }}{% endfor %}],
+      dragId: null,
+      dragStart(id) { this.dragId = id; },
+      dragOver(id) {
+        if (this.dragId === null || this.dragId === id) return;
+        const from = this.order.indexOf(this.dragId);
+        const to = this.order.indexOf(id);
+        this.order.splice(from, 1);
+        this.order.splice(to, 0, this.dragId);
+      },
+      dragEnd() {
+        this.dragId = null;
+        this.$refs.reorderForm.submit();
+      },
+    }"
+  >
+    <form
+      x-ref="reorderForm"
+      method="post"
+      action="{{ url_for('campaigns.reorder_sources', campaign_id=campaign.id) }}"
+      style="display:none;"
+    >
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <template x-for="id in order" :key="id">
+        <input type="hidden" name="content_source_id" :value="id">
+      </template>
+    </form>
+    <table class="data-table" style="margin-bottom:0.5rem;">
+      <thead><tr><th></th><th>Precedence</th><th>Source</th><th>Kind</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+      {% for assoc, source in attached_sources | sort(attribute="precedence") %}
+        <tr
+          draggable="true"
+          @dragstart="dragStart({{ assoc.content_source_id }})"
+          @dragover.prevent="dragOver({{ assoc.content_source_id }})"
+          @dragend="dragEnd()"
+          style="cursor:grab;"
+        >
+          <td class="text-muted" title="Drag to reorder precedence">&#x2630;</td>
+          <td>{{ assoc.precedence }}</td>
+          <td>
+            {{ source.name if source else "Unknown source" }}
+            {% if source and source.is_builtin %}{{ ui.badge("Built-in", "neutral") }}{% endif %}
+          </td>
+          <td>{{ (source.kind if source else "") | replace("_", " ") | title }}</td>
+          <td>{{ ui.badge("Enabled" if assoc.enabled else "Disabled", "ready" if assoc.enabled else "unknown") }}</td>
+          <td class="list-row-actions">
+            <form method="post" action="{{ url_for('campaigns.toggle_source', campaign_id=campaign.id, source_id=assoc.content_source_id) }}">
+              <button class="btn btn--sm" type="submit">{{ "Disable" if assoc.enabled else "Enable" }}</button>
+            </form>
+            <form method="post" action="{{ url_for('campaigns.remove_source', campaign_id=campaign.id, source_id=assoc.content_source_id) }}">
+              <button class="btn btn--sm btn--danger" type="submit">Remove</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="text-small text-muted" style="margin-bottom:1.5rem;">Drag a row by the handle to change precedence order (higher precedence wins when two enabled sources describe the same object); the new order saves automatically on drop.</p>
 {% else %}
   {{ ui.empty_state("No content sources attached", "Attach at least one content source (e.g. XCOM 2, War of the Chosen) so the catalog has something to show for this campaign.") }}
 {% endif %}

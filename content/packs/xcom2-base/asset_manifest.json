@@ -1,0 +1,26 @@
+[
+  {
+    "target": ["xcom2-base", "AssaultRifle_CV"],
+    "role": "icon",
+    "source_url": "https://www.ufopaedia.org/index.php?title=Weapons_(XCOM2)",
+    "source_name": "UFOpaedia",
+    "redistribution_allowed": false,
+    "import_status": "pending"
+  },
+  {
+    "target": ["xcom2-base", "KevlarArmor"],
+    "role": "icon",
+    "source_url": "https://www.ufopaedia.org/Armor_(XCOM2)",
+    "source_name": "UFOpaedia",
+    "redistribution_allowed": false,
+    "import_status": "pending"
+  },
+  {
+    "target": ["xcom2-base", "ProvingGround"],
+    "role": "icon",
+    "source_url": "https://xcom2.wiki.fextralife.com/Proving_Ground",
+    "source_name": "Fextralife XCOM 2 Wiki",
+    "redistribution_allowed": false,
+    "import_status": "pending"
+  }
+]

@@ -1,0 +1,154 @@
+[
+  {
+    "template_key": "OfficerTrainingSchool_LWOTC",
+    "type": "facility",
+    "name": "Guerrilla Tactics School (LWOTC)",
+    "short_description": "LWOTC rebalances the Guerrilla Tactics School's cost and power consumption compared to WotC.",
+    "tags": ["facility", "avenger-grid", "lwotc"],
+    "overrides": ["xcom2-base", "OfficerTrainingSchool"],
+    "patch": {
+      "attributes": {
+        "build_cost_supplies": 150,
+        "power_cost": 2,
+        "ruleset_note": "LWOTC values per LongWarOfTheChosen/Config/XComLW_Overhaul.ini FacilityTable (OfficerTrainingSchool, pinned commit 4872d8e). Build-days not present in that table (facility already existed pre-WOTC with no BuildDays override recorded)."
+      }
+    }
+  },
+  {
+    "template_key": "ResistanceRing_LWOTC",
+    "type": "facility",
+    "name": "Resistance Ring (LWOTC)",
+    "short_description": "LWOTC keeps the Resistance Ring's base cost but changes its engineer-slot upgrade behaviour (one upgrade slot instead of WotC's two).",
+    "tags": ["facility", "avenger-grid", "lwotc", "wotc-only"],
+    "overrides": ["wotc", "ResistanceRing"],
+    "patch": {
+      "attributes": {
+        "ruleset_note": "LWOTC removes the second Resistance Ring engineer-slot upgrade present in vanilla WotC (see FacilityUpgradeTable comment 'Second upgrade currently removed from LWOTC' in XComLW_Overhaul.ini, pinned commit 4872d8e); engineers reduce Covert Action duration by 25% per engineer instead of WotC's 33%/50%."
+      }
+    }
+  },
+  {
+    "template_key": "Infirmary_LWOTC",
+    "type": "facility",
+    "name": "Infirmary (LWOTC)",
+    "short_description": "LWOTC-specific Infirmary upgrade: the Recovery Chamber.",
+    "tags": ["facility", "avenger-grid", "lwotc", "wotc-only"],
+    "overrides": ["wotc", "Infirmary"],
+    "patch": {
+      "attributes": {
+        "ruleset_note": "LWOTC adds an Infirmary_RecoveryChamber upgrade (-2 power, 80 supplies) per XComLW_Overhaul.ini FacilityUpgradeTable, pinned commit 4872d8e."
+      }
+    }
+  },
+
+  {
+    "template_key": "LWS_Gunner",
+    "type": "soldier_class",
+    "name": "Gunner",
+    "short_description": "LWOTC-exclusive class: heavy automatic-weapons specialist, suppression and sustained direct damage with cannons.",
+    "tags": ["soldier-class", "lwotc"],
+    "attributes": {
+      "primary_weapon_categories": "Cannon",
+      "secondary_equipment": "Combat Knife",
+      "training_method": "gts",
+      "roster_origin": "lwotc"
+    }
+  },
+  {
+    "template_key": "LWS_Technical",
+    "type": "soldier_class",
+    "name": "Technical",
+    "short_description": "LWOTC-exclusive class: brings heavy-weapon gauntlets (Rocket Launcher, Flamethrower) to a regular soldier loadout.",
+    "tags": ["soldier-class", "lwotc"],
+    "attributes": {
+      "primary_weapon_categories": "Rifle / SMG / Shotgun",
+      "secondary_equipment": "Gauntlet (Rocket Launcher / Flamethrower)",
+      "training_method": "gts",
+      "roster_origin": "lwotc"
+    }
+  },
+  {
+    "template_key": "LWS_Shinobi",
+    "type": "soldier_class",
+    "name": "Shinobi",
+    "short_description": "LWOTC-exclusive class: stealth and short-range combat specialist, closest analogue to the vanilla Ranger.",
+    "tags": ["soldier-class", "lwotc"],
+    "attributes": {
+      "primary_weapon_categories": "Rifle / SMG / Shotgun",
+      "secondary_equipment": "Sword",
+      "training_method": "gts",
+      "roster_origin": "lwotc"
+    }
+  },
+  {
+    "template_key": "LWS_Assault",
+    "type": "soldier_class",
+    "name": "Assault",
+    "short_description": "LWOTC starter class (one of the 8 LWOTC squaddie-promotion options per Soldier_Overview_(LWOTC)); close-range rifle/SMG/shotgun specialist.",
+    "tags": ["soldier-class", "lwotc"],
+    "attributes": {
+      "primary_weapon_categories": "Rifle / SMG / Shotgun",
+      "secondary_equipment": "Combat Knife",
+      "training_method": "gts",
+      "roster_origin": "lwotc"
+    }
+  },
+
+  {
+    "template_key": "LaserWeapons",
+    "type": "research_project",
+    "name": "Laser Weapons",
+    "short_description": "LWOTC-added research tier between Modular Weapons and Magnetic Weapons; unlocks laser-tier primary weapons. Does not exist in vanilla XCOM 2/WotC.",
+    "tags": ["research", "weapons", "lwotc"],
+    "attributes": {
+      "research_category": "weapons",
+      "ruleset_note": "LWOTC-exclusive tech per XComLW_Overhaul.ini TechTable (LaserWeapons: PrereqTech1=ModularWeapons, PrereqTech2=HybridMaterials, ResearchPointCost=4000, RequiredScienceScore=10), pinned commit 4872d8e."
+    }
+  },
+  {
+    "template_key": "AdvancedLasers",
+    "type": "research_project",
+    "name": "Advanced Laser Weapons",
+    "short_description": "LWOTC-added research tier unlocking the full laser weapon set. Does not exist in vanilla XCOM 2/WotC.",
+    "tags": ["research", "weapons", "lwotc"],
+    "attributes": {
+      "research_category": "weapons",
+      "ruleset_note": "LWOTC-exclusive tech per XComLW_Overhaul.ini TechTable (AdvancedLasers: PrereqTech1=LaserWeapons, ResearchPointCost=4000, RequiredScienceScore=10), pinned commit 4872d8e."
+    }
+  },
+  {
+    "template_key": "Coilguns",
+    "type": "research_project",
+    "name": "Coilguns",
+    "short_description": "LWOTC-added research tier between Gauss Weapons and Plasma Rifle; unlocks coilgun-tier primary weapons. Does not exist in vanilla XCOM 2/WotC (which goes Gauss -> Elerium -> Plasma directly).",
+    "tags": ["research", "weapons", "lwotc"],
+    "attributes": {
+      "research_category": "weapons",
+      "ruleset_note": "LWOTC-exclusive tech per XComLW_Overhaul.ini TechTable (Coilguns: PrereqTech1=GaussWeapons, PrereqTech2=Tech_Elerium, ResearchPointCost=18000, RequiredScienceScore=30), pinned commit 4872d8e."
+    }
+  },
+  {
+    "template_key": "AdvancedCoilguns",
+    "type": "research_project",
+    "name": "Advanced Coilguns",
+    "short_description": "LWOTC-added research tier unlocking the full coilgun weapon set.",
+    "tags": ["research", "weapons", "lwotc"],
+    "attributes": {
+      "research_category": "weapons",
+      "ruleset_note": "LWOTC-exclusive tech per XComLW_Overhaul.ini TechTable (AdvancedCoilguns: PrereqTech1=Coilguns, ResearchPointCost=18000, RequiredScienceScore=30), pinned commit 4872d8e."
+    }
+  },
+  {
+    "template_key": "PlasmaRifle_LWOTC",
+    "type": "research_project",
+    "name": "Plasma Rifle (LWOTC)",
+    "short_description": "LWOTC changes Plasma Rifle's prerequisite to an OR of Advanced Coilguns / Advanced Laser Weapons, and raises its cost substantially compared to vanilla/WotC.",
+    "tags": ["research", "weapons", "lwotc"],
+    "overrides": ["xcom2-base", "PlasmaRifle"],
+    "patch": {
+      "attributes": {
+        "ruleset_note": "LWOTC per XComLW_Overhaul.ini TechTable (PlasmaRifle: PrereqTech1=AdvancedCoilguns, PrereqTech2=AdvancedLasers, ResearchPointCost=22000, RequiredScienceScore=40, AlloyCost=20, CrystalCost=30, CoreCost=3), pinned commit 4872d8e -- see prerequisite_groups.json for the OR-group representation of this either-or requirement."
+      }
+    }
+  }
+]

@@ -6,6 +6,8 @@ from __future__ import annotations
 
 import json
 
+from flask import current_app
+
 from app.domain.attributes import parse_attributes_json
 from app.domain.effective_catalog import resolve_effective_catalog
 from app.extensions import db
@@ -15,9 +17,17 @@ from app.repositories import campaign_sources as campaign_sources_repo
 # In-process cache: {(campaign_id, version): {object_id: effective_fields}}.
 # Bounded and trivially invalidated because the key includes the version
 # counter that every mutation path bumps (ARCHITECTURE.md §7.3) -- a stale
-# entry is simply never looked up again.
-_CACHE: dict[tuple[int, int], dict[int, dict]] = {}
+# entry is simply never looked up again. Stored on `current_app.extensions`
+# rather than a bare module-level dict so each Flask app instance (and thus
+# each distinct database -- every test gets its own app/DB pair) gets its
+# own cache; a module-level dict would otherwise let one app's cached
+# `campaign_id` collide with an unrelated app's same-numbered campaign.
+_CACHE_EXTENSION_KEY = "effective_catalog_cache"
 _CACHE_MAX_ENTRIES = 256
+
+
+def _cache() -> dict[tuple[int, int], dict[int, dict]]:
+    return current_app.extensions.setdefault(_CACHE_EXTENSION_KEY, {})
 
 
 def _object_to_dict(obj: CatalogObject) -> dict:
@@ -55,13 +65,14 @@ def get_effective_catalog(campaign_id: int, *, version: int) -> dict[int, dict]:
     naturally invalidates (ARCHITECTURE.md §7.3).
     """
     cache_key = (campaign_id, version)
-    cached = _CACHE.get(cache_key)
+    cache = _cache()
+    cached = cache.get(cache_key)
     if cached is not None:
         return cached
 
     enabled_ids = campaign_sources_repo.enabled_source_ids(campaign_id)
     if not enabled_ids:
-        _CACHE[cache_key] = {}
+        cache[cache_key] = {}
         return {}
 
     precedence_by_source = {
@@ -79,9 +90,9 @@ def get_effective_catalog(campaign_id: int, *, version: int) -> dict[int, dict]:
 
     effective = resolve_effective_catalog(object_dicts, precedence_by_source)
 
-    if len(_CACHE) >= _CACHE_MAX_ENTRIES:
-        _CACHE.clear()
-    _CACHE[cache_key] = effective
+    if len(cache) >= _CACHE_MAX_ENTRIES:
+        cache.clear()
+    cache[cache_key] = effective
     return effective
 
 

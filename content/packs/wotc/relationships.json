@@ -1,0 +1,5 @@
+[
+  {"type": "class_can_equip", "from": ["wotc", "Reaper"], "to": ["xcom2-base", "SniperRifle_CV"]},
+  {"type": "class_can_equip", "from": ["wotc", "Skirmisher"], "to": ["xcom2-base", "AssaultRifle_CV"]},
+  {"type": "class_can_equip", "from": ["wotc", "Templar"], "to": ["xcom2-base", "Pistol_CV"]}
+]

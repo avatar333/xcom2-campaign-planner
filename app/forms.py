@@ -86,6 +86,20 @@ class ImageUploadForm(FlaskForm):
     attribution_text = StringField("Attribution (optional)", validators=[Optional(), Length(max=500)])
 
 
+class ImageFetchForm(FlaskForm):
+    """FR-AST-4: fetch-from-URL companion to `ImageUploadForm` -- `url` is
+    required here (it IS the image source, not optional provenance)."""
+
+    role = SelectField(
+        "Role",
+        choices=[("icon", "Icon"), ("portrait", "Portrait"), ("banner", "Banner"), ("gallery", "Gallery")],
+        default="icon",
+    )
+    url = StringField("Image URL", validators=[DataRequired(), Length(max=500)])
+    license = StringField("License (optional)", validators=[Optional(), Length(max=200)])
+    attribution_text = StringField("Attribution (optional)", validators=[Optional(), Length(max=500)])
+
+
 class CatalogImportForm(FlaskForm):
     confirm = BooleanField("I have reviewed the validation report and want to import")
 

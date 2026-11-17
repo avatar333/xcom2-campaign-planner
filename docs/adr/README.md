@@ -21,3 +21,5 @@ Format: lightweight [MADR](https://adr.github.io/)-style — Context, Decision, 
 | [ADR-0015](ADR-0015-htmx-alpine-frontend.md) | HTMX + Alpine.js, vendored locally, for progressive enhancement | Accepted — fulfils the option left open in ADR-0011 |
 | [ADR-0016](ADR-0016-pillow-image-handling.md) | Pillow for image validation, re-encoding and asset storage | Accepted (Phase 3) |
 | [ADR-0017](ADR-0017-catalog-interchange-format.md) | A lean, user-facing catalog interchange format, separate from the curated pack format | Accepted (Phase 3) |
+| [ADR-0018](ADR-0018-compound-prerequisite-groups.md) | Compound (nested AND/OR) prerequisite expression tree | Accepted (Phase 4) |
+| [ADR-0019](ADR-0019-content-source-revision-pinning.md) | Content-source revision pinning and provenance fields | Accepted (Phase 4) |

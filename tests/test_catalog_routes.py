@@ -107,6 +107,84 @@ def test_catalog_filters_by_type(client, app, seeded_db):
     assert b"An Armor" not in response.data
 
 
+def test_catalog_filters_by_tier(client, app, seeded_db):
+    user_source_id = _user_source_id(app)
+    weapon_type_id = _weapon_type_id(app)
+    client.post(
+        "/catalog/objects/new",
+        data={"source_id": user_source_id, "type_id": weapon_type_id, "name": "Tier One Rifle", "tier": "1"},
+    )
+    client.post(
+        "/catalog/objects/new",
+        data={"source_id": user_source_id, "type_id": weapon_type_id, "name": "Tier Three Rifle", "tier": "3"},
+    )
+
+    response = client.get("/catalog/?tier=3")
+    assert b"Tier Three Rifle" in response.data
+    assert b"Tier One Rifle" not in response.data
+
+
+def test_catalog_filters_by_equippable_class(client, app, seeded_db):
+    user_source_id = _user_source_id(app)
+    weapon_type_id = _weapon_type_id(app)
+    with app.app_context():
+        from app.models import CatalogObjectType, CatalogRelationshipType
+        from app.services import catalog_objects as objects_service
+        from app.services import catalog_relationships as relationships_service
+
+        class_type = CatalogObjectType.query.filter_by(slug="soldier_class").first()
+        rel_type = CatalogRelationshipType.query.filter_by(slug="class_can_equip").first()
+        ranger = objects_service.create_object(
+            source_id=user_source_id, type_id=class_type.id, name="Ranger"
+        )
+        shotgun = objects_service.create_object(
+            source_id=user_source_id, type_id=weapon_type_id, name="Shotgun"
+        )
+        objects_service.create_object(
+            source_id=user_source_id, type_id=weapon_type_id, name="Sniper Rifle"
+        )
+        relationships_service.create_relationship(
+            relationship_type=rel_type,
+            source_object=ranger,
+            target_object=shotgun,
+            source_pack_id=user_source_id,
+        )
+        ranger_id = ranger.id
+
+    response = client.get(f"/catalog/?equippable_class_id={ranger_id}")
+    assert b"Shotgun" in response.data
+    assert b"Sniper Rifle" not in response.data
+
+
+def test_catalog_filters_by_research_category(client, app, seeded_db):
+    with app.app_context():
+        from app.repositories import object_types as object_types_repo
+        from app.services import catalog_objects as objects_service
+
+        user_source_id = _user_source_id(app)
+        research_type = object_types_repo.get_object_type_by_slug("research_project")
+        object_types_repo.create_attribute_definition(
+            object_type_id=research_type.id, key="research_category", data_type="string"
+        )
+        objects_service.create_object(
+            source_id=user_source_id,
+            type_id=research_type.id,
+            name="Magnetic Weapons",
+            attributes={"research_category": "weapons"},
+        )
+        objects_service.create_object(
+            source_id=user_source_id,
+            type_id=research_type.id,
+            name="Alien Biotech",
+            attributes={"research_category": "autopsy"},
+        )
+        research_type_id = research_type.id
+
+    response = client.get(f"/catalog/?type_id={research_type_id}&research_category=weapons")
+    assert b"Magnetic Weapons" in response.data
+    assert b"Alien Biotech" not in response.data
+
+
 def test_object_detail_route(client, app, seeded_db):
     user_source_id = _user_source_id(app)
     weapon_type_id = _weapon_type_id(app)
@@ -184,6 +262,73 @@ def test_upload_rejects_non_image(client, app, seeded_db):
             "image_file": (io.BytesIO(b"not an image"), "fake.png"),
         },
         content_type="multipart/form-data",
+    )
+    assert response.status_code == 400
+
+
+def test_fetch_image_via_route(client, app, seeded_db, monkeypatch):
+    user_source_id = _user_source_id(app)
+    weapon_type_id = _weapon_type_id(app)
+    client.post(
+        "/catalog/objects/new",
+        data={"source_id": user_source_id, "type_id": weapon_type_id, "name": "Fetched Rifle"},
+    )
+    with app.app_context():
+        from app.models import CatalogObject
+
+        obj_id = CatalogObject.query.filter_by(name="Fetched Rifle").first().id
+
+    class _FakeResponse:
+        def __init__(self, data: bytes):
+            self._data = data
+
+        def read(self, _n=-1):
+            return self._data
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc_info):
+            return False
+
+    import urllib.request
+
+    from app.services import asset_service
+
+    monkeypatch.setattr(asset_service, "_assert_safe_fetch_url", lambda url: None)
+    monkeypatch.setattr(
+        urllib.request, "urlopen", lambda request, timeout: _FakeResponse(make_png_bytes())
+    )
+
+    response = client.post(
+        f"/catalog/objects/{obj_id}/image/fetch",
+        data={"role": "icon", "url": "https://example.com/rifle.png", "attribution_text": ""},
+        follow_redirects=True,
+    )
+    assert response.status_code == 200
+
+    with app.app_context():
+        from app.models import CatalogObject
+
+        reloaded = CatalogObject.query.filter_by(name="Fetched Rifle").first()
+        assert reloaded.primary_asset_id is not None
+
+
+def test_fetch_image_rejects_private_url_via_route(client, app, seeded_db):
+    user_source_id = _user_source_id(app)
+    weapon_type_id = _weapon_type_id(app)
+    client.post(
+        "/catalog/objects/new",
+        data={"source_id": user_source_id, "type_id": weapon_type_id, "name": "Ssrf Rifle"},
+    )
+    with app.app_context():
+        from app.models import CatalogObject
+
+        obj_id = CatalogObject.query.filter_by(name="Ssrf Rifle").first().id
+
+    response = client.post(
+        f"/catalog/objects/{obj_id}/image/fetch",
+        data={"role": "icon", "url": "http://127.0.0.1/evil.png", "attribution_text": ""},
     )
     assert response.status_code == 400
 

@@ -53,13 +53,13 @@
 {# Image-forward catalog object card: image/icon is always present, name is
    always shown alongside it (object requirement: "image + name throughout
    applicable UI"). Used by the Catalog grid and object pickers. #}
-{% macro object_card(obj, detail_url, image_url=none, type_badge=none, source_badge=none) %}
+{% macro object_card(obj, detail_url, image_url=none, type_badge=none, source_badge=none, fallback_glyph=none) %}
 <a class="object-card" href="{{ detail_url }}">
   <div class="object-card__image">
     {% if image_url %}
       <img src="{{ image_url }}" alt="{{ obj.name }}">
     {% else %}
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M4 15l4-4 4 4 4-6 4 4"/></svg>
+      {{ (fallback_glyph or '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M4 15l4-4 4 4 4-6 4 4"/></svg>') | safe }}
     {% endif %}
   </div>
   <div class="object-card__body">

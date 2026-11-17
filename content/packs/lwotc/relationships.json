@@ -1,0 +1,14 @@
+[
+  {"type": "requires_research", "from": ["xcom2-base", "ModularWeapons"], "to": ["lwotc", "LaserWeapons"]},
+  {"type": "requires_research", "from": ["xcom2-base", "HybridMaterials"], "to": ["lwotc", "LaserWeapons"]},
+  {"type": "requires_research", "from": ["lwotc", "LaserWeapons"], "to": ["lwotc", "AdvancedLasers"]},
+
+  {"type": "requires_research", "from": ["xcom2-base", "GaussWeapons"], "to": ["lwotc", "Coilguns"]},
+  {"type": "requires_research", "from": ["xcom2-base", "Elerium"], "to": ["lwotc", "Coilguns"]},
+  {"type": "requires_research", "from": ["lwotc", "Coilguns"], "to": ["lwotc", "AdvancedCoilguns"]},
+
+  {"type": "class_can_equip", "from": ["lwotc", "LWS_Gunner"], "to": ["xcom2-base", "Cannon_CV"]},
+  {"type": "class_can_equip", "from": ["lwotc", "LWS_Technical"], "to": ["xcom2-base", "AssaultRifle_CV"]},
+  {"type": "class_can_equip", "from": ["lwotc", "LWS_Shinobi"], "to": ["xcom2-base", "Shotgun_CV"]},
+  {"type": "class_can_equip", "from": ["lwotc", "LWS_Assault"], "to": ["xcom2-base", "AssaultRifle_CV"]}
+]

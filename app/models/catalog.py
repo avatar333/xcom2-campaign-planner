@@ -47,6 +47,9 @@ class ContentSource(Model, TimestampMixin):
         Boolean, nullable=False, default=0)
     import_checksum: Mapped[str | None] = mapped_column(String, nullable=True)
     imported_at: Mapped[str | None] = mapped_column(String, nullable=True)
+    source_repository: Mapped[str | None] = mapped_column(String, nullable=True)
+    source_ref: Mapped[str | None] = mapped_column(String, nullable=True)
+    source_commit_sha: Mapped[str | None] = mapped_column(String, nullable=True)
 
 
 class ContentSourceRelation(Model):
@@ -224,3 +227,127 @@ class CatalogRelationship(Model, CreatedAtMixin):
     )
     is_user_authored: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=0)
+
+
+PREREQUISITE_GROUP_LOGICS = ("AND", "OR")
+
+
+class CatalogPrerequisiteGroup(Model, CreatedAtMixin):
+    """A node in a compound (nested AND/OR) prerequisite expression tree
+    (Phase 4, `ADR-0018`). Complements the flat `group_key`/`group_logic`
+    columns on `catalog_relationships` (ADR-0004), which already handle a
+    single level of AND/OR -- this table is only needed for genuinely
+    nested expressions such as "(B AND C) OR (D AND E)", which a flat
+    group_key cannot represent.
+
+    A root group (`parent_group_id IS NULL`) is "the" requirement set for
+    `target_object_id`. Non-root groups are only ever referenced as a
+    member of exactly one parent group (via `CatalogPrerequisiteGroupMember
+    .child_group_id`), forming a tree, never a general graph.
+    """
+
+    __tablename__ = "catalog_prerequisite_groups"
+    __table_args__ = (
+        CheckConstraint(
+            f"logic IN {PREREQUISITE_GROUP_LOGICS}", name="ck_prerequisite_groups_logic"
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    target_object_id: Mapped[int] = mapped_column(
+        ForeignKey("catalog_objects.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    parent_group_id: Mapped[int | None] = mapped_column(
+        ForeignKey("catalog_prerequisite_groups.id", ondelete="CASCADE"), nullable=True, index=True
+    )
+    logic: Mapped[str] = mapped_column(String, nullable=False)
+    relationship_type_id: Mapped[int] = mapped_column(
+        ForeignKey("catalog_relationship_types.id", ondelete="RESTRICT"), nullable=False
+    )
+    source_pack_id: Mapped[int] = mapped_column(
+        ForeignKey("content_sources.id", ondelete="CASCADE"), nullable=False
+    )
+
+
+class CatalogPrerequisiteGroupMember(Model):
+    """One leaf/branch of a `CatalogPrerequisiteGroup`: either a direct
+    catalog-object requirement (`catalog_object_id` set) or a nested
+    sub-group (`child_group_id` set) -- never both, never neither."""
+
+    __tablename__ = "catalog_prerequisite_group_members"
+    __table_args__ = (
+        CheckConstraint(
+            "(catalog_object_id IS NOT NULL AND child_group_id IS NULL) OR "
+            "(catalog_object_id IS NULL AND child_group_id IS NOT NULL)",
+            name="ck_prerequisite_group_members_xor",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    group_id: Mapped[int] = mapped_column(
+        ForeignKey("catalog_prerequisite_groups.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    catalog_object_id: Mapped[int | None] = mapped_column(
+        ForeignKey("catalog_objects.id", ondelete="RESTRICT"), nullable=True, index=True
+    )
+    child_group_id: Mapped[int | None] = mapped_column(
+        ForeignKey("catalog_prerequisite_groups.id", ondelete="CASCADE"), nullable=True, index=True
+    )
+    amount: Mapped[float | None] = mapped_column(Numeric, nullable=True)
+    unit: Mapped[str | None] = mapped_column(String, nullable=True)
+    sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+
+SOLDIER_STAT_KEYS = (
+    "health",
+    "aim",
+    "defense",
+    "dodge",
+    "mobility",
+    "hacking",
+    "will",
+    "psi_offense",
+    "armor",
+    "combat_intelligence",
+)
+
+
+class CatalogSoldierStatProfile(Model, CreatedAtMixin):
+    """Ruleset- and (optionally) difficulty-aware default soldier stats
+    (Phase 4, FR-SOL-* / brief "Soldier stat profiles"). Attached to a
+    catalog object (typically a `soldier_class` object, or a source's
+    generic "Rookie" baseline object) rather than being a new object type,
+    since it is per-stat *data* about an existing object, not a new kind
+    of thing. `difficulty IS NULL` means the row applies at every
+    difficulty. `stat_min`/`stat_max` are populated only when the source
+    material documents a randomized range (e.g. "Not Created Equal");
+    otherwise only `stat_default` is set and `stat_min`/`stat_max` stay
+    NULL rather than guessed (`DATA_SOURCING.md` "never silently guess").
+    """
+
+    __tablename__ = "catalog_soldier_stat_profiles"
+    __table_args__ = (
+        UniqueConstraint(
+            "catalog_object_id", "difficulty", "stat_key",
+            name="uq_soldier_stat_profiles_natural_key",
+        ),
+        CheckConstraint(f"stat_key IN {SOLDIER_STAT_KEYS}", name="ck_soldier_stat_profiles_key"),
+        CheckConstraint(
+            "difficulty IS NULL OR difficulty IN ('rookie', 'veteran', 'commander', 'legend')",
+            name="ck_soldier_stat_profiles_difficulty",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    catalog_object_id: Mapped[int] = mapped_column(
+        ForeignKey("catalog_objects.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    difficulty: Mapped[str | None] = mapped_column(String, nullable=True)
+    stat_key: Mapped[str] = mapped_column(String, nullable=False)
+    stat_min: Mapped[float | None] = mapped_column(Numeric, nullable=True)
+    stat_default: Mapped[float | None] = mapped_column(Numeric, nullable=True)
+    stat_max: Mapped[float | None] = mapped_column(Numeric, nullable=True)
+    is_randomized: Mapped[bool] = mapped_column(Boolean, nullable=False, default=0)
+    source_pack_id: Mapped[int] = mapped_column(
+        ForeignKey("content_sources.id", ondelete="CASCADE"), nullable=False
+    )

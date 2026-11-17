@@ -23,6 +23,9 @@ Conventions: every table has an integer `id` surrogate primary key unless noted.
 | is_builtin | INTEGER NOT NULL DEFAULT 0 | curated vs. user-added |
 | import_checksum | TEXT NULL | sha256 of last imported pack content |
 | imported_at | TEXT NULL | |
+| source_repository | TEXT NULL | Phase 4, `ADR-0019`: e.g. `github.com/long-war-2/lwotc`, for sources curated from an external repo |
+| source_ref | TEXT NULL | the pinned branch/tag/release, e.g. `v1.1.0` |
+| source_commit_sha | TEXT NULL | the pinned immutable commit SHA at `source_ref`, so a later refresh can diff what changed |
 | created_at | TEXT NOT NULL | |
 | updated_at | TEXT NOT NULL | |
 
@@ -144,6 +147,55 @@ PK: `(object_id, tag)`. Index: `INDEX(tag)` for "browse by tag".
 Indexes: `UNIQUE(source_pack_id, relationship_type_id, source_object_id, target_object_id, group_key)` (prevents duplicate edges from repeated import); `INDEX(source_object_id)`; `INDEX(target_object_id, relationship_type_id)` (primary access path for "what does X require").
 Delete behaviour: `RESTRICT` on both object FKs — an object with relationships must be retired, not hard-deleted, preserving graph integrity; `source_pack_id ON DELETE CASCADE` removes a pack's authored edges if the pack itself is removed.
 
+### 1.9 `catalog_prerequisite_groups` / `catalog_prerequisite_group_members` (Phase 4, `ADR-0018`)
+
+A compound (nested AND/OR) prerequisite expression tree, for requirements the flat `catalog_relationships.group_key` (single-level OR, ADR-0004) cannot represent, e.g. "(B AND C) OR (D AND E)". Most relationships still use the flat `group_key` mechanism; this pair of tables is only populated when a requirement genuinely nests.
+
+#### `catalog_prerequisite_groups`
+| Column | Type | Notes |
+|---|---|---|
+| id | INTEGER PK | |
+| target_object_id | INTEGER NOT NULL FK → catalog_objects.id ON DELETE RESTRICT | the object this (sub)tree gates |
+| parent_group_id | INTEGER NULL FK → catalog_prerequisite_groups.id ON DELETE CASCADE | NULL = root group for `target_object_id` |
+| logic | TEXT NOT NULL | CHECK IN (`AND`,`OR`) |
+| relationship_type_id | INTEGER NOT NULL FK → catalog_relationship_types.id ON DELETE RESTRICT | which relationship kind this tree expresses (e.g. `prerequisite`) |
+| source_pack_id | INTEGER NOT NULL FK → content_sources.id ON DELETE CASCADE | |
+| created_at | TEXT NOT NULL | |
+
+Indexes: `INDEX(target_object_id)`, `INDEX(parent_group_id)`.
+
+#### `catalog_prerequisite_group_members`
+| Column | Type | Notes |
+|---|---|---|
+| id | INTEGER PK | |
+| group_id | INTEGER NOT NULL FK → catalog_prerequisite_groups.id ON DELETE CASCADE | |
+| catalog_object_id | INTEGER NULL FK → catalog_objects.id ON DELETE RESTRICT | a direct leaf requirement |
+| child_group_id | INTEGER NULL FK → catalog_prerequisite_groups.id ON DELETE CASCADE | a nested sub-group (mutually exclusive with `catalog_object_id`) |
+| amount | NUMERIC NULL | quantity, mirrors `catalog_relationships.amount` for quantified leaf requirements |
+| unit | TEXT NULL | |
+| sort_order | INTEGER NOT NULL DEFAULT 0 | |
+
+CHECK: exactly one of `catalog_object_id`/`child_group_id` is set (XOR). Indexes: `INDEX(group_id)`, `INDEX(catalog_object_id)`, `INDEX(child_group_id)`.
+
+### 1.10 `catalog_soldier_stat_profiles` (Phase 4, brief "Soldier stat profiles")
+
+Ruleset- and (optionally) difficulty-aware default stats for a soldier/class, consumed by the future soldier-creation flow to initialize editable values (the user's actual stats always override these defaults, per the brief).
+
+| Column | Type | Notes |
+|---|---|---|
+| id | INTEGER PK | |
+| catalog_object_id | INTEGER NOT NULL FK → catalog_objects.id ON DELETE CASCADE | typically a `soldier_class` object |
+| difficulty | TEXT NULL | CHECK IN (`rookie`,`veteran`,`commander`,`legend`) NULL allowed; NULL = applies at every difficulty |
+| stat_key | TEXT NOT NULL | CHECK IN (`health`,`aim`,`defense`,`dodge`,`mobility`,`hacking`,`will`,`psi_offense`,`armor`,`combat_intelligence`) |
+| stat_min | NUMERIC NULL | only set when the source documents a randomized range |
+| stat_default | NUMERIC NULL | the single default/average value |
+| stat_max | NUMERIC NULL | only set when the source documents a randomized range |
+| is_randomized | INTEGER NOT NULL DEFAULT 0 | true when this ruleset randomizes the stat within [min, max] (e.g. "Not Created Equal") |
+| source_pack_id | INTEGER NOT NULL FK → content_sources.id ON DELETE CASCADE | |
+| created_at | TEXT NOT NULL | |
+
+Indexes: `UNIQUE(catalog_object_id, difficulty, stat_key)`; `INDEX(catalog_object_id)`. Per `DATA_SOURCING.md`'s "never silently guess" rule, a row with unverified min/max is entered with `stat_min`/`stat_max` left NULL rather than invented — see `docs/DATA_SOURCING.md` §7 for which stats are currently verified vs. "not stated".
+
 ## 2. Asset tables
 
 ### 2.1 `assets`
@@ -157,9 +209,12 @@ Delete behaviour: `RESTRICT` on both object FKs — an object with relationships
 | height | INTEGER NULL | |
 | origin | TEXT NOT NULL | CHECK IN (`upload`,`pack_bundled`,`fetched_url`,`generated_default`) |
 | source_url | TEXT NULL | informational only |
+| source_name | TEXT NULL | Phase 4, `ADR-0019`: human-readable name of the reference source (e.g. "UFOpaedia", "LWotC repository"), distinct from `source_url` |
+| original_filename | TEXT NULL | the filename as provided by the import/upload, preserved for the asset manifest even though storage uses the content hash |
 | license | TEXT NULL | |
 | attribution_text | TEXT NULL | |
 | redistribution_allowed | INTEGER NOT NULL DEFAULT 0 | gate for pack export, `ADR-0008` |
+| import_status | TEXT NOT NULL DEFAULT 'imported' | CHECK IN (`imported`,`placeholder`,`pending`,`missing`) — asset-manifest status (brief "asset manifest ... import status") |
 | created_at | TEXT NOT NULL | |
 
 ### 2.2 `object_assets`
@@ -336,7 +391,10 @@ content_sources ─┬─< content_source_relations >─ content_sources
                   └─< catalog_objects (self: overrides_object_id, replaces_object_id)
                          ├─< catalog_object_tags
                          ├─< object_assets >─ assets
-                         └─< catalog_relationships >─ catalog_objects (source/target)
+                         ├─< catalog_relationships >─ catalog_objects (source/target)
+                         ├─< catalog_prerequisite_groups (self: parent_group_id)
+                         │      └─< catalog_prerequisite_group_members >─ catalog_objects / catalog_prerequisite_groups
+                         └─< catalog_soldier_stat_profiles
 
 campaigns ─┬─< campaign_content_sources >─ content_sources
            ├─< campaign_object_state >─ catalog_objects
@@ -362,3 +420,14 @@ campaigns ─┬─< campaign_content_sources >─ content_sources
 ## 9. Example seed data note
 
 Resolved (Phase 2, see `IMPLEMENTATION_PLAN.md`): seeding is done by an idempotent `flask seed-dev` CLI command (`app/cli.py`), not baked into the Alembic migration itself — this keeps schema changes (structure) and reference data (content) as separate, independently re-runnable concerns, and avoids re-seeding on every `db upgrade`. It populates the four foundational `content_sources` rows (`xcom2-base`, `wotc`, `lwotc`, `user-local` — see `DOMAIN_MODEL.md` §3) and the builtin `catalog_object_types` (§`DOMAIN_MODEL.md` §4) and `catalog_relationship_types` (§`DOMAIN_MODEL.md` §6) rows with `is_builtin=1`, `source_id=NULL`. These are structural/reference seed data, not game content — no actual XCOM objects/relationships are seeded in Phase 2.
+
+## 10. Migration changelog
+
+| Revision | Summary |
+|---|---|
+| `7f5c4f4dfef7` | Initial schema (Phase 2): all tables through §1-5 as of that phase. |
+| `56a40f219e11` | Phase 4: added `content_sources.source_repository`/`source_ref`/`source_commit_sha` (§1.1, provenance pinning, `ADR-0019`); added `catalog_prerequisite_groups`/`catalog_prerequisite_group_members` (§1.9, compound AND/OR prerequisites, `ADR-0018`); added `catalog_soldier_stat_profiles` (§1.10, soldier stat profiles); added `assets.source_name`/`original_filename`/`import_status` (§2.1, asset manifest fields). |
+
+## 11. Curated game-data population (Phase 4, see `docs/DATA_INGESTION.md`)
+
+This phase introduces the **curated content-pack importer** anticipated by `ARCHITECTURE.md` §5 and `ADR-0005`: a canonical, versioned, human-reviewable directory of game-fact JSON under `content/packs/<slug>/`, loaded into the tables above by explicit `flask content *` CLI commands (`app/services/content_import.py`, distinct from Phase 3's ad hoc interchange importer `app/services/catalog_import.py`/`ADR-0017`). No new tables were needed for the pack *format* itself — `catalog_objects`/`catalog_relationships`/`catalog_prerequisite_groups`/`catalog_soldier_stat_profiles` are the same tables the importer writes into that the UI and Phase 3's manual-authoring path already used. See `docs/DATA_SOURCING.md` for the authoritative-source hierarchy and `docs/DATA_INGESTION.md` for the ingestion/refresh/validation process.

@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "slug": "wotc",
+  "name": "War of the Chosen",
+  "kind": "dlc",
+  "version": "1.0.0",
+  "description": "The War of the Chosen expansion: resistance factions (Reapers, Skirmishers, Templars), the Chosen, Infirmary/Training Center/Resistance Ring facilities, and the removal of the Advanced Warfare Center.",
+  "license": "fact-data-only; see docs/DATA_SOURCING.md and docs/DATA_SOURCING.md",
+  "attribution_text": "Firaxis Games / 2K Games (facts only, no bundled assets -- ADR-0008)",
+  "homepage_url": "https://www.ufopaedia.org/index.php/XCOM_2:_War_of_the_Chosen",
+  "requires": ["xcom2-base"],
+  "extends": ["xcom2-base"],
+  "conflicts": [],
+  "ingestion_notes": "Authored from UFOpaedia WotC-tagged pages and Fextralife cross-references, November 2026. The Advanced Warfare Center is explicitly NOT re-declared in this pack (it has no WOTC buildable-facility equivalent); its vanilla object from xcom2-base remains importable but is flagged with a WOTC-unavailability tag for UI filtering -- see objects.json."
+}

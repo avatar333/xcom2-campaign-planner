@@ -272,3 +272,122 @@ def test_is_referenced_by_campaign_state_detection(app, seeded_db):
         db.session.commit()
 
         assert objects_repo.is_referenced_by_campaign_state(obj) is True
+
+
+def test_search_filters_by_tier(app, seeded_db):
+    with app.app_context():
+        source = _user_source()
+        obj_type = _weapon_type()
+        objects_service.create_object(source_id=source.id, type_id=obj_type.id, name="Tier One Rifle", tier=1)
+        objects_service.create_object(source_id=source.id, type_id=obj_type.id, name="Tier Two Rifle", tier=2)
+
+        results, total = objects_repo.search(tier=2)
+
+        assert total == 1
+        assert results[0].name == "Tier Two Rifle"
+
+
+def test_search_filters_by_equippable_class(app, seeded_db):
+    with app.app_context():
+        from app.models import CatalogObjectType, CatalogRelationshipType
+        from app.services import catalog_relationships as relationships_service
+
+        source = _user_source()
+        obj_type = _weapon_type()
+        class_type = CatalogObjectType.query.filter_by(slug="soldier_class").first()
+        rel_type = CatalogRelationshipType.query.filter_by(slug="class_can_equip").first()
+
+        ranger = objects_service.create_object(source_id=source.id, type_id=class_type.id, name="Ranger")
+        sharpshooter = objects_service.create_object(
+            source_id=source.id, type_id=class_type.id, name="Sharpshooter"
+        )
+        shotgun = objects_service.create_object(source_id=source.id, type_id=obj_type.id, name="Shotgun")
+        sniper_rifle = objects_service.create_object(
+            source_id=source.id, type_id=obj_type.id, name="Sniper Rifle"
+        )
+        relationships_service.create_relationship(
+            relationship_type=rel_type, source_object=ranger, target_object=shotgun, source_pack_id=source.id
+        )
+        relationships_service.create_relationship(
+            relationship_type=rel_type,
+            source_object=sharpshooter,
+            target_object=sniper_rifle,
+            source_pack_id=source.id,
+        )
+
+        results, total = objects_repo.search(equippable_by_class_id=ranger.id)
+
+        assert total == 1
+        assert results[0].name == "Shotgun"
+
+
+def test_search_filters_by_attribute_key_value(app, seeded_db):
+    with app.app_context():
+        from app.repositories import object_types as object_types_repo
+
+        source = _user_source()
+        research_type = object_types_repo.get_object_type_by_slug("research_project")
+        object_types_repo.create_attribute_definition(
+            object_type_id=research_type.id, key="research_category", data_type="string"
+        )
+
+        objects_service.create_object(
+            source_id=source.id,
+            type_id=research_type.id,
+            name="Magnetic Weapons",
+            attributes={"research_category": "weapons"},
+        )
+        objects_service.create_object(
+            source_id=source.id,
+            type_id=research_type.id,
+            name="Alien Biotech",
+            attributes={"research_category": "autopsy"},
+        )
+
+        results, total = objects_repo.search(attribute_key="research_category", attribute_value="weapons")
+
+        assert total == 1
+        assert results[0].name == "Magnetic Weapons"
+
+
+def test_list_soldier_classes_returns_only_that_type(app, seeded_db):
+    with app.app_context():
+        from app.models import CatalogObjectType
+
+        source = _user_source()
+        class_type = CatalogObjectType.query.filter_by(slug="soldier_class").first()
+        obj_type = _weapon_type()
+        objects_service.create_object(source_id=source.id, type_id=class_type.id, name="Grenadier")
+        objects_service.create_object(source_id=source.id, type_id=obj_type.id, name="Not A Class")
+
+        classes = objects_repo.list_soldier_classes()
+
+        assert any(c.name == "Grenadier" for c in classes)
+        assert all(c.name != "Not A Class" for c in classes)
+
+
+def test_list_distinct_attribute_values(app, seeded_db):
+    with app.app_context():
+        from app.repositories import object_types as object_types_repo
+
+        source = _user_source()
+        research_type = object_types_repo.get_object_type_by_slug("research_project")
+        object_types_repo.create_attribute_definition(
+            object_type_id=research_type.id, key="research_category", data_type="string"
+        )
+        objects_service.create_object(
+            source_id=source.id, type_id=research_type.id, name="A",
+            attributes={"research_category": "weapons"},
+        )
+        objects_service.create_object(
+            source_id=source.id, type_id=research_type.id, name="B",
+            attributes={"research_category": "armor"},
+        )
+        objects_service.create_object(
+            source_id=source.id, type_id=research_type.id, name="C",
+            attributes={"research_category": "weapons"},
+        )
+
+        values = objects_repo.list_distinct_attribute_values(research_type.id, "research_category")
+
+        assert values == ["armor", "weapons"]

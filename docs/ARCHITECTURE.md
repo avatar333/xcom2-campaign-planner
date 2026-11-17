@@ -98,7 +98,7 @@ This curated-pack import flow (and the `services/content_import.py` module name)
 
 `instance/config.py` (gitignored) or environment variables: `DATABASE_PATH` (default `instance/app.sqlite3`), `ASSETS_PATH` (default `instance/assets`), `SECRET_KEY` (required for CSRF; generated on first run and persisted to `instance/secret_key` if absent), `HOST`/`PORT` (default `127.0.0.1:5000`), `MAX_UPLOAD_MB` (default 8). No external services, no API keys, by design (offline-first, NFR-4).
 
-## 5. Content Pack format (normative, implements ADR-0005; **not yet implemented**, reserved for the future curated-data phase — see `ADR-0017` for Phase 3's actual, simpler interchange format at `/catalog/export`/`/catalog/import`)
+## 5. Content Pack format (normative, implements ADR-0005; **implemented in Phase 4** — see `app/importer/pack_schema.py`/`pack_validator.py`, `app/services/content_import.py`, `docs/DATA_INGESTION.md` for the full ingestion/CLI/refresh reference; see `ADR-0017` for Phase 3's separate, simpler interchange format at `/catalog/export`/`/catalog/import`)
 
 ```
 content/packs/<slug>/
@@ -170,8 +170,10 @@ content/packs/<slug>/
 2. Resolve `requires` (error if a required source is not already imported) and `conflicts` (error if a conflicting source is imported and enabled anywhere — advisory at import, hard-checked at campaign source-enable time).
 3. Compute pack checksum (sha256 of canonicalized JSON); if equal to `content_sources.import_checksum`, no-op (log "already up to date").
 4. Transaction: upsert `content_sources` row; upsert `catalog_object_types`/`catalog_attribute_definitions`/`catalog_relationship_types` introduced by the pack; upsert `catalog_objects` by `(source_id, template_key)` (insert new, update changed fields on existing, resolving `overrides`/`replaces` references); mark objects present in the DB for this source but absent from the new pack version as `is_retired=1` **only if** not referenced by any `campaign_object_state`/`campaign_plan_items`/`campaign_soldier_loadouts` row, else keep active but flagged `is_orphaned_upstream` for UI warning; upsert `catalog_relationships` similarly (natural key: `(source_pack_id, relationship_type_id, source_object_id, target_object_id, group_key)`); copy new/changed files from `assets/` into asset storage (content-addressed, dedup by hash).
-5. Commit; record checksum + `imported_at`.
+5. Commit; record checksum + `imported_at`; bump `effective_catalog_version` for every campaign with this source enabled (`app/services/effective_catalog.py:bump_version_for_sources`) so already-created campaigns see the re-imported changes immediately rather than a stale cached resolution.
 6. `--dry-run` performs steps 1-2 and a read-only simulation of step 4 (diff report: N new, M updated, K retired, validation errors), no transaction commit.
+
+Implementation note: the actual module names are `app/importer/pack_schema.py` (load + schema), `app/importer/pack_validator.py` (the dry-run diagnostics report — invoked via `flask content validate <slug>` rather than an `--import --dry-run` flag), and `app/services/content_import.py` (the transactional commit, `import_pack()`). The description above is the normative *algorithm*; `docs/DATA_INGESTION.md` documents the actual CLI surface and file layout in full.
 
 ## 6. Requirement / Availability resolver (`domain/requirements.py`)
 
@@ -206,6 +208,7 @@ Algorithm: group inbound requirement-ish relationships (`prerequisite`, `require
 - `campaign_content_sources` INSERT/UPDATE/DELETE for a campaign → bump that campaign's version.
 - `content_import` commit for source S → bump version for every campaign with S enabled.
 - Cache is a pure function of `(campaign_id, version)`; stale entries are simply never looked up again once the version advances (no explicit eviction needed beyond an LRU bound).
+- Implementation note (Phase 4 fix): the cache dict lives on `current_app.extensions`, not a bare module-level global — a module-level dict would let one Flask app instance's cached `(campaign_id, version)` key collide with an unrelated app instance's same-numbered campaign (this is exactly how every pytest test gets its own app + SQLite file), silently returning a different database's resolved catalog. Each app instance now gets its own cache, same invalidation semantics.
 
 ## 8. Asset pipeline
 

@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "slug": "lwotc",
+  "name": "Long War of the Chosen",
+  "kind": "total_conversion",
+  "version": "1.1.0",
+  "description": "The Long War of the Chosen (LWOTC) total-conversion overhaul of War of the Chosen: reworked classes (Gunner, Technical, Shinobi, Assault), rebalanced research/weapons, and ruleset-specific facility costs.",
+  "license": "fact-data-only; see docs/DATA_SOURCING.md and docs/DATA_SOURCING.md",
+  "attribution_text": "Long War 2 Studios / Pavonis Interactive community (LWOTC project)",
+  "homepage_url": "https://github.com/long-war-2/lwotc",
+  "requires": ["xcom2-base", "wotc"],
+  "extends": ["xcom2-base", "wotc"],
+  "conflicts": [],
+  "source_repository": "github.com/long-war-2/lwotc",
+  "source_ref": "v1.1.0",
+  "source_commit_sha": "4872d8e27910e186fac2a67201593fff7c2df7e2",
+  "ingestion_notes": "Authored directly from LongWarOfTheChosen/Config/XComLW_Overhaul.ini at the pinned commit (the FacilityTable, TechTable and ItemTable config arrays), plus UFOpaedia '(LWOTC)'-tagged pages for class-roster confirmation, November 2026. Facility BuildDays/Power/SupplyCost/AlloyCost/CrystalCost/CoreCost values are transcribed verbatim from FacilityTable/FacilityUpgradeTable entries in that INI file. Research prerequisite chains (PrereqTech1/2/3, RequiredScienceScore, resource costs) are transcribed verbatim from TechTable entries in the same file. This pack does NOT attempt to transcribe LWOTC's full ability-tree/combat-balance data (brief: 'build parser/adapter code only when it produces reliable, repeatable data' -- ability trees are far too large and volatile between LWOTC releases to be worth transcribing in this phase); only strategy-layer facts (facilities, research, classes, weapons) relevant to a campaign planner are included. A future refresh should re-diff against a newer source_commit_sha before re-curating."
+}

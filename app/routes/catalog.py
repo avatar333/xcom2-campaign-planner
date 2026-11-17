@@ -13,7 +13,13 @@ import json
 from flask import Blueprint, abort, redirect, render_template, request, url_for
 
 from app.domain.attributes import parse_attributes_json
-from app.forms import CatalogImportForm, CatalogObjectForm, CatalogRelationshipForm, ImageUploadForm
+from app.forms import (
+    CatalogImportForm,
+    CatalogObjectForm,
+    CatalogRelationshipForm,
+    ImageFetchForm,
+    ImageUploadForm,
+)
 from app.importer.document import from_json, to_json
 from app.importer.validator import validate_document
 from app.repositories import catalog_objects as objects_repo
@@ -58,6 +64,9 @@ def index():
     type_id = request.args.get("type_id", type=int)
     source_id = request.args.get("source_id", type=int)
     tag = request.args.get("tag", "").strip()
+    tier = request.args.get("tier", type=int)
+    equippable_class_id = request.args.get("equippable_class_id", type=int)
+    research_category = request.args.get("research_category", "").strip()
     view = request.args.get("view", "grid")
     page = max(request.args.get("page", 1, type=int) or 1, 1)
 
@@ -65,23 +74,37 @@ def index():
     if source_id is not None:
         effective_source_ids = [source_id] if (source_ids is None or source_id in source_ids) else []
 
+    object_types = object_types_repo.list_object_types()
+    research_type = object_types_repo.get_object_type_by_slug("research_project")
+    research_type_active = research_type is not None and type_id == research_type.id
+    research_categories = (
+        objects_repo.list_distinct_attribute_values(research_type.id, "research_category")
+        if research_type is not None
+        else []
+    )
+
     objects, total = objects_repo.search(
         source_ids=effective_source_ids,
         type_id=type_id,
         text=q or None,
         tag=tag or None,
+        tier=tier,
+        equippable_by_class_id=equippable_class_id,
+        attribute_key="research_category" if (research_category and research_type_active) else None,
+        attribute_value=research_category if (research_category and research_type_active) else None,
         page=page,
         per_page=PER_PAGE,
     )
 
-    object_types = object_types_repo.list_object_types()
     all_sources = sources_repo.list_content_sources()
     available_sources = (
         [s for s in all_sources if s.id in source_ids] if source_ids is not None else all_sources
     )
+    soldier_classes = objects_repo.list_soldier_classes(source_ids=effective_source_ids)
 
     type_by_id = {t.id: t for t in object_types}
     source_by_id = {s.id: s for s in all_sources}
+    glyph_by_type_id = {t.id: asset_service.fallback_glyph_for_type(t) for t in object_types}
 
     total_pages = max((total + PER_PAGE - 1) // PER_PAGE, 1)
 
@@ -96,11 +119,18 @@ def index():
         all_sources=all_sources,
         type_by_id=type_by_id,
         source_by_id=source_by_id,
+        glyph_by_type_id=glyph_by_type_id,
         campaign=campaign,
         q=q,
         type_id=type_id,
         source_id=source_id,
         tag=tag,
+        tier=tier,
+        equippable_class_id=equippable_class_id,
+        soldier_classes=soldier_classes,
+        research_category=research_category,
+        research_categories=research_categories,
+        research_type_id=(research_type.id if research_type else None),
         view=view,
     )
 
@@ -292,6 +322,36 @@ def upload_image(object_id: int):
     return redirect(url_for("catalog.detail", object_id=object_id))
 
 
+@catalog_bp.route("/objects/<int:object_id>/image/fetch", methods=["POST"])
+def fetch_image(object_id: int):
+    """FR-AST-4: user-initiated "fetch from URL" -- downloads once, stores
+    the bytes locally, and never fetches that URL again at render time."""
+    obj = objects_repo.get_object(object_id)
+    if obj is None:
+        abort(404)
+
+    form = ImageFetchForm()
+    error = None
+    if not form.validate_on_submit():
+        error = "Enter a valid image URL."
+    else:
+        try:
+            asset_service.fetch_image_for_object(
+                object_id,
+                role=form.role.data,
+                url=form.url.data,
+                license=form.license.data,
+                attribution_text=form.attribution_text.data,
+            )
+        except AssetValidationError as exc:
+            error = str(exc)
+
+    if error:
+        return _render_detail(obj, image_error=error), 400
+
+    return redirect(url_for("catalog.detail", object_id=object_id))
+
+
 @catalog_bp.route("/assets/<int:asset_id>")
 def serve_asset(asset_id: int):
     from flask import Response
@@ -322,6 +382,7 @@ def _render_detail(obj, **extra):
         "attribute_defs": object_types_repo.list_attribute_definitions(obj.type_id),
         "relationship_types": relationships_repo.list_relationship_types(),
         "overlay_base": objects_repo.get_object(obj.overrides_object_id) if obj.overrides_object_id else None,
+        "fallback_glyph": asset_service.fallback_glyph_for_type(object_type),
     }
     context.update(extra)
     return render_template("catalog/detail.html", **context)

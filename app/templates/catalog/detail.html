@@ -38,7 +38,7 @@
       {% if obj.primary_asset_id %}
         <img src="{{ url_for('catalog.serve_asset', asset_id=obj.primary_asset_id) }}" alt="{{ obj.name }}">
       {% else %}
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M4 15l4-4 4 4 4-6 4 4"/></svg>
+        {{ fallback_glyph | safe }}
       {% endif %}
     </div>
 
@@ -82,6 +82,36 @@
           </div>
           <div class="form-actions">
             <button class="btn btn--primary" type="submit">Upload</button>
+          </div>
+        </form>
+      </div>
+    </details>
+
+    <details style="margin-top:0.6rem;">
+      <summary class="btn btn--sm" style="display:inline-block; cursor:pointer;">Fetch image from URL</summary>
+      <div class="card" style="margin-top:0.6rem;">
+        <form method="post" action="{{ url_for('catalog.fetch_image', object_id=obj.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="form-field">
+            <label for="fetch_url">Image URL</label>
+            <input type="url" id="fetch_url" name="url" class="form-control" placeholder="https://example.com/image.png" required>
+          </div>
+          <div class="form-field">
+            <label for="fetch_role">Role</label>
+            <select id="fetch_role" name="role" class="form-control">
+              <option value="icon">Icon</option>
+              <option value="portrait">Portrait</option>
+              <option value="banner">Banner</option>
+              <option value="gallery">Gallery</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="fetch_attribution_text">Attribution (optional)</label>
+            <input type="text" id="fetch_attribution_text" name="attribution_text" class="form-control">
+          </div>
+          <p class="text-small text-muted">Downloaded once and stored locally; the app never re-fetches this URL.</p>
+          <div class="form-actions">
+            <button class="btn btn--primary" type="submit">Fetch &amp; Store</button>
           </div>
         </form>
       </div>

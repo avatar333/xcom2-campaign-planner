@@ -1,0 +1,13 @@
+[
+  {
+    "target": ["lwotc", "PlasmaRifle_LWOTC"],
+    "relationship_type": "requires_research",
+    "root": {
+      "logic": "OR",
+      "members": [
+        ["lwotc", "AdvancedCoilguns"],
+        ["lwotc", "AdvancedLasers"]
+      ]
+    }
+  }
+]

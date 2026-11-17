@@ -1,0 +1,90 @@
+[
+  {
+    "template_key": "ResistanceRing",
+    "type": "facility",
+    "name": "Resistance Ring",
+    "short_description": "Enables Covert Actions with resistance factions; unlocks Resistance Orders. War of the Chosen only.",
+    "tags": ["facility", "avenger-grid", "wotc"],
+    "attributes": {
+      "build_cost_supplies": 80,
+      "build_days": 11,
+      "power_cost": 3,
+      "staffing_slots": "1-2 Engineers -- each reduces Covert Action completion time by 33%.",
+      "buildable_in_avenger_grid": true,
+      "allows_duplicates": false,
+      "ruleset_note": "War of the Chosen only; no vanilla XCOM 2 equivalent."
+    }
+  },
+  {
+    "template_key": "Infirmary",
+    "type": "facility",
+    "name": "Infirmary",
+    "short_description": "Heals injured soldiers and removes negative traits. War of the Chosen only -- replaces part of the vanilla Advanced Warfare Center's function.",
+    "tags": ["facility", "avenger-grid", "wotc"],
+    "attributes": {
+      "build_cost_supplies": 150,
+      "build_days": 14,
+      "power_cost": 3,
+      "staffing_slots": "1 Scientist -- increases wound recovery speed by 50%.",
+      "buildable_in_avenger_grid": true,
+      "allows_duplicates": false,
+      "ruleset_note": "War of the Chosen only; together with the Training Center, replaces the vanilla-only Advanced Warfare Center."
+    }
+  },
+  {
+    "template_key": "TrainingCenter",
+    "type": "facility",
+    "name": "Training Center",
+    "short_description": "Allows soldiers to purchase abilities with Ability Points (including cross-class options) and retrain abilities. War of the Chosen only -- replaces part of the vanilla Advanced Warfare Center's function.",
+    "tags": ["facility", "avenger-grid", "wotc"],
+    "attributes": {
+      "build_cost_supplies": 150,
+      "build_days": 12,
+      "power_cost": 3,
+      "staffing_slots": "None.",
+      "buildable_in_avenger_grid": true,
+      "allows_duplicates": false,
+      "ruleset_note": "War of the Chosen only; together with the Infirmary, replaces the vanilla-only Advanced Warfare Center."
+    }
+  },
+
+  {
+    "template_key": "Reaper",
+    "type": "soldier_class",
+    "name": "Reaper",
+    "short_description": "Reapers resistance-faction hero class; stealth and long-range specialist.",
+    "tags": ["soldier-class", "wotc", "faction-hero"],
+    "attributes": {
+      "primary_weapon_categories": "Vektor Rifle",
+      "secondary_equipment": "Claymore (concealable explosive)",
+      "training_method": "covert_action",
+      "roster_origin": "wotc_faction"
+    }
+  },
+  {
+    "template_key": "Skirmisher",
+    "type": "soldier_class",
+    "name": "Skirmisher",
+    "short_description": "Skirmishers resistance-faction hero class; mobile assault specialist.",
+    "tags": ["soldier-class", "wotc", "faction-hero"],
+    "attributes": {
+      "primary_weapon_categories": "Kal-7 Bullpup",
+      "secondary_equipment": "Ripjack (grapple gauntlet / melee)",
+      "training_method": "covert_action",
+      "roster_origin": "wotc_faction"
+    }
+  },
+  {
+    "template_key": "Templar",
+    "type": "soldier_class",
+    "name": "Templar",
+    "short_description": "Templars resistance-faction hero class; melee/psionic hybrid specialist.",
+    "tags": ["soldier-class", "wotc", "faction-hero"],
+    "attributes": {
+      "primary_weapon_categories": "Psi Gauntlet (melee)",
+      "secondary_equipment": "Autopistol",
+      "training_method": "covert_action",
+      "roster_origin": "wotc_faction"
+    }
+  }
+]

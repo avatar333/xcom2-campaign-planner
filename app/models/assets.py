@@ -8,12 +8,16 @@ from app.models.base import CreatedAtMixin, Model
 
 ASSET_ORIGINS = ("upload", "pack_bundled", "fetched_url", "generated_default")
 OBJECT_ASSET_ROLES = ("icon", "portrait", "banner", "gallery")
+ASSET_IMPORT_STATUSES = ("imported", "placeholder", "pending", "missing")
 
 
 class Asset(Model, CreatedAtMixin):
     __tablename__ = "assets"
     __table_args__ = (
         CheckConstraint(f"origin IN {ASSET_ORIGINS}", name="ck_assets_origin"),
+        CheckConstraint(
+            f"import_status IN {ASSET_IMPORT_STATUSES}", name="ck_assets_import_status"
+        ),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -24,11 +28,14 @@ class Asset(Model, CreatedAtMixin):
     height: Mapped[int | None] = mapped_column(Integer, nullable=True)
     origin: Mapped[str] = mapped_column(String, nullable=False)
     source_url: Mapped[str | None] = mapped_column(String, nullable=True)
+    source_name: Mapped[str | None] = mapped_column(String, nullable=True)
+    original_filename: Mapped[str | None] = mapped_column(String, nullable=True)
     license: Mapped[str | None] = mapped_column(String, nullable=True)
     attribution_text: Mapped[str | None] = mapped_column(String, nullable=True)
     redistribution_allowed: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=0
     )
+    import_status: Mapped[str] = mapped_column(String, nullable=False, default="imported")
 
 
 class ObjectAsset(Model):
@@ -45,3 +52,4 @@ class ObjectAsset(Model):
     )
     role: Mapped[str] = mapped_column(String, primary_key=True)
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+

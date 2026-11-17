@@ -2,6 +2,7 @@
 {% block title %}Catalog{% endblock %}
 {% block content %}
 {% import "_components/ui.html" as ui %}
+{% set common_args = {"q": q, "type_id": type_id, "source_id": source_id, "tag": tag, "tier": tier, "equippable_class_id": equippable_class_id, "research_category": research_category, "view": view} %}
 <div class="page-header">
   <div>
     <div class="page-header__eyebrow">Game Content</div>
@@ -26,12 +27,15 @@
     {% if type_id %}<input type="hidden" name="type_id" value="{{ type_id }}">{% endif %}
     {% if source_id %}<input type="hidden" name="source_id" value="{{ source_id }}">{% endif %}
     {% if tag %}<input type="hidden" name="tag" value="{{ tag }}">{% endif %}
+    {% if tier %}<input type="hidden" name="tier" value="{{ tier }}">{% endif %}
+    {% if equippable_class_id %}<input type="hidden" name="equippable_class_id" value="{{ equippable_class_id }}">{% endif %}
+    {% if research_category %}<input type="hidden" name="research_category" value="{{ research_category }}">{% endif %}
     <input type="hidden" name="view" value="{{ view }}">
     <button class="btn" type="submit">Search</button>
   </form>
   <div class="catalog-view-toggle">
-    <a class="{{ 'is-active' if view == 'grid' else '' }}" href="{{ url_for('catalog.index', q=q, type_id=type_id, source_id=source_id, tag=tag, view='grid') }}">Grid</a>
-    <a class="{{ 'is-active' if view == 'list' else '' }}" href="{{ url_for('catalog.index', q=q, type_id=type_id, source_id=source_id, tag=tag, view='list') }}">List</a>
+    <a class="{{ 'is-active' if view == 'grid' else '' }}" href="{{ url_for('catalog.index', **dict(common_args, view='grid')) }}">Grid</a>
+    <a class="{{ 'is-active' if view == 'list' else '' }}" href="{{ url_for('catalog.index', **dict(common_args, view='list')) }}">List</a>
   </div>
 </div>
 
@@ -39,21 +43,44 @@
   <aside class="catalog-filters">
     <div class="catalog-filters__group">
       <div class="catalog-filters__group-title">Object Type</div>
-      <a class="catalog-filters__link {{ 'is-active' if not type_id else '' }}" href="{{ url_for('catalog.index', q=q, source_id=source_id, tag=tag, view=view) }}">All types</a>
+      <a class="catalog-filters__link {{ 'is-active' if not type_id else '' }}" href="{{ url_for('catalog.index', **dict(common_args, type_id=none)) }}">All types</a>
       {% for t in object_types %}
-        <a class="catalog-filters__link {{ 'is-active' if type_id == t.id else '' }}" href="{{ url_for('catalog.index', q=q, type_id=t.id, source_id=source_id, tag=tag, view=view) }}">{{ t.name }}</a>
+        <a class="catalog-filters__link {{ 'is-active' if type_id == t.id else '' }}" href="{{ url_for('catalog.index', **dict(common_args, type_id=t.id)) }}">{{ t.name }}</a>
       {% endfor %}
     </div>
     <div class="catalog-filters__group">
-      <div class="catalog-filters__group-title">Source</div>
-      <a class="catalog-filters__link {{ 'is-active' if not source_id else '' }}" href="{{ url_for('catalog.index', q=q, type_id=type_id, tag=tag, view=view) }}">All sources{% if campaign %} (enabled){% endif %}</a>
+      <div class="catalog-filters__group-title">Source / Ruleset</div>
+      <a class="catalog-filters__link {{ 'is-active' if not source_id else '' }}" href="{{ url_for('catalog.index', **dict(common_args, source_id=none)) }}">All sources{% if campaign %} (enabled){% endif %}</a>
       {% for s in sources %}
-        <a class="catalog-filters__link {{ 'is-active' if source_id == s.id else '' }}" href="{{ url_for('catalog.index', q=q, type_id=type_id, source_id=s.id, tag=tag, view=view) }}">{{ s.name }}</a>
+        <a class="catalog-filters__link {{ 'is-active' if source_id == s.id else '' }}" href="{{ url_for('catalog.index', **dict(common_args, source_id=s.id)) }}">{{ s.name }}</a>
       {% endfor %}
       {% if campaign and all_sources | length > sources | length %}
         <div class="text-small text-muted" style="margin-top:0.5rem;">{{ all_sources | length - sources | length }} source(s) disabled for this campaign.</div>
       {% endif %}
     </div>
+    <div class="catalog-filters__group">
+      <div class="catalog-filters__group-title">Tier</div>
+      <a class="catalog-filters__link {{ 'is-active' if not tier else '' }}" href="{{ url_for('catalog.index', **dict(common_args, tier=none)) }}">Any tier</a>
+      {% for t in range(1, 8) %}
+        <a class="catalog-filters__link {{ 'is-active' if tier == t else '' }}" href="{{ url_for('catalog.index', **dict(common_args, tier=t)) }}">Tier {{ t }}</a>
+      {% endfor %}
+    </div>
+    <div class="catalog-filters__group">
+      <div class="catalog-filters__group-title">Class Compatibility</div>
+      <a class="catalog-filters__link {{ 'is-active' if not equippable_class_id else '' }}" href="{{ url_for('catalog.index', **dict(common_args, equippable_class_id=none)) }}">Any class</a>
+      {% for cls in soldier_classes %}
+        <a class="catalog-filters__link {{ 'is-active' if equippable_class_id == cls.id else '' }}" href="{{ url_for('catalog.index', **dict(common_args, equippable_class_id=cls.id)) }}">{{ cls.name }}</a>
+      {% endfor %}
+    </div>
+    {% if research_type_id and (type_id == research_type_id or not type_id) and research_categories %}
+    <div class="catalog-filters__group">
+      <div class="catalog-filters__group-title">Research Category</div>
+      <a class="catalog-filters__link {{ 'is-active' if not research_category else '' }}" href="{{ url_for('catalog.index', **dict(common_args, type_id=research_type_id, research_category=none)) }}">Any category</a>
+      {% for cat in research_categories %}
+        <a class="catalog-filters__link {{ 'is-active' if research_category == cat else '' }}" href="{{ url_for('catalog.index', **dict(common_args, type_id=research_type_id, research_category=cat)) }}">{{ cat | title }}</a>
+      {% endfor %}
+    </div>
+    {% endif %}
   </aside>
 
   <section>
@@ -69,7 +96,7 @@
                   {% if obj.primary_asset_id %}
                     <img src="{{ url_for('catalog.serve_asset', asset_id=obj.primary_asset_id) }}" alt="{{ obj.name }}">
                   {% else %}
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M4 15l4-4 4 4 4-6 4 4"/></svg>
+                    {{ glyph_by_type_id.get(obj.type_id, '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M4 15l4-4 4 4 4-6 4 4"/></svg>') | safe }}
                   {% endif %}
                 </div>
               </td>
@@ -92,7 +119,8 @@
               url_for('catalog.detail', object_id=obj.id),
               image_url=(url_for('catalog.serve_asset', asset_id=obj.primary_asset_id) if obj.primary_asset_id else none),
               type_badge=(type_by_id[obj.type_id].name if obj.type_id in type_by_id else none),
-              source_badge=(source_by_id[obj.source_id].name if obj.source_id in source_by_id else none)
+              source_badge=(source_by_id[obj.source_id].name if obj.source_id in source_by_id else none),
+              fallback_glyph=glyph_by_type_id.get(obj.type_id)
             ) }}
           {% endfor %}
         </div>
@@ -101,7 +129,7 @@
       {% if total_pages > 1 %}
         <div class="pagination">
           {% for p in range(1, total_pages + 1) %}
-            <a class="btn btn--sm {{ 'btn--primary' if p == page else '' }}" href="{{ url_for('catalog.index', q=q, type_id=type_id, source_id=source_id, tag=tag, view=view, page=p) }}">{{ p }}</a>
+            <a class="btn btn--sm {{ 'btn--primary' if p == page else '' }}" href="{{ url_for('catalog.index', **dict(common_args, page=p)) }}">{{ p }}</a>
           {% endfor %}
         </div>
       {% endif %}

@@ -81,3 +81,117 @@ def test_fallback_glyph_for_type_returns_svg_markup(app, seeded_db):
         obj_type = CatalogObjectType.query.filter_by(slug="weapon").first()
         glyph = asset_service.fallback_glyph_for_type(obj_type)
         assert "<svg" in glyph
+
+
+def test_fallback_glyph_differs_between_distinct_types(app, seeded_db):
+    """Phase 4 FR-AST-5 upgrade: glyphs are per-type, not one shared shape."""
+    with app.app_context():
+        weapon_type = CatalogObjectType.query.filter_by(slug="weapon").first()
+        facility_type = CatalogObjectType.query.filter_by(slug="facility").first()
+
+        weapon_glyph = asset_service.fallback_glyph_for_type(weapon_type)
+        facility_glyph = asset_service.fallback_glyph_for_type(facility_type)
+
+        assert weapon_glyph != facility_glyph
+
+
+def test_fallback_glyph_falls_back_to_generic_for_unknown_or_none_type(app, seeded_db):
+    with app.app_context():
+        generic_for_none = asset_service.fallback_glyph_for_type(None)
+        assert "<svg" in generic_for_none
+
+        unknown_type = CatalogObjectType(slug="totally-unseen-type", name="Unseen", is_builtin=False)
+        generic_for_unknown = asset_service.fallback_glyph_for_type(unknown_type)
+        assert generic_for_unknown == generic_for_none
+
+
+def test_fetch_image_for_object_rejects_private_host(app, seeded_db):
+    """FR-AST-4 SSRF guard: internal/private hosts are refused before any
+    network request is attempted."""
+    with app.app_context():
+        obj = _make_object(app)
+        with pytest.raises(AssetValidationError):
+            asset_service.fetch_image_for_object(obj.id, role="icon", url="http://127.0.0.1/evil.png")
+
+
+def test_fetch_image_for_object_rejects_non_http_scheme(app, seeded_db):
+    with app.app_context():
+        obj = _make_object(app)
+        with pytest.raises(AssetValidationError):
+            asset_service.fetch_image_for_object(obj.id, role="icon", url="file:///etc/passwd")
+
+
+def test_fetch_image_for_object_downloads_and_stores_locally(app, seeded_db, monkeypatch):
+    with app.app_context():
+        obj = _make_object(app)
+
+        class _FakeResponse:
+            def __init__(self, data: bytes):
+                self._data = data
+
+            def read(self, _n=-1):
+                return self._data
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc_info):
+                return False
+
+        png_bytes = make_png_bytes()
+        monkeypatch.setattr(
+            asset_service, "_assert_safe_fetch_url", lambda url: None
+        )
+
+        def _fake_urlopen(request, timeout):
+            return _FakeResponse(png_bytes)
+
+        import urllib.request
+
+        monkeypatch.setattr(urllib.request, "urlopen", _fake_urlopen)
+
+        asset = asset_service.fetch_image_for_object(
+            obj.id, role="icon", url="https://example.com/thing.png", attribution_text="Example"
+        )
+
+        assert asset.origin == "fetched_url"
+        assert asset.source_url == "https://example.com/thing.png"
+
+        from app.repositories.catalog_objects import get_object
+
+        reloaded = get_object(obj.id)
+        assert reloaded.primary_asset_id == asset.id
+
+        data = asset_service.read_asset_bytes(asset)
+        assert data.startswith(b"\x89PNG")
+
+
+def test_fetch_image_for_object_rejects_oversized_response(app, seeded_db, monkeypatch):
+    with app.app_context():
+        obj = _make_object(app)
+
+        class _FakeResponse:
+            def __init__(self, data: bytes):
+                self._data = data
+
+            def read(self, _n=-1):
+                return self._data
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc_info):
+                return False
+
+        monkeypatch.setattr(asset_service, "_assert_safe_fetch_url", lambda url: None)
+        oversized = b"x" * (asset_service.MAX_FETCH_MB * 1024 * 1024 + 10)
+
+        def _fake_urlopen(request, timeout):
+            return _FakeResponse(oversized)
+
+        import urllib.request
+
+        monkeypatch.setattr(urllib.request, "urlopen", _fake_urlopen)
+
+        with pytest.raises(AssetValidationError):
+            asset_service.fetch_image_for_object(obj.id, role="icon", url="https://example.com/huge.png")
