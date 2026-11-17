@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Content Sources{% endblock %}
+{% block content %}
+{% import "_components/ui.html" as ui %}
+<div class="page-header">
+  <div>
+    <div class="page-header__eyebrow">Game Content Provenance</div>
+    <h1 class="page-header__title">Content Sources</h1>
+    <p class="page-header__subtitle">XCOM 2, War of the Chosen, LWotC, individual Workshop mods and your own custom content -- each a first-class, independently toggleable source.</p>
+  </div>
+  <div class="page-header__actions">
+    <a class="btn btn--primary" href="{{ url_for('content_sources.new_source') }}">+ New Source</a>
+    <a class="btn" href="{{ url_for('catalog.export_catalog') }}">Export Catalog</a>
+    <a class="btn" href="{{ url_for('catalog.import_catalog') }}">Import Catalog</a>
+  </div>
+</div>
+
+{% if sources %}
+<div class="card-grid">
+  {% for source in sources %}
+    <a class="card card--interactive" href="{{ url_for('content_sources.detail', source_id=source.id) }}" style="display:block;">
+      <h3 class="card__title">{{ source.name }}</h3>
+      <div class="cluster" style="margin-bottom:0.5rem;">
+        {{ ui.badge(source.kind | replace("_", " ") | title, "neutral") }}
+        {% if source.is_builtin %}{{ ui.badge("Built-in", "ready") }}{% endif %}
+        {% if source.steam_workshop_id %}{{ ui.badge("Workshop", "warning") }}{% endif %}
+      </div>
+      <div class="card__meta">v{{ source.version }}{% if source.description %} &middot; {{ source.description }}{% endif %}</div>
+    </a>
+  {% endfor %}
+</div>
+{% else %}
+  {{ ui.empty_state("No content sources yet", "Create your first content source -- for example a Steam Workshop mod -- to start adding catalog objects.", action_label="+ New Source", action_url=url_for('content_sources.new_source')) }}
+{% endif %}
+{% endblock %}

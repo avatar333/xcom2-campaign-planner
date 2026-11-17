@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Import Catalog Data{% endblock %}
+{% block content %}
+{% import "_components/ui.html" as ui %}
+<div class="page-header">
+  <div>
+    <div class="page-header__eyebrow">Backup / Sharing</div>
+    <h1 class="page-header__title">Import Catalog Data</h1>
+    <p class="page-header__subtitle">Upload or paste a catalog export document. It is always validated first -- nothing is imported until you review the report and confirm.</p>
+  </div>
+  <div class="page-header__actions">
+    <a class="btn" href="{{ url_for('catalog.export_catalog') }}">Export Catalog</a>
+  </div>
+</div>
+
+{% if error %}{{ ui.alert(error, "danger") }}{% endif %}
+
+{% if result %}
+  {{ ui.alert(
+    "Import complete: " ~ result.objects_created ~ " object(s) created, " ~ result.objects_skipped ~ " skipped (already existed), " ~
+    result.relationships_created ~ " relationship(s) created, " ~ result.relationships_skipped ~ " skipped.",
+    "success"
+  ) }}
+  {% if result.errors %}
+    {% for e in result.errors %}{{ ui.alert(e, "warning") }}{% endfor %}
+  {% endif %}
+{% endif %}
+
+{% if report %}
+  {{ ui.section_header("Validation Report") }}
+  <div class="card" style="margin-bottom:1.5rem;">
+    <table class="data-table">
+      <tbody>
+        <tr><th>New content sources</th><td>{{ report.new_sources }}</td></tr>
+        <tr><th>New object types</th><td>{{ report.new_object_types }}</td></tr>
+        <tr><th>New objects</th><td>{{ report.new_objects }}</td></tr>
+        <tr><th>Conflicting objects (will be skipped, not overwritten)</th><td>{{ report.conflicting_objects }}</td></tr>
+        <tr><th>New relationships</th><td>{{ report.new_relationships }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  {% if report.errors %}
+    {{ ui.section_header("Errors (must be fixed before import)", report.errors | length ~ " error(s)") }}
+    <ul class="form-errors" style="margin-bottom:1.5rem;">
+      {% for issue in report.errors %}<li>{{ issue.message }}{% if issue.context %} <span class="text-muted">({{ issue.context }})</span>{% endif %}</li>{% endfor %}
+    </ul>
+  {% endif %}
+
+  {% if report.warnings %}
+    {{ ui.section_header("Warnings", report.warnings | length ~ " warning(s)") }}
+    <ul class="form-errors" style="color: var(--status-warning); margin-bottom:1.5rem;">
+      {% for issue in report.warnings %}<li>{{ issue.message }}{% if issue.context %} <span class="text-muted">({{ issue.context }})</span>{% endif %}</li>{% endfor %}
+    </ul>
+  {% endif %}
+
+  {% if report.is_valid and not result %}
+    {{ ui.alert("Document is valid and ready to import.", "success") }}
+  {% endif %}
+{% endif %}
+
+<div class="card" style="max-width:720px;">
+  <form method="post" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <div class="form-field">
+      <label for="document_file">Upload a JSON file</label>
+      <input type="file" id="document_file" name="document_file" accept="application/json,.json" class="form-control">
+    </div>
+    <div class="form-field">
+      <label for="document_text">&hellip;or paste JSON directly</label>
+      <textarea id="document_text" name="document_text" class="form-control" rows="10" placeholder='{"format": "xcom2-campaign-planner.catalog-export", "version": 1, ...}'>{{ document_text }}</textarea>
+    </div>
+    {% if report and report.is_valid %}
+      <div class="form-field form-check">
+        {{ form.confirm() }}
+        {{ form.confirm.label }}
+      </div>
+    {% endif %}
+    <div class="form-actions">
+      <button class="btn btn--primary" type="submit">{{ "Confirm Import" if (report and report.is_valid) else "Validate" }}</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

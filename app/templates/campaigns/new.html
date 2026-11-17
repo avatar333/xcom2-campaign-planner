@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}New Campaign{% endblock %}
+{% block content %}
+{% import "campaigns/_form_fields.html" as fields %}
+<div class="page-header">
+  <div>
+    <div class="page-header__eyebrow">New Playthrough</div>
+    <h1 class="page-header__title">Create Campaign</h1>
+  </div>
+</div>
+<div class="card" style="max-width:560px;">
+  <form method="post">
+    {{ form.hidden_tag() }}
+    {{ fields.campaign_form_fields(form) }}
+    <div class="form-actions">
+      <a class="btn" href="{{ url_for('campaigns.list_campaigns') }}">Cancel</a>
+      <button class="btn btn--primary" type="submit">Create Campaign</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

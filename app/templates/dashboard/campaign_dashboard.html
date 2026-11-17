@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}{{ campaign.name }}{% endblock %}
+{% block content %}
+{% import "_components/ui.html" as ui %}
+<div class="page-header">
+  <div>
+    <div class="page-header__eyebrow">Campaign Dashboard</div>
+    <h1 class="page-header__title">{{ campaign.name }}</h1>
+    <div class="cluster" style="margin-top:0.5rem;">
+      {{ ui.badge(campaign.difficulty | capitalize, "neutral") }}
+      {% if campaign.is_ironman %}{{ ui.badge("Iron Man", "warning") }}{% endif %}
+      {{ ui.badge(campaign.game_profile_slug or "No profile", "ready") }}
+    </div>
+  </div>
+  <div class="page-header__actions">
+    <a class="btn" href="{{ url_for('campaigns.edit_campaign', campaign_id=campaign.id) }}">Edit</a>
+    <a class="btn btn--danger" href="{{ url_for('campaigns.delete_campaign', campaign_id=campaign.id) }}">Delete</a>
+  </div>
+</div>
+
+{% if campaign.notes %}
+  <div class="card" style="margin-bottom:1.5rem;">
+    <h3 class="card__title">Notes</h3>
+    <p style="white-space:pre-wrap;">{{ campaign.notes }}</p>
+  </div>
+{% endif %}
+
+{{ ui.section_header("Enabled Content Sources") }}
+{% if campaign.content_sources %}
+  <table class="data-table" style="margin-bottom:1.5rem;">
+    <thead><tr><th>Source</th><th>Precedence</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for cs in campaign.content_sources | sort(attribute="precedence") %}
+      <tr>
+        <td>Source #{{ cs.content_source_id }}</td>
+        <td>{{ cs.precedence }}</td>
+        <td>{{ ui.badge("Enabled" if cs.enabled else "Disabled", "ready" if cs.enabled else "unknown") }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  {{ ui.empty_state("No content sources enabled", "This campaign has no content sources selected yet. Full source management arrives in Phase 3.") }}
+{% endif %}
+
+{{ ui.section_header("Progression") }}
+{{ ui.empty_state(
+  "Catalog and planning are coming in Phase 3-5",
+  "Research progress, engineering projects, the Avenger, your roster and plans will appear here once the catalog importer and planning engine are implemented.",
+  action_label="Preview Catalog",
+  action_url=url_for('catalog.index')
+) }}
+{% endblock %}

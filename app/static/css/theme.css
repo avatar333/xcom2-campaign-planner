@@ -1,0 +1,131 @@
+/*
+ * XCOM-inspired dark theme -- design tokens.
+ * Dark-mode only (NFR-9); all colours via CSS custom properties so a future
+ * second theme is purely additive. See docs/UI_UX_SPEC.md §1 for rationale.
+ *
+ * Direction for Phase 2: very dark charcoal/navy background, cyan/blue
+ * technological accent, high-contrast text, subtle grid/holographic
+ * texture, sharp panels with thin illuminated borders, obvious status
+ * colours, restrained animation.
+ */
+
+:root {
+  /* Backgrounds */
+  --bg-0: #07090d;
+  --bg-1: #0d1117;
+  --bg-2: #121a24;
+  --panel: #141d28;
+  --panel-raised: #182332;
+  --border: #223244;
+  --border-bright: #2f4a63;
+
+  /* Text */
+  --text-0: #eaf2f8;
+  --text-1: #b7c6d4;
+  --text-2: #7e92a3;
+  --text-disabled: #566574;
+
+  /* Accent: cyan/blue technological */
+  --accent: #35d1e6;
+  --accent-strong: #5be8ff;
+  --accent-dim: #1c4a56;
+  --accent-contrast: #04141a;
+
+  /* Status */
+  --status-ready: #35d1e6;
+  --status-success: #59c97a;
+  --status-warning: #e8b64c;
+  --status-danger: #ef5b5b;
+  --status-unknown: #6b7b8a;
+
+  /* Shape / elevation */
+  --radius: 2px;
+  --border-width: 1px;
+  --shadow-panel: 0 0 0 1px rgba(53, 209, 230, 0.06), 0 8px 24px rgba(0, 0, 0, 0.55);
+  --glow-accent: 0 0 0 1px rgba(53, 209, 230, 0.35), 0 0 12px rgba(53, 209, 230, 0.18);
+
+  /* Motion -- restrained */
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --ease: cubic-bezier(0.2, 0.6, 0.2, 1);
+
+  /* Layout */
+  --nav-width: 240px;
+  --nav-width-collapsed: 64px;
+  --topbar-height: 56px;
+  --content-max-width: 1600px;
+
+  /* Typography */
+  --font-display: "Eurostile", "Oswald", "Segoe UI", "Arial Narrow", sans-serif;
+  --font-body: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-0);
+  color: var(--text-0);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background-image:
+    linear-gradient(rgba(53, 209, 230, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(53, 209, 230, 0.035) 1px, transparent 1px);
+  background-size: 48px 48px;
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--accent-strong);
+  text-decoration: underline;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-0);
+  margin: 0 0 0.5em 0;
+  font-weight: 600;
+}
+
+h1 { font-size: 1.6rem; }
+h2 { font-size: 1.25rem; }
+h3 { font-size: 1.05rem; }
+
+p { margin: 0 0 0.75em 0; color: var(--text-1); }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--accent-dim);
+  color: var(--text-0);
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

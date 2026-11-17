@@ -1,0 +1,6 @@
+{
+  "slug": "lwotc",
+  "name": "Long War of the Chosen",
+  "description": "The LWotC total-conversion overhaul on top of War of the Chosen.",
+  "default_sources": ["xcom2-base", "wotc", "lwotc"]
+}

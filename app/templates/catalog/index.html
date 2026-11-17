@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Catalog{% endblock %}
+{% block content %}
+{% import "_components/ui.html" as ui %}
+<div class="page-header">
+  <div>
+    <div class="page-header__eyebrow">Game Content</div>
+    <h1 class="page-header__title">Catalog</h1>
+    <p class="page-header__subtitle">
+      {% if campaign %}
+        Showing objects from sources enabled in <strong>{{ campaign.name }}</strong>.
+      {% else %}
+        Showing the full global catalog (no active campaign). Select a campaign to filter by its enabled sources.
+      {% endif %}
+    </p>
+  </div>
+  <div class="page-header__actions">
+    <a class="btn btn--primary" href="{{ url_for('catalog.new_object') }}">+ Add Object</a>
+    <a class="btn" href="{{ url_for('content_sources.list_sources') }}">Manage Sources</a>
+  </div>
+</div>
+
+<div class="catalog-toolbar">
+  <form class="catalog-search-form" method="get" action="{{ url_for('catalog.index') }}">
+    <input type="search" name="q" value="{{ q }}" placeholder="Search by name, description or template ID&hellip;" class="form-control">
+    {% if type_id %}<input type="hidden" name="type_id" value="{{ type_id }}">{% endif %}
+    {% if source_id %}<input type="hidden" name="source_id" value="{{ source_id }}">{% endif %}
+    {% if tag %}<input type="hidden" name="tag" value="{{ tag }}">{% endif %}
+    <input type="hidden" name="view" value="{{ view }}">
+    <button class="btn" type="submit">Search</button>
+  </form>
+  <div class="catalog-view-toggle">
+    <a class="{{ 'is-active' if view == 'grid' else '' }}" href="{{ url_for('catalog.index', q=q, type_id=type_id, source_id=source_id, tag=tag, view='grid') }}">Grid</a>
+    <a class="{{ 'is-active' if view == 'list' else '' }}" href="{{ url_for('catalog.index', q=q, type_id=type_id, source_id=source_id, tag=tag, view='list') }}">List</a>
+  </div>
+</div>
+
+<div class="catalog-layout">
+  <aside class="catalog-filters">
+    <div class="catalog-filters__group">
+      <div class="catalog-filters__group-title">Object Type</div>
+      <a class="catalog-filters__link {{ 'is-active' if not type_id else '' }}" href="{{ url_for('catalog.index', q=q, source_id=source_id, tag=tag, view=view) }}">All types</a>
+      {% for t in object_types %}
+        <a class="catalog-filters__link {{ 'is-active' if type_id == t.id else '' }}" href="{{ url_for('catalog.index', q=q, type_id=t.id, source_id=source_id, tag=tag, view=view) }}">{{ t.name }}</a>
+      {% endfor %}
+    </div>
+    <div class="catalog-filters__group">
+      <div class="catalog-filters__group-title">Source</div>
+      <a class="catalog-filters__link {{ 'is-active' if not source_id else '' }}" href="{{ url_for('catalog.index', q=q, type_id=type_id, tag=tag, view=view) }}">All sources{% if campaign %} (enabled){% endif %}</a>
+      {% for s in sources %}
+        <a class="catalog-filters__link {{ 'is-active' if source_id == s.id else '' }}" href="{{ url_for('catalog.index', q=q, type_id=type_id, source_id=s.id, tag=tag, view=view) }}">{{ s.name }}</a>
+      {% endfor %}
+      {% if campaign and all_sources | length > sources | length %}
+        <div class="text-small text-muted" style="margin-top:0.5rem;">{{ all_sources | length - sources | length }} source(s) disabled for this campaign.</div>
+      {% endif %}
+    </div>
+  </aside>
+
+  <section>
+    {% if objects %}
+      {% if view == "list" %}
+        <table class="data-table">
+          <thead><tr><th></th><th>Name</th><th>Type</th><th>Source</th><th>Tier</th><th></th></tr></thead>
+          <tbody>
+          {% for obj in objects %}
+            <tr>
+              <td>
+                <div class="object-tile__thumb" style="width:32px;height:32px;">
+                  {% if obj.primary_asset_id %}
+                    <img src="{{ url_for('catalog.serve_asset', asset_id=obj.primary_asset_id) }}" alt="{{ obj.name }}">
+                  {% else %}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M4 15l4-4 4 4 4-6 4 4"/></svg>
+                  {% endif %}
+                </div>
+              </td>
+              <td><a href="{{ url_for('catalog.detail', object_id=obj.id) }}">{{ obj.name }}</a></td>
+              <td>{{ type_by_id[obj.type_id].name if obj.type_id in type_by_id else "" }}</td>
+              <td>{{ source_by_id[obj.source_id].name if obj.source_id in source_by_id else "" }}</td>
+              <td>{{ obj.tier or "—" }}</td>
+              <td class="list-row-actions">
+                <a class="btn btn--sm" href="{{ url_for('catalog.detail', object_id=obj.id) }}">View</a>
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="object-card-grid">
+          {% for obj in objects %}
+            {{ ui.object_card(
+              obj,
+              url_for('catalog.detail', object_id=obj.id),
+              image_url=(url_for('catalog.serve_asset', asset_id=obj.primary_asset_id) if obj.primary_asset_id else none),
+              type_badge=(type_by_id[obj.type_id].name if obj.type_id in type_by_id else none),
+              source_badge=(source_by_id[obj.source_id].name if obj.source_id in source_by_id else none)
+            ) }}
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {% if total_pages > 1 %}
+        <div class="pagination">
+          {% for p in range(1, total_pages + 1) %}
+            <a class="btn btn--sm {{ 'btn--primary' if p == page else '' }}" href="{{ url_for('catalog.index', q=q, type_id=type_id, source_id=source_id, tag=tag, view=view, page=p) }}">{{ p }}</a>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% else %}
+      {{ ui.empty_state(
+        "No objects found",
+        "No catalog objects match these filters yet. Try a broader search, or add a custom object -- including ones from a community mod.",
+        action_label="+ Add Object",
+        action_url=url_for('catalog.new_object')
+      ) }}
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

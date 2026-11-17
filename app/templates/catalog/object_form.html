@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}{{ "New Object" if mode == "create" else "Edit " ~ obj.name }}{% endblock %}
+{% block content %}
+{% import "_components/ui.html" as ui %}
+<div class="page-header">
+  <div>
+    <div class="page-header__eyebrow">{{ "Add Custom Object" if mode == "create" else "Edit Object" }}</div>
+    <h1 class="page-header__title">{{ "New Catalog Object" if mode == "create" else obj.name }}</h1>
+    <p class="page-header__subtitle">Works entirely without editing Python code -- pick a source (including a community mod), a type, and fill in details.</p>
+  </div>
+</div>
+
+<div class="card" style="max-width:680px;">
+  <form method="post">
+    {{ form.hidden_tag() }}
+    <div class="form-field">
+      {{ form.source_id.label }}
+      {{ form.source_id(class_="form-control", disabled=(mode == "edit")) }}
+      <p class="text-small text-muted">
+        {% if mode == "edit" %}
+          Source cannot be changed after creation. To move this object to another source, create a new object there or use the overlay action on the original.
+        {% else %}
+          Select the content source this object belongs to -- e.g. "[WOTC] Some Weapon Pack" for a community mod, or Custom / User Content.
+        {% endif %}
+      </p>
+    </div>
+    <div class="form-field">
+      {{ form.type_id.label }}
+      {{ form.type_id(class_="form-control", disabled=(mode == "edit")) }}
+      {% if mode == "edit" %}<p class="text-small text-muted">Object type cannot be changed after creation (attribute schema depends on it).</p>{% endif %}
+    </div>
+    <div class="form-field">
+      {{ form.name.label }}
+      {{ form.name(class_="form-control") }}
+      {% if form.name.errors %}
+        <ul class="form-errors">{% for e in form.name.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+      {% endif %}
+    </div>
+    <div class="form-field">
+      {{ form.template_key.label }}
+      {{ form.template_key(class_="form-control", placeholder="e.g. a game DataName -- leave blank to auto-generate") }}
+    </div>
+    <div class="form-field">
+      {{ form.tier.label }}
+      {{ form.tier(class_="form-control", placeholder="e.g. 1, 2, 3") }}
+    </div>
+    <div class="form-field">
+      {{ form.tags.label }}
+      {{ form.tags(class_="form-control", placeholder="e.g. primary, conventional, tier-1") }}
+    </div>
+    <div class="form-field">
+      {{ form.short_description.label }}
+      {{ form.short_description(class_="form-control") }}
+    </div>
+    <div class="form-field">
+      {{ form.long_description.label }}
+      {{ form.long_description(class_="form-control", rows=4) }}
+    </div>
+    <div class="form-field">
+      {{ form.attributes_json.label }}
+      {{ form.attributes_json(class_="form-control", rows=5, placeholder='{"damage_min": 4, "damage_max": 6}') }}
+      <p class="text-small text-muted">Optional. Only keys already declared for this object type are accepted; unknown keys are rejected.</p>
+    </div>
+    <div class="form-actions">
+      <a class="btn" href="{{ url_for('catalog.index') }}">Cancel</a>
+      <button class="btn btn--primary" type="submit">{{ "Create Object" if mode == "create" else "Save Changes" }}</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

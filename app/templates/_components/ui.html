@@ -1,0 +1,76 @@
+{% macro badge(label, variant="neutral") %}
+<span class="badge badge--{{ variant }}">{{ label }}</span>
+{% endmacro %}
+
+{% macro status_badge(status) %}
+  {% set variants = {
+    "active": "ready", "ready": "ready", "available": "ready",
+    "completed": "success", "owned": "success", "done": "success",
+    "in_progress": "warning", "blocked": "danger", "locked": "danger",
+    "archived": "unknown", "unknown": "unknown"
+  } %}
+  {{ badge(status | replace("_", " ") | title, variants.get(status, "neutral")) }}
+{% endmacro %}
+
+{% macro section_header(title, meta=none) %}
+<div class="section-header">
+  <h2 class="section-header__title">{{ title }}</h2>
+  {% if meta %}<span class="section-header__meta">{{ meta }}</span>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro empty_state(title, body, icon_svg=none, action_label=none, action_url=none) %}
+<div class="empty-state">
+  {% if icon_svg %}<div class="empty-state__icon">{{ icon_svg | safe }}</div>{% endif %}
+  <h3 class="empty-state__title">{{ title }}</h3>
+  <p class="empty-state__body">{{ body }}</p>
+  {% if action_label and action_url %}
+    <a class="btn btn--primary" href="{{ action_url }}">{{ action_label }}</a>
+  {% endif %}
+</div>
+{% endmacro %}
+
+{% macro alert(message, variant="info") %}
+<div class="alert alert--{{ variant }}" role="status">{{ message }}</div>
+{% endmacro %}
+
+{% macro object_tile(name, subtitle=none, image_url=none, icon_svg=none) %}
+<div class="object-tile">
+  <div class="object-tile__thumb">
+    {% if image_url %}
+      <img src="{{ image_url }}" alt="{{ name }}">
+    {% else %}
+      {{ (icon_svg or '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M4 15l4-4 4 4 4-6 4 4"/></svg>') | safe }}
+    {% endif %}
+  </div>
+  <div>
+    <div class="object-tile__name">{{ name }}</div>
+    {% if subtitle %}<div class="object-tile__subtitle">{{ subtitle }}</div>{% endif %}
+  </div>
+</div>
+{% endmacro %}
+
+{# Image-forward catalog object card: image/icon is always present, name is
+   always shown alongside it (object requirement: "image + name throughout
+   applicable UI"). Used by the Catalog grid and object pickers. #}
+{% macro object_card(obj, detail_url, image_url=none, type_badge=none, source_badge=none) %}
+<a class="object-card" href="{{ detail_url }}">
+  <div class="object-card__image">
+    {% if image_url %}
+      <img src="{{ image_url }}" alt="{{ obj.name }}">
+    {% else %}
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M4 15l4-4 4 4 4-6 4 4"/></svg>
+    {% endif %}
+  </div>
+  <div class="object-card__body">
+    <div class="object-card__name">{{ obj.name }}</div>
+    <div class="object-card__badges">
+      {% if type_badge %}{{ badge(type_badge, "neutral") }}{% endif %}
+      {% if obj.tier %}{{ badge("Tier " ~ obj.tier, "ready") }}{% endif %}
+      {% if source_badge %}{{ badge(source_badge, "unknown") }}{% endif %}
+      {% if obj.is_user_authored %}{{ badge("Custom", "warning") }}{% endif %}
+      {% if obj.is_retired %}{{ badge("Retired", "danger") }}{% endif %}
+    </div>
+  </div>
+</a>
+{% endmacro %}

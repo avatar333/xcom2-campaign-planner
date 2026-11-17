@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}{{ campaign.name }} — Content Sources{% endblock %}
+{% block content %}
+{% import "_components/ui.html" as ui %}
+<div class="page-header">
+  <div>
+    <div class="page-header__eyebrow">{{ campaign.name }}</div>
+    <h1 class="page-header__title">Content Sources</h1>
+    <p class="page-header__subtitle">Precedence order determines which source "wins" when two enabled sources describe the same object. Higher precedence number overrides lower.</p>
+  </div>
+  <div class="page-header__actions">
+    <a class="btn" href="{{ url_for('dashboard.campaign_dashboard', campaign_id=campaign.id) }}">Back to Dashboard</a>
+  </div>
+</div>
+
+{% if error %}{{ ui.alert(error, "danger") }}{% endif %}
+
+{{ ui.section_header("Enabled / Attached Sources", attached_sources | length ~ " attached") }}
+{% if attached_sources %}
+  <table class="data-table" style="margin-bottom:1.5rem;">
+    <thead><tr><th>Precedence</th><th>Source</th><th>Kind</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    {% for assoc, source in attached_sources | sort(attribute="precedence") %}
+      <tr>
+        <td>{{ assoc.precedence }}</td>
+        <td>
+          {{ source.name if source else "Unknown source" }}
+          {% if source and source.is_builtin %}{{ ui.badge("Built-in", "neutral") }}{% endif %}
+        </td>
+        <td>{{ (source.kind if source else "") | replace("_", " ") | title }}</td>
+        <td>{{ ui.badge("Enabled" if assoc.enabled else "Disabled", "ready" if assoc.enabled else "unknown") }}</td>
+        <td class="list-row-actions">
+          <form method="post" action="{{ url_for('campaigns.toggle_source', campaign_id=campaign.id, source_id=assoc.content_source_id) }}">
+            <button class="btn btn--sm" type="submit">{{ "Disable" if assoc.enabled else "Enable" }}</button>
+          </form>
+          <form method="post" action="{{ url_for('campaigns.remove_source', campaign_id=campaign.id, source_id=assoc.content_source_id) }}">
+            <button class="btn btn--sm btn--danger" type="submit">Remove</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <p class="text-small text-muted" style="margin-bottom:1.5rem;">Precedence currently follows attach order (first attached = lowest). Drag-and-drop reordering is planned for the full catalog UI; to change precedence today, remove and re-attach sources in the order you want them to win.</p>
+{% else %}
+  {{ ui.empty_state("No content sources attached", "Attach at least one content source (e.g. XCOM 2, War of the Chosen) so the catalog has something to show for this campaign.") }}
+{% endif %}
+
+{{ ui.section_header("Add a Source") }}
+{% if available_sources %}
+<div class="card-grid">
+  {% for source in available_sources %}
+    <div class="card">
+      <h3 class="card__title">{{ source.name }}</h3>
+      <div class="cluster" style="margin-bottom:0.5rem;">
+        {{ ui.badge(source.kind | replace("_", " ") | title, "neutral") }}
+        {% if source.is_builtin %}{{ ui.badge("Built-in", "ready") }}{% endif %}
+      </div>
+      {% if source.description %}<p class="card__meta">{{ source.description }}</p>{% endif %}
+      <form method="post" action="{{ url_for('campaigns.add_source', campaign_id=campaign.id) }}">
+        <input type="hidden" name="content_source_id" value="{{ source.id }}">
+        <button class="btn btn--primary btn--sm" type="submit">+ Attach</button>
+      </form>
+    </div>
+  {% endfor %}
+</div>
+{% else %}
+  {{ ui.empty_state("No more sources to add", "Every known content source is already attached to this campaign. Create a new one from Content Sources.", action_label="Manage Content Sources", action_url=url_for('content_sources.list_sources')) }}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,6 @@
+{
+  "slug": "wotc-standard",
+  "name": "War of the Chosen / Standard",
+  "description": "Vanilla XCOM 2 with the War of the Chosen expansion. No total conversions.",
+  "default_sources": ["xcom2-base", "wotc"]
+}

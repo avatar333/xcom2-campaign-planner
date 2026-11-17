@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+{% import "_components/ui.html" as ui %}
+<div class="page-header">
+  <div>
+    <div class="page-header__eyebrow">Command Center</div>
+    <h1 class="page-header__title">Dashboard</h1>
+    <p class="page-header__subtitle">Pick a campaign to continue, or start a new playthrough.</p>
+  </div>
+  <div class="page-header__actions">
+    <a class="btn btn--primary" href="{{ url_for('campaigns.new_campaign') }}">+ New Campaign</a>
+  </div>
+</div>
+
+{% if campaigns %}
+  {{ ui.section_header("Your Campaigns", campaigns | length ~ " total") }}
+  <div class="card-grid">
+    {% for campaign in campaigns %}
+      <a class="card card--interactive" href="{{ url_for('dashboard.campaign_dashboard', campaign_id=campaign.id) }}" style="display:block;">
+        <h3 class="card__title">{{ campaign.name }}</h3>
+        <div class="cluster" style="margin-bottom:0.5rem;">
+          {{ ui.badge(campaign.difficulty | capitalize, "neutral") }}
+          {% if campaign.is_ironman %}{{ ui.badge("Iron Man", "warning") }}{% endif %}
+          {{ ui.status_badge(campaign.status) if campaign.status == "archived" else "" }}
+        </div>
+        <div class="card__meta">{{ campaign.game_profile_slug or "No profile" }} &middot; updated {{ campaign.updated_at[:10] }}</div>
+      </a>
+    {% endfor %}
+  </div>
+{% else %}
+  {{ ui.empty_state(
+    "No campaigns yet",
+    "Create your first campaign to start tracking research, engineering and your roster across XCOM 2, War of the Chosen or a modded ruleset.",
+    action_label="+ New Campaign",
+    action_url=url_for('campaigns.new_campaign')
+  ) }}
+{% endif %}
+{% endblock %}

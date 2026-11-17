@@ -1,0 +1,25 @@
+{% macro campaign_form_fields(form) %}
+  <div class="form-field">
+    {{ form.name.label }}
+    {{ form.name(class_="form-control") }}
+    {% if form.name.errors %}
+      <ul class="form-errors">{% for e in form.name.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+    {% endif %}
+  </div>
+  <div class="form-field">
+    {{ form.game_profile_slug.label }}
+    {{ form.game_profile_slug(class_="form-control") }}
+  </div>
+  <div class="form-field">
+    {{ form.difficulty.label }}
+    {{ form.difficulty(class_="form-control") }}
+  </div>
+  <div class="form-field form-check">
+    {{ form.is_ironman() }}
+    {{ form.is_ironman.label }}
+  </div>
+  <div class="form-field">
+    {{ form.notes.label }}
+    {{ form.notes(class_="form-control", rows=4) }}
+  </div>
+{% endmacro %}

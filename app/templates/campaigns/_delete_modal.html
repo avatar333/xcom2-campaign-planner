@@ -1,0 +1,23 @@
+<div class="modal-backdrop" data-modal-root>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+    <div class="modal__header">
+      <h2 class="modal__title" id="delete-modal-title">Delete {{ campaign.name }}</h2>
+      <button class="modal__close" type="button" onclick="this.closest('[data-modal-root]').remove()" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal__body">
+      {% import "_components/ui.html" as ui %}
+      {{ ui.alert("This permanently deletes this campaign's state, plans and roster. The global catalog and every other campaign are unaffected.", "danger") }}
+      {% if error %}{{ ui.alert(error, "danger") }}{% endif %}
+      <form method="post" action="{{ url_for('campaigns.delete_campaign', campaign_id=campaign.id) }}" hx-post="{{ url_for('campaigns.delete_campaign', campaign_id=campaign.id) }}" hx-target="closest [data-modal-root]" hx-swap="outerHTML">
+        <div class="form-field">
+          <label for="confirm_name">Type <strong>{{ campaign.name }}</strong> to confirm</label>
+          <input type="text" id="confirm_name" name="confirm_name" class="form-control" autocomplete="off">
+        </div>
+        <div class="form-actions">
+          <button class="btn" type="button" onclick="this.closest('[data-modal-root]').remove()">Cancel</button>
+          <button class="btn btn--danger" type="submit">Delete Permanently</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

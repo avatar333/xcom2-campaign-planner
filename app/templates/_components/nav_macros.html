@@ -1,0 +1,15 @@
+{% macro nav_link(endpoint, label, icon_svg, soon=false) %}
+  {% set is_active = request.endpoint and (request.endpoint == endpoint or request.endpoint.startswith(endpoint ~ '.')) %}
+  {% if soon %}
+    <span class="app-nav__link is-disabled" title="{{ label }} -- coming in a later phase">
+      <span class="app-nav__link-icon">{{ icon_svg | safe }}</span>
+      <span class="app-nav__link-text">{{ label }}</span>
+      <span class="app-nav__soon">Soon</span>
+    </span>
+  {% else %}
+    <a class="app-nav__link{{ ' is-active' if is_active else '' }}" href="{{ url_for(endpoint) }}">
+      <span class="app-nav__link-icon">{{ icon_svg | safe }}</span>
+      <span class="app-nav__link-text">{{ label }}</span>
+    </a>
+  {% endif %}
+{% endmacro %}

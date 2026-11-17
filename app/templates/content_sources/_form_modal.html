@@ -1,0 +1,19 @@
+<div class="modal-backdrop" data-modal-root>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="source-modal-title">
+    <div class="modal__header">
+      <h2 class="modal__title" id="source-modal-title">{{ "Create Content Source" if mode == "create" else "Edit " ~ source.name }}</h2>
+      <button class="modal__close" type="button" onclick="this.closest('[data-modal-root]').remove()" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal__body">
+      {% import "content_sources/_form_fields.html" as fields %}
+      <form method="post" action="{{ url_for('content_sources.new_source') if mode == 'create' else url_for('content_sources.edit_source', source_id=source.id) }}" hx-post="{{ url_for('content_sources.new_source') if mode == 'create' else url_for('content_sources.edit_source', source_id=source.id) }}" hx-target="closest [data-modal-root]" hx-swap="outerHTML">
+        {{ form.hidden_tag() }}
+        {{ fields.content_source_form_fields(form) }}
+        <div class="form-actions">
+          <button class="btn" type="button" onclick="this.closest('[data-modal-root]').remove()">Cancel</button>
+          <button class="btn btn--primary" type="submit">{{ "Create Source" if mode == "create" else "Save Changes" }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

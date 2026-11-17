@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+{% block title %}{{ obj.name }}{% endblock %}
+{% block content %}
+{% import "_components/ui.html" as ui %}
+<div class="page-header">
+  <div>
+    <div class="page-header__eyebrow">{{ object_type.name if object_type else "Catalog Object" }}</div>
+    <h1 class="page-header__title">{{ obj.name }}</h1>
+    <div class="cluster" style="margin-top:0.5rem;">
+      {% if source %}{{ ui.badge(source.name, "neutral") }}{% endif %}
+      {% if obj.tier %}{{ ui.badge("Tier " ~ obj.tier, "ready") }}{% endif %}
+      {% if obj.is_user_authored %}{{ ui.badge("Custom / User-authored", "warning") }}{% endif %}
+      {% if obj.is_retired %}{{ ui.badge("Retired", "danger") }}{% endif %}
+    </div>
+  </div>
+  <div class="page-header__actions">
+    {% if obj.is_user_authored %}
+      <a class="btn" href="{{ url_for('catalog.edit_object', object_id=obj.id) }}">Edit</a>
+      <form method="post" action="{{ url_for('catalog.delete_object', object_id=obj.id) }}" style="display:inline;">
+        <button class="btn btn--danger" type="submit">Delete</button>
+      </form>
+    {% else %}
+      <form method="post" action="{{ url_for('catalog.create_overlay', object_id=obj.id) }}" style="display:inline;">
+        <button class="btn btn--primary" type="submit" title="Built-in/imported objects are read-only; this creates an editable copy in your Custom source.">Edit (creates overlay)</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+{% if delete_error %}{{ ui.alert(delete_error, "danger") }}{% endif %}
+{% if overlay_base %}
+  {{ ui.alert("This is a user overlay of \u201c" ~ overlay_base.name ~ "\u201d. The original object is untouched.", "info") }}
+{% endif %}
+
+<div class="object-detail-grid">
+  <div>
+    <div class="object-detail-image">
+      {% if obj.primary_asset_id %}
+        <img src="{{ url_for('catalog.serve_asset', asset_id=obj.primary_asset_id) }}" alt="{{ obj.name }}">
+      {% else %}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M4 15l4-4 4 4 4-6 4 4"/></svg>
+      {% endif %}
+    </div>
+
+    {% if object_assets %}
+      <div class="cluster" style="margin-top:0.6rem;">
+        {% for link, asset in object_assets %}
+          <div class="object-tile__thumb" title="{{ link.role }}">
+            <img src="{{ url_for('catalog.serve_asset', asset_id=asset.id) }}" alt="{{ obj.name }} ({{ link.role }})">
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <details style="margin-top:1rem;">
+      <summary class="btn btn--sm" style="display:inline-block; cursor:pointer;">Upload image</summary>
+      <div class="card" style="margin-top:0.6rem;">
+        {% if image_error %}{{ ui.alert(image_error, "danger") }}{% endif %}
+        <form method="post" action="{{ url_for('catalog.upload_image', object_id=obj.id) }}" enctype="multipart/form-data">
+          {% import "_components/ui.html" as _ui %}
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="form-field">
+            <label for="image_file">Image file (PNG, JPEG, WebP or GIF)</label>
+            <input type="file" id="image_file" name="image_file" accept="image/png,image/jpeg,image/webp,image/gif" class="form-control">
+          </div>
+          <div class="form-field">
+            <label for="role">Role</label>
+            <select id="role" name="role" class="form-control">
+              <option value="icon">Icon</option>
+              <option value="portrait">Portrait</option>
+              <option value="banner">Banner</option>
+              <option value="gallery">Gallery</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="source_url">Source URL (optional, informational)</label>
+            <input type="text" id="source_url" name="source_url" class="form-control" placeholder="Where this image originally came from">
+          </div>
+          <div class="form-field">
+            <label for="attribution_text">Attribution (optional)</label>
+            <input type="text" id="attribution_text" name="attribution_text" class="form-control">
+          </div>
+          <div class="form-actions">
+            <button class="btn btn--primary" type="submit">Upload</button>
+          </div>
+        </form>
+      </div>
+    </details>
+  </div>
+
+  <div class="stack">
+    {% if obj.short_description %}<p>{{ obj.short_description }}</p>{% endif %}
+    {% if obj.long_description %}<p style="white-space:pre-wrap;">{{ obj.long_description }}</p>{% endif %}
+
+    {% if tags %}
+      <div class="cluster">
+        {% for t in tags %}{{ ui.badge(t, "neutral") }}{% endfor %}
+      </div>
+    {% endif %}
+
+    {% if attributes %}
+      {{ ui.section_header("Attributes") }}
+      <table class="data-table" style="margin-bottom:1.5rem;">
+        <tbody>
+        {% for key, value in attributes.items() %}
+          <tr><th>{{ key | replace("_", " ") | title }}</th><td>{{ value }}</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+
+    <div>
+      {{ ui.section_header("Provenance") }}
+      <table class="data-table" style="margin-bottom:1.5rem;">
+        <tbody>
+          <tr><th>Source</th><td>{{ source.name if source else "Unknown" }}</td></tr>
+          <tr><th>Template / game ID</th><td>{{ obj.template_key }}</td></tr>
+          <tr><th>Internal ID</th><td>#{{ obj.id }}</td></tr>
+          <tr><th>User-authored</th><td>{{ "Yes" if obj.is_user_authored else "No (built-in / imported)" }}</td></tr>
+          {% if overlay_base %}<tr><th>Overlays</th><td><a href="{{ url_for('catalog.detail', object_id=overlay_base.id) }}">{{ overlay_base.name }}</a></td></tr>{% endif %}
+          <tr><th>Created</th><td>{{ obj.created_at[:10] }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    {% if relationship_error %}{{ ui.alert(relationship_error, "danger") }}{% endif %}
+
+    {{ ui.section_header("Relationships", "What this unlocks / requires") }}
+    <div class="stack" style="margin-bottom:1rem;">
+      <div>
+        <h3 style="font-size:0.85rem; color:var(--text-2); text-transform:uppercase; letter-spacing:0.05em;">Outbound (this &rarr; target)</h3>
+        {% if outbound %}
+          <ul class="relationship-list">
+            {% for rel in outbound %}
+              <li class="relationship-list__item">
+                <span>
+                  <strong>{{ rel.relationship_type.name }}</strong>
+                  &rarr;
+                  <a href="{{ url_for('catalog.detail', object_id=rel.target_object_id) }}">{{ rel.target_name }}</a>
+                  {% if rel.amount %}<span class="text-small text-muted">({{ rel.amount }} {{ rel.unit or '' }})</span>{% endif %}
+                  {% if rel.group_key %}{{ ui.badge("OR: " ~ rel.group_key, "warning") }}{% endif %}
+                </span>
+                <form method="post" action="{{ url_for('catalog.delete_relationship', relationship_id=rel.id) }}">
+                  <button class="btn btn--sm btn--ghost" type="submit">Remove</button>
+                </form>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-small text-muted">No outbound relationships yet.</p>
+        {% endif %}
+      </div>
+      <div>
+        <h3 style="font-size:0.85rem; color:var(--text-2); text-transform:uppercase; letter-spacing:0.05em;">Inbound (source &rarr; this)</h3>
+        {% if inbound %}
+          <ul class="relationship-list">
+            {% for rel in inbound %}
+              <li class="relationship-list__item">
+                <span>
+                  <a href="{{ url_for('catalog.detail', object_id=rel.source_object_id) }}">{{ rel.source_name }}</a>
+                  &rarr;
+                  <strong>{{ rel.relationship_type.name }}</strong>
+                  {% if rel.amount %}<span class="text-small text-muted">({{ rel.amount }} {{ rel.unit or '' }})</span>{% endif %}
+                </span>
+                <form method="post" action="{{ url_for('catalog.delete_relationship', relationship_id=rel.id) }}">
+                  <button class="btn btn--sm btn--ghost" type="submit">Remove</button>
+                </form>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-small text-muted">No inbound relationships yet.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <details>
+      <summary class="btn btn--sm btn--primary" style="display:inline-block; cursor:pointer;">+ Add relationship</summary>
+      <div class="card" style="margin-top:0.6rem; max-width:480px;" x-data="{ targetId: '', targetName: '', query: '', results: [] }">
+        <form method="post" action="{{ url_for('catalog.add_relationship', object_id=obj.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="form-field">
+            <label for="relationship_type_id">Relationship type</label>
+            <select id="relationship_type_id" name="relationship_type_id" class="form-control">
+              {% for rt in relationship_types %}
+                <option value="{{ rt.id }}">{{ rt.name }}{% if rt.is_quantified %} (quantified){% endif %}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="direction">Direction</label>
+            <select id="direction" name="direction" class="form-control">
+              <option value="outbound">This object &rarr; target</option>
+              <option value="inbound">Target &rarr; this object</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="target-search">Target object</label>
+            <input
+              type="text"
+              id="target-search"
+              class="form-control"
+              placeholder="Search by name&hellip;"
+              x-model="query"
+              @input.debounce.300ms="
+                if (query.length < 2) { results = []; return; }
+                fetch('{{ url_for('catalog.search_json') }}?q=' + encodeURIComponent(query) + '&exclude_id={{ obj.id }}')
+                  .then(r => r.json()).then(data => results = data.results)
+              "
+            >
+            <div class="object-picker-results" x-show="results.length > 0" style="display:none;">
+              <template x-for="result in results" :key="result.id">
+                <div class="object-picker-result" @click="targetId = result.id; targetName = result.name; query = result.name; results = []">
+                  <div class="object-picker-result__thumb">
+                    <template x-if="result.image_url"><img :src="result.image_url" :alt="result.name"></template>
+                  </div>
+                  <span x-text="result.name"></span>
+                </div>
+              </template>
+            </div>
+            <input type="hidden" name="target_object_id" :value="targetId">
+          </div>
+          <div class="form-field">
+            <label for="group_key">Alternative group key (optional, for OR groups)</label>
+            <input type="text" id="group_key" name="group_key" class="form-control" placeholder="e.g. plasma-rifle-path">
+          </div>
+          <div class="form-field">
+            <label for="amount">Amount (for quantified relationships)</label>
+            <input type="number" step="any" id="amount" name="amount" class="form-control">
+          </div>
+          <div class="form-field">
+            <label for="unit">Unit</label>
+            <input type="text" id="unit" name="unit" class="form-control">
+          </div>
+          <div class="form-actions">
+            <button class="btn btn--primary" type="submit" :disabled="!targetId">Add Relationship</button>
+          </div>
+        </form>
+      </div>
+    </details>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Edit {{ source.name }}{% endblock %}
+{% block content %}
+{% import "content_sources/_form_fields.html" as fields %}
+<div class="page-header">
+  <div>
+    <div class="page-header__eyebrow">Edit Content Source</div>
+    <h1 class="page-header__title">{{ source.name }}</h1>
+  </div>
+</div>
+<div class="card" style="max-width:560px;">
+  <form method="post">
+    {{ form.hidden_tag() }}
+    {{ fields.content_source_form_fields(form) }}
+    <div class="form-actions">
+      <a class="btn" href="{{ url_for('content_sources.detail', source_id=source.id) }}">Cancel</a>
+      <button class="btn btn--primary" type="submit">Save Changes</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

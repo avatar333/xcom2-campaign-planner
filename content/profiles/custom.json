@@ -1,0 +1,6 @@
+{
+  "slug": "custom",
+  "name": "Custom / Modded",
+  "description": "Start with no preselected sources and choose your own combination of base game, DLC and mods.",
+  "default_sources": []
+}

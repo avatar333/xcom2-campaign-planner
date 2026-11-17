@@ -1,0 +1,53 @@
+"""Model package: import order establishes FK target visibility for Alembic autogenerate.
+
+Catalog/assets first (no dependency on campaign/strategy), then campaign
+tables (reference catalog/assets), then strategy tables (reference catalog)
+and the campaign<->strategy link table last.
+"""
+from app.models.assets import Asset, ObjectAsset
+from app.models.campaign import (
+    Campaign,
+    CampaignContentSource,
+    CampaignEvent,
+    CampaignObjectState,
+    CampaignPlan,
+    CampaignPlanItem,
+    CampaignSoldier,
+    CampaignSoldierLoadout,
+    CampaignStrategyProfile,
+)
+from app.models.catalog import (
+    CatalogAttributeDefinition,
+    CatalogObject,
+    CatalogObjectTag,
+    CatalogObjectType,
+    CatalogRelationship,
+    CatalogRelationshipType,
+    ContentSource,
+    ContentSourceRelation,
+)
+from app.models.strategy import StrategyProfile, StrategyRecommendation
+
+__all__ = [
+    "Asset",
+    "Campaign",
+    "CampaignContentSource",
+    "CampaignEvent",
+    "CampaignObjectState",
+    "CampaignPlan",
+    "CampaignPlanItem",
+    "CampaignSoldier",
+    "CampaignSoldierLoadout",
+    "CampaignStrategyProfile",
+    "CatalogAttributeDefinition",
+    "CatalogObject",
+    "CatalogObjectTag",
+    "CatalogObjectType",
+    "CatalogRelationship",
+    "CatalogRelationshipType",
+    "ContentSource",
+    "ContentSourceRelation",
+    "ObjectAsset",
+    "StrategyProfile",
+    "StrategyRecommendation",
+]

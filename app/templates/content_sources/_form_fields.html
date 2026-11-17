@@ -1,0 +1,37 @@
+{% macro content_source_form_fields(form) %}
+  <div class="form-field">
+    {{ form.name.label }}
+    {{ form.name(class_="form-control") }}
+    {% if form.name.errors %}
+      <ul class="form-errors">{% for e in form.name.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+    {% endif %}
+  </div>
+  <div class="form-field">
+    {{ form.kind.label }}
+    {{ form.kind(class_="form-control") }}
+  </div>
+  <div class="form-field">
+    {{ form.version.label }}
+    {{ form.version(class_="form-control") }}
+  </div>
+  <div class="form-field">
+    {{ form.steam_workshop_id.label }}
+    {{ form.steam_workshop_id(class_="form-control", placeholder="e.g. 1134188340 (optional -- not mandatory)") }}
+  </div>
+  <div class="form-field">
+    {{ form.description.label }}
+    {{ form.description(class_="form-control", rows=3) }}
+  </div>
+  <div class="form-field">
+    {{ form.license.label }}
+    {{ form.license(class_="form-control") }}
+  </div>
+  <div class="form-field">
+    {{ form.attribution_text.label }}
+    {{ form.attribution_text(class_="form-control") }}
+  </div>
+  <div class="form-field">
+    {{ form.homepage_url.label }}
+    {{ form.homepage_url(class_="form-control") }}
+  </div>
+{% endmacro %}
