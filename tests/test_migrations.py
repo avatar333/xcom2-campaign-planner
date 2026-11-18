@@ -32,6 +32,7 @@ EXPECTED_TABLES = {
     "campaign_object_state",
     "campaign_events",
     "campaign_plans",
+    "campaign_research_queue",
     "campaign_plan_items",
     "campaign_soldiers",
     "campaign_soldier_loadouts",

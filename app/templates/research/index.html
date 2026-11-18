@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Research{% endblock %}
+{% block content %}
+{% import "_components/ui.html" as ui %}
+{% import "research/_macros.html" as rs %}
+<div class="page-header">
+  <div>
+    <div class="page-header__eyebrow">{{ campaign.name }} &middot; Research</div>
+    <h1 class="page-header__title">Research &amp; Dependencies</h1>
+    <p class="page-header__subtitle">Track what <strong>{{ campaign.name }}</strong> has researched, plan what comes next, and ask how to unlock anything.</p>
+  </div>
+  <div class="page-header__actions">
+    <a class="btn btn--primary" href="{{ url_for('research.path_picker', campaign_id=campaign.id) }}" data-testid="open-path-picker">Show Unlock Path&hellip;</a>
+  </div>
+</div>
+{% if error %}{{ ui.alert(error, "danger") }}{% endif %}
+
+<div class="rs-summary" data-testid="research-summary">
+  {% for key, label in [('completed','Completed'),('in_progress','In progress'),('planned','Planned'),('available','Available'),('blocked','Locked')] %}
+    <a class="rs-summary__item rs-summary__item--{{ key }}" href="{{ url_for('research.index', campaign_id=campaign.id, status=key) }}"><strong data-count="{{ key }}">{{ browse.counts.get(key, 0) }}</strong> {{ label }}</a>
+  {% endfor %}
+</div>
+
+<div class="rs-layout">
+  <section aria-label="Research browser">
+    <form class="rs-filters" method="get" action="{{ url_for('research.index', campaign_id=campaign.id) }}" role="search">
+      <input type="search" name="q" value="{{ filters.q }}" class="form-control" placeholder="Search research&hellip;" aria-label="Search research">
+      <select name="category" class="form-control" aria-label="Category">
+        <option value="">All categories</option>
+        {% for c in browse.categories %}<option value="{{ c }}" {{ 'selected' if filters.category == c }}>{{ c | title }}</option>{% endfor %}
+      </select>
+      <select name="status" class="form-control" aria-label="State">
+        <option value="">Any state</option>
+        {% for key, label in [('completed','Completed'),('in_progress','In progress'),('planned','Planned'),('available','Available'),('blocked','Locked')] %}
+          <option value="{{ key }}" {{ 'selected' if filters.status == key }}>{{ label }}</option>{% endfor %}
+      </select>
+      <select name="source_id" class="form-control" aria-label="Source">
+        <option value="">All sources</option>
+        {% for sid, sname in browse.sources %}<option value="{{ sid }}" {{ 'selected' if filters.source_id == sid }}>{{ sname }}</option>{% endfor %}
+      </select>
+      <select name="type" class="form-control" aria-label="Project type">
+        <option value="">All types</option>
+        {% for slug, tname in browse.types %}<option value="{{ slug }}" {{ 'selected' if filters.type_slug == slug }}>{{ tname }}</option>{% endfor %}
+      </select>
+      <button class="btn" type="submit">Filter</button>
+      <a class="btn btn--ghost" href="{{ url_for('research.index', campaign_id=campaign.id) }}">Clear</a>
+    </form>
+    <p class="text-small text-muted" data-testid="result-count">Showing {{ browse.cards | length }} of {{ browse.total_unfiltered }} projects available to this campaign's sources.</p>
+
+    {% if browse.cards %}
+    <div class="rs-grid" data-testid="research-grid">
+      {% for card in browse.cards %}{% set ref = card.ref %}
+      <article class="rs-card rs-card--{{ ref.status }}" data-object-id="{{ ref.object_id }}">
+        <header class="rs-card__head">
+          {{ rs.art(ref, "md") }}
+          <div class="rs-card__title">
+            <a class="rs-card__name" href="{{ url_for('research.detail', campaign_id=campaign.id, object_id=ref.object_id) }}">{{ ref.name }}</a>
+            <div class="rs-card__meta">{{ ref.type_name }}{% if card.category %} &middot; <span class="rs-tag">{{ card.category }}</span>{% endif %}{% if ref.source_name %} &middot; {{ ref.source_name }}{% endif %}</div>
+          </div>
+          {{ rs.status_pill(ref) }}
+        </header>
+        {% if card.short_description %}<p class="rs-card__desc">{{ card.short_description }}</p>{% endif %}
+        <div class="rs-card__section"><div class="rs-card__label">Requires</div>
+          {% if card.requires %}<ul class="rs-reqlist">{% for entry in card.requires %}{{ rs.requirement_entry(entry, campaign) }}{% endfor %}</ul>
+          {% else %}<span class="text-small text-muted">Nothing &mdash; available from the start.</span>{% endif %}
+        </div>
+        {% if card.unlocks %}
+        <div class="rs-card__section"><div class="rs-card__label">Unlocks</div>
+          <div class="rs-chips">{% for u in card.unlocks %}{{ rs.chip(u, campaign, show_status=false, show_type=false) }}{% endfor %}</div>
+        </div>
+        {% endif %}
+        <footer class="rs-card__actions">
+          {% if ref.satisfied %}
+            {{ rs.post_button(campaign, 'research.reopen', ref.object_id, 'Undo completion') }}
+          {% elif card.in_queue %}
+            <span class="text-small">In queue (#{{ card.queue_position }})</span>
+            {{ rs.post_button(campaign, 'research.complete', ref.object_id, 'Complete', 'btn--primary') }}
+          {% else %}
+            {{ rs.post_button(campaign, 'research.queue_add', ref.object_id, 'Plan') }}
+            {{ rs.post_button(campaign, 'research.complete', ref.object_id, 'Mark complete') }}
+          {% endif %}
+          <a class="btn btn--sm" href="{{ url_for('research.unlock_path', campaign_id=campaign.id, object_id=ref.object_id) }}">Show Unlock Path</a>
+        </footer>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+      {{ ui.empty_state("No research found", "No research projects match these filters for this campaign's content sources.") }}
+    {% endif %}
+  </section>
+
+  <aside>{% include "research/_queue.html" %}</aside>
+</div>
+{% endblock %}

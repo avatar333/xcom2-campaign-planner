@@ -1,0 +1,81 @@
+{% import "research/_macros.html" as rs %}
+<section class="rs-queue" aria-labelledby="queue-title" x-data="researchQueue()" data-testid="research-queue"
+         data-reorder-url="{{ url_for('research.reorder', campaign_id=campaign.id) }}" data-csrf="{{ csrf_token() }}">
+  <div class="rs-queue__head">
+    <h2 id="queue-title" class="rs-queue__title">Research queue</h2>
+    <span class="rs-queue__count">{{ queue.items | length }} planned</span>
+  </div>
+  <p class="text-small text-muted">Your intended order. Drag the handle, or use the arrow buttons / <kbd>Alt</kbd>+<kbd>&uarr;</kbd><kbd>&darr;</kbd>. Nothing is reordered for you.</p>
+  <div class="rs-sr-only" aria-live="polite" x-text="announcement"></div>
+
+  {% if queue.items %}
+  <ol class="rs-queue__list" data-queue-list>
+    {% for item in queue.items %}
+    <li class="rs-qitem rs-qitem--{{ item.state }}{{ ' has-warning' if item.warnings else '' }}" draggable="true"
+        data-object-id="{{ item.ref.object_id }}" data-testid="queue-item"
+        @dragstart="dragStart($event)" @dragover.prevent="dragOver($event)" @drop.prevent="drop($event)" @dragend="dragEnd($event)"
+        @keydown="keyMove($event)" tabindex="0" aria-label="{{ item.position }}. {{ item.ref.name }}">
+      <span class="rs-qitem__handle" aria-hidden="true" title="Drag to reorder">&#x2630;</span>
+      <span class="rs-qitem__pos">{{ item.position }}</span>
+      {{ rs.art(item.ref, "sm") }}
+      <span class="rs-qitem__body">
+        <a class="rs-qitem__name" href="{{ url_for('research.detail', campaign_id=campaign.id, object_id=item.ref.object_id) }}">{{ item.ref.name }}</a>
+        <span class="rs-qitem__meta">
+          {% if item.state == 'in_progress' %}<span class="rs-status rs-status--in_progress"><span aria-hidden="true">&#9654;</span> In progress</span>
+          {% else %}<span class="rs-status rs-status--planned"><span aria-hidden="true">&#9675;</span> Planned</span>{% endif %}
+          {% if item.category %}<span class="rs-tag">{{ item.category }}</span>{% endif %}
+        </span>
+        {% if item.warnings %}
+        <ul class="rs-qitem__warn" data-testid="queue-warning">
+          <li class="rs-qitem__warn-head">&#9888; Blocked before position {{ item.position }}:</li>
+          {% for w in item.warnings %}<li>{{ w.text }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+      </span>
+      <span class="rs-qitem__actions">
+        {{ rs.post_button(campaign, 'research.move', item.ref.object_id, '\u2191', extra={'direction': 'up'}) }}
+        {{ rs.post_button(campaign, 'research.move', item.ref.object_id, '\u2193', extra={'direction': 'down'}) }}
+        {% if item.state != 'in_progress' %}{{ rs.post_button(campaign, 'research.start', item.ref.object_id, 'Start') }}{% endif %}
+        {{ rs.post_button(campaign, 'research.complete', item.ref.object_id, 'Complete', 'btn--primary') }}
+        {{ rs.post_button(campaign, 'research.queue_remove', item.ref.object_id, 'Remove', 'btn--danger') }}
+      </span>
+    </li>
+    {% endfor %}
+  </ol>
+
+  {% if queue.warnings_total %}
+  <div class="rs-queue__advice" data-testid="queue-advice">
+    <strong>{{ queue.warnings_total }} item{{ 's' if queue.warnings_total != 1 else '' }} cannot start in this order.</strong>
+    You can keep your plan as it is.
+    {% if queue.suggestion is none %}
+      <a class="btn btn--sm" href="{{ url_for('research.index', campaign_id=campaign.id, suggest=1) }}">Suggest a valid order</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if queue.suggestion is not none %}
+  <div class="rs-suggest" data-testid="queue-suggestion">
+    <h3>Suggested order</h3>
+    {% if queue.suggestion.changed %}
+      <p class="text-small">Same projects, reordered only where a prerequisite is queued later. Review, then apply &mdash; or ignore it.</p>
+      <ol>{% for object_id in queue.suggestion.order %}{% set it = queue.items | selectattr('ref.object_id', 'equalto', object_id) | first %}<li>{{ it.ref.name }}</li>{% endfor %}</ol>
+      <form method="post" action="{{ url_for('research.apply_suggestion', campaign_id=campaign.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {% for object_id in queue.suggestion.order %}<input type="hidden" name="order" value="{{ object_id }}">{% endfor %}
+        <button class="btn btn--sm btn--primary" type="submit" data-testid="apply-suggestion">Apply this order</button>
+        <a class="btn btn--sm" href="{{ url_for('research.index', campaign_id=campaign.id) }}">Dismiss</a>
+      </form>
+    {% else %}
+      <p class="text-small">Your order already respects every prerequisite that is itself queued.</p>
+    {% endif %}
+    {% if queue.suggestion.unresolved %}
+      <p class="text-small">Reordering cannot fix these &mdash; they need something not in your queue:</p>
+      <ul class="text-small">{% for b in queue.suggestion.unresolved %}<li>{{ b.text }}</li>{% endfor %}</ul>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="rs-empty">Nothing planned yet. Use <strong>Plan</strong> on any project in the browser.</div>
+  {% endif %}
+</section>

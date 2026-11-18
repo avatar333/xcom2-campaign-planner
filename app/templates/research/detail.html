@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}{{ detail.ref.name }}{% endblock %}
+{% block content %}
+{% import "_components/ui.html" as ui %}
+{% import "research/_macros.html" as rs %}
+{% set ref = detail.ref %}
+<div class="page-header">
+  <div class="rs-detail-head">
+    {{ rs.art(ref, "lg") }}
+    <div>
+      <div class="page-header__eyebrow"><a href="{{ url_for('research.index', campaign_id=campaign.id) }}">{{ campaign.name }} &middot; Research</a></div>
+      <h1 class="page-header__title">{{ ref.name }}</h1>
+      <div class="cluster">{{ rs.status_pill(ref) }}<span class="rs-tag">{{ ref.type_name }}</span>
+        {% if detail.category %}<span class="rs-tag">{{ detail.category }}</span>{% endif %}
+        {% if ref.source_name %}<span class="text-small text-muted">{{ ref.source_name }}</span>{% endif %}</div>
+    </div>
+  </div>
+  <div class="page-header__actions">
+    <a class="btn btn--primary" href="{{ url_for('research.unlock_path', campaign_id=campaign.id, object_id=ref.object_id) }}" data-testid="show-unlock-path">Show Unlock Path</a>
+    {% if ref.category == 'project' %}
+      {% if ref.satisfied %}{{ rs.post_button(campaign, 'research.reopen', ref.object_id, 'Undo completion', next_url=request.path) }}
+      {% else %}
+        {% if not detail.in_queue %}{{ rs.post_button(campaign, 'research.queue_add', ref.object_id, 'Plan', next_url=request.path) }}
+        {% else %}{{ rs.post_button(campaign, 'research.queue_remove', ref.object_id, 'Remove from queue', next_url=request.path) }}{% endif %}
+        {% if detail.recorded_status != 'in_progress' %}{{ rs.post_button(campaign, 'research.start', ref.object_id, 'Start', next_url=request.path) }}{% endif %}
+        {{ rs.post_button(campaign, 'research.complete', ref.object_id, 'Mark complete', 'btn--primary', next_url=request.path) }}
+      {% endif %}
+    {% elif ref.type_slug == 'facility' %}
+      <a class="btn" href="{{ url_for('avenger.index', campaign_id=campaign.id) }}">Plan in Avenger</a>
+    {% endif %}
+  </div>
+</div>
+{% if error %}{{ ui.alert(error, "danger") }}{% endif %}
+{% if detail.description %}<p>{{ detail.description }}</p>{% endif %}
+{% if detail.completed_at %}<p class="text-small text-muted" data-testid="completed-at">Completed {{ detail.completed_at }} &middot; #{{ detail.completion_sequence }} in this campaign.</p>{% endif %}
+{% if detail.in_queue %}<p class="text-small">In your research queue at position <strong>{{ detail.queue_position }}</strong>.</p>{% endif %}
+
+<div class="rs-two-col">
+  <section class="rs-panel" data-testid="requires-panel">
+    <h2 class="rs-panel__title">Requires</h2>
+    {% if detail.requires %}<ul class="rs-reqlist">{% for entry in detail.requires %}{{ rs.requirement_entry(entry, campaign) }}{% endfor %}</ul>
+    {% else %}<p class="text-muted">No prerequisites recorded &mdash; available from the start.</p>{% endif %}
+    {% if detail.blockers and not ref.satisfied %}
+      <div class="rs-blockers"><strong>Outstanding for this campaign</strong><ul>{% for b in detail.blockers %}<li>{{ b.text }}</li>{% endfor %}</ul></div>
+    {% endif %}
+  </section>
+  <section class="rs-panel" data-testid="unlocks-panel">
+    <h2 class="rs-panel__title">Unlocks</h2>
+    {% if detail.unlocks %}
+      <div class="rs-chips rs-chips--col">{% for u in detail.unlocks %}
+        <div>{{ rs.chip(u, campaign) }}
+          {% if u.is_alternative %}<span class="rs-note">one of several ways</span>{% endif %}
+          {% if u.other_required %}<span class="rs-note">also needs {{ u.other_required | join(', ') }}</span>{% endif %}
+        </div>{% endfor %}</div>
+    {% else %}<p class="text-muted">Nothing in the catalog lists this as a requirement.</p>{% endif %}
+  </section>
+</div>
+{% endblock %}

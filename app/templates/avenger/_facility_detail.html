@@ -24,6 +24,7 @@
       <p class="text-small text-muted">No upgrades recorded in the catalog for this facility.</p>
     {% endif %}
 
+    <p><a class="btn btn--sm" href="{{ url_for('research.unlock_path', campaign_id=campaign.id, object_id=f.object_id) }}" data-testid="facility-show-unlock-path">Show Unlock Path</a></p>
     <h5>Prerequisites</h5>
     {% if detail.prerequisite_leaves %}
       <ul>{% for p in detail.prerequisite_leaves %}<li>{{ p.name }}</li>{% endfor %}</ul>

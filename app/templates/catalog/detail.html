@@ -14,6 +14,9 @@
     </div>
   </div>
   <div class="page-header__actions">
+    {% if active_campaign %}
+      <a class="btn" href="{{ url_for('research.unlock_path', campaign_id=active_campaign.id, object_id=obj.id) }}" data-testid="catalog-show-unlock-path" title="Everything {{ active_campaign.name }} needs to reach this object">Show Unlock Path</a>
+    {% endif %}
     {% if obj.is_user_authored %}
       <a class="btn" href="{{ url_for('catalog.edit_object', object_id=obj.id) }}">Edit</a>
       <form method="post" action="{{ url_for('catalog.delete_object', object_id=obj.id) }}" style="display:inline;">

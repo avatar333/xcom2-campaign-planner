@@ -267,6 +267,8 @@ Indexes: `UNIQUE(campaign_id, content_source_id)`; `INDEX(campaign_id, precedenc
 | notes | TEXT NULL | |
 | state_attributes | TEXT NOT NULL DEFAULT '{}' | JSON |
 | is_active | INTEGER NOT NULL DEFAULT 1 | false when owning object's source got disabled |
+| completed_at | TEXT NULL | Phase 6 (`ADR-0021`): ISO timestamp the campaign completed the object; NULL unless `status` is `completed`/`owned` |
+| completion_sequence | INTEGER NULL | Phase 6: per-campaign completion counter (1, 2, 3 …) so completion order survives equal timestamps |
 | created_at | TEXT NOT NULL | |
 | updated_at | TEXT NOT NULL | |
 
@@ -372,6 +374,19 @@ Constraints: `UNIQUE(campaign_id, coordinate)`, `UNIQUE(campaign_id, grid_row, g
 
 *Not stored*: "Available to build" / "Blocked" (derived from catalog prerequisites + room state, `ADR-0020`), duplicate eligibility (the facility's `allows_duplicates` attribute under the campaign's ruleset), power totals.
 
+### 3.11 `campaign_research_queue` (Phase 6, `ADR-0021`)
+A campaign's ordered research queue: projects the player intends to research (planned) or is researching (in progress; the status itself lives in `campaign_object_state`).
+
+| Column | Type | Notes |
+|---|---|---|
+| id | INTEGER PK | |
+| campaign_id | INTEGER NOT NULL FK → campaigns.id ON DELETE CASCADE | |
+| catalog_object_id | INTEGER NOT NULL FK → catalog_objects.id ON DELETE RESTRICT | the effective-catalog winner id at the time it was queued; normalised on read if a ruleset override changes |
+| position | INTEGER NOT NULL | CHECK `position >= 0`; the sole ordering key, renumbered `0..n-1` on every write |
+| created_at | TEXT NOT NULL | |
+
+Constraints: `UNIQUE(campaign_id, catalog_object_id)`. Indexes: `campaign_id`, `catalog_object_id`. Completing a project deletes its row. Catalog rows referenced here can only be retired, never hard-deleted.
+
 ## 4. Strategy (opinion) tables — separate from fact tables, `ADR-0009`
 
 ### 4.1 `strategy_profiles`
@@ -419,6 +434,7 @@ content_sources ─┬─< content_source_relations >─ content_sources
 campaigns ─┬─< campaign_content_sources >─ content_sources
            ├─< campaign_object_state >─ catalog_objects
            ├─< campaign_avenger_cells >─ catalog_objects (room state), catalog_objects (facility)
+           ├─< campaign_research_queue >─ catalog_objects
            ├─< campaign_events >─ catalog_objects (nullable)
            ├─< campaign_plans ─< campaign_plan_items >─ catalog_objects (self: depends_on_plan_item_id)
            ├─< campaign_soldiers >─ catalog_objects (class), assets (portrait)
@@ -450,6 +466,7 @@ Resolved (Phase 2, see `IMPLEMENTATION_PLAN.md`): seeding is done by an idempote
 | `56a40f219e11` | Phase 4: added `content_sources.source_repository`/`source_ref`/`source_commit_sha` (§1.1, provenance pinning, `ADR-0019`); added `catalog_prerequisite_groups`/`catalog_prerequisite_group_members` (§1.9, compound AND/OR prerequisites, `ADR-0018`); added `catalog_soldier_stat_profiles` (§1.10, soldier stat profiles); added `assets.source_name`/`original_filename`/`import_status` (§2.1, asset manifest fields). |
 
 | `447c666ac239` | Phase 5: added `campaign_avenger_cells` (§3.10, per-campaign 3×4 Avenger grid with separate room state / facility assignment / build state, `ADR-0020`). Pure addition; no existing table changed. |
+| `41940602ac87` | Phase 6: added `campaign_research_queue` (§3.11) and `campaign_object_state.completed_at` / `completion_sequence` (§3.3) for research tracking, `ADR-0021`. Pure additions; existing rows unaffected. |
 
 ## 11. Curated game-data population (Phase 4, see `docs/DATA_INGESTION.md`)
 

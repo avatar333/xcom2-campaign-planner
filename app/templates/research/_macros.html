@@ -1,0 +1,51 @@
+{# Status is always conveyed by a symbol AND text as well as colour (NFR-6). #}
+{% set STATUS_SYMBOL = {"completed": "\u2713", "in_progress": "\u25b6", "planned": "\u25cb", "available": "\u25c6", "blocked": "\u2715"} %}
+
+{% macro status_pill(ref) %}
+<span class="rs-status rs-status--{{ ref.status }}" title="{{ ref.status_label }}"><span aria-hidden="true">{{ STATUS_SYMBOL.get(ref.status, '') }}</span> {{ ref.status_label }}</span>
+{% endmacro %}
+
+{% macro art(ref, size="md") %}
+<span class="rs-art rs-art--{{ size }} rs-art--{{ ref.status }}">
+  {% if ref.primary_asset_id %}<img src="{{ url_for('catalog.serve_asset', asset_id=ref.primary_asset_id) }}" alt="">
+  {% else %}<span class="rs-art__glyph" aria-hidden="true">{{ ref.glyph | safe }}</span>{% endif %}
+</span>
+{% endmacro %}
+
+{# One object: image + name (+ type, status). Links to the research detail page. #}
+{% macro chip(ref, campaign, show_status=true, show_type=true) %}
+<a class="rs-chip rs-chip--{{ ref.status }}" href="{{ url_for('research.detail', campaign_id=campaign.id, object_id=ref.object_id) }}">
+  {{ art(ref, "sm") }}
+  <span class="rs-chip__text">
+    <span class="rs-chip__name">{{ ref.name }}{% if ref.amount %} <span class="rs-chip__amount">&times;{{ '%g' % ref.amount }}</span>{% endif %}</span>
+    {% if show_type %}<span class="rs-chip__type">{{ ref.type_name }}{% if ref.source_name %} &middot; {{ ref.source_name }}{% endif %}</span>{% endif %}
+  </span>
+  {% if show_status %}{{ status_pill(ref) }}{% endif %}
+</a>
+{% endmacro %}
+
+{# A REQUIRES line: a single item, an OR ("any one of") or a nested AND group. #}
+{% macro requirement_entry(entry, campaign) %}
+<li class="rs-req rs-req--{{ entry.logic }}{{ ' is-met' if entry.satisfied else ' is-unmet' }}">
+  {% if entry.logic == "any" %}
+    <div class="rs-req__label">Any one of <span class="rs-req__sat">{{ 'satisfied' if entry.satisfied else 'none satisfied yet' }}</span></div>
+    <div class="rs-req__alts">{% for ref in entry.refs %}{{ chip(ref, campaign) }}{% if not loop.last %}<span class="rs-or" aria-label="or">OR</span>{% endif %}{% endfor %}</div>
+  {% elif entry.logic == "group" %}
+    <div class="rs-req__label">All of</div>
+    <div class="rs-req__alts">{% for ref in entry.refs %}{{ chip(ref, campaign) }}{% endfor %}</div>
+  {% else %}
+    {% set ref = entry.refs[0] %}
+    {{ chip(ref, campaign, show_status=entry.gating) }}
+    {% if not entry.gating %}<span class="rs-note">not tracked as a blocker</span>{% endif %}
+  {% endif %}
+</li>
+{% endmacro %}
+
+{% macro post_button(campaign, endpoint, object_id, label, variant="", next_url=none, extra=none) %}
+<form method="post" action="{{ url_for(endpoint, campaign_id=campaign.id, object_id=object_id) }}" class="rs-inline">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  {% if next_url %}<input type="hidden" name="next" value="{{ next_url }}">{% endif %}
+  {% if extra %}{% for k, v in extra.items() %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endfor %}{% endif %}
+  <button class="btn btn--sm {{ variant }}" type="submit">{{ label }}</button>
+</form>
+{% endmacro %}

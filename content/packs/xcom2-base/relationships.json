@@ -63,6 +63,10 @@
   {"type": "unlocks", "from": ["xcom2-base", "AutopsyMuton"], "to": ["xcom2-base", "AdvancedExplosives"]},
   {"type": "produced_by", "from": ["xcom2-base", "AdvancedExplosives"], "to": ["xcom2-base", "PlasmaGrenade"]},
   {"type": "requires_facility", "from": ["xcom2-base", "AutopsyAdventOfficer"], "to": ["xcom2-base", "Skulljack_Project"]},
+  {"type": "requires_facility", "from": ["xcom2-base", "ProvingGround"], "to": ["xcom2-base", "BattleScanner"]},
+  {"type": "requires_facility", "from": ["xcom2-base", "ProvingGround"], "to": ["xcom2-base", "BattlefieldMedicine"]},
+  {"type": "requires_facility", "from": ["xcom2-base", "ProvingGround"], "to": ["xcom2-base", "AdvancedExplosives"]},
+  {"type": "requires_facility", "from": ["xcom2-base", "ProvingGround"], "to": ["xcom2-base", "Skulljack_Project"]},
   {"type": "requires_resource", "from": ["xcom2-base", "CorpseAdventOfficer"], "to": ["xcom2-base", "Skulljack_Project"], "amount": 1},
   {"type": "produced_by", "from": ["xcom2-base", "Skulljack_Project"], "to": ["xcom2-base", "Skulljack"]},
 

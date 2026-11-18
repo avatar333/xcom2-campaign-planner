@@ -103,3 +103,15 @@ The planner reads catalog data only; these conventions let a pack drive it with 
 - **Removing a facility for a ruleset**: author an override object (`overrides` → the base facility) whose `patch.attributes` sets `buildable_in_avenger_grid: false`. The `wotc` pack does this for the vanilla-only Advanced Warfare Center (`AdvancedWarfareCenter_NotInWotC`); vanilla campaigns still see the original.
 - **Room states**: objects of type `avenger_room_state`. Attributes: `clearable`, `blocks_construction` (a planned facility on this room is shown blocked until cleared; falls back to `clearable` when absent), `is_default_empty` (the state "Reset to EMPTY" applies), `gameplay_effect`, `clear_reward`. A pack may add new room states.
 - **Facility prerequisites**: inbound `prerequisite` / `unlocks` / `requires_research` / `requires_facility` relationships on the facility (flat `group_key` OR/AND groups) or a compound group in `prerequisite_groups.json` (`ADR-0018`). In the shipped packs `requires_facility` and `unlocks` are authored with the *requirement as source and the dependent object as target*.
+
+## 10. Data conventions consumed by the Research & Dependency Planner (Phase 6, `ADR-0021`)
+
+The research planner and unlock paths read these generic conventions; a pack drives them with no code change:
+
+- **Requirement direction**: every requirement-style relationship (`requires_research`, `requires_facility`, `prerequisite`, `unlocks`, `produced_by`, `requires_resource`) is authored with the **requirement as `from` and the thing it enables as `to`**. `unlocks research -> weapon` means the weapon requires the research. `produced_by project -> item` means the item requires the project.
+- **AND / OR**: relationships on one target are AND-ed. To express alternatives use `prerequisite_groups.json` (`logic: "OR"`, nestable) or a shared `group_key` + `group_logic` on flat relationships. Never encode an OR by authoring two ungrouped relationships.
+- **Overrides**: an override object that authors *any* requirement of its own **replaces** the requirements of the object it overrides (as `PlasmaRifle_LWOTC` does); one that authors none inherits them. Requirements authored by a source apply only to campaigns that enable that source.
+- **Non-blocking inputs**: `requires_resource` and `resource`-type objects are displayed with their `amount` but never block; the application does not model stockpiles.
+- **Facilities**: use `requires_facility` (facility as `from`) so a Proving Ground project or similar shows the facility it needs; a facility is satisfied by a *built* cell in the campaign's Avenger grid.
+- **Research metadata**: `research_category` (string) on research/autopsy objects drives the category filter; `short_description` is searchable.
+

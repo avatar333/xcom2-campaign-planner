@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Show Unlock Path{% endblock %}
+{% block content %}
+{% import "_components/ui.html" as ui %}
+{% import "research/_macros.html" as rs %}
+<div class="page-header">
+  <div>
+    <div class="page-header__eyebrow"><a href="{{ url_for('research.index', campaign_id=campaign.id) }}">{{ campaign.name }} &middot; Research</a></div>
+    <h1 class="page-header__title">How do I unlock&hellip;?</h1>
+    <p class="page-header__subtitle">Pick any weapon, armour, facility, item, research, Proving Ground project or technology to see everything required to reach it.</p>
+  </div>
+</div>
+<form class="rs-filters" method="get" action="{{ url_for('research.path_picker', campaign_id=campaign.id) }}" role="search">
+  <input type="search" name="q" value="{{ q }}" class="form-control" placeholder="Search by name&hellip;" aria-label="Search objects" autofocus>
+  <select name="type" class="form-control" aria-label="Object type">
+    <option value="">All types</option>
+    {% for slug, name in types %}<option value="{{ slug }}" {{ 'selected' if type_slug == slug }}>{{ name }}</option>{% endfor %}
+  </select>
+  <button class="btn" type="submit">Search</button>
+</form>
+{% if targets %}
+<div class="rs-grid rs-grid--compact" data-testid="path-targets">
+  {% for ref in targets %}
+  <a class="rs-target rs-target--{{ ref.status }}" href="{{ url_for('research.unlock_path', campaign_id=campaign.id, object_id=ref.object_id) }}">
+    {{ rs.art(ref, "md") }}
+    <span class="rs-target__text"><span class="rs-target__name">{{ ref.name }}</span><span class="rs-target__type">{{ ref.type_name }}{% if ref.source_name %} &middot; {{ ref.source_name }}{% endif %}</span></span>
+    {{ rs.status_pill(ref) }}
+  </a>
+  {% endfor %}
+</div>
+{% else %}{{ ui.empty_state("Nothing found", "No objects in this campaign's catalog match that search.") }}{% endif %}
+{% endblock %}

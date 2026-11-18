@@ -61,23 +61,25 @@ Goal: the campaign-specific **Avenger Facility Planner** (`FR-PLN-7`, promoted f
 
 **Definition of done**: a user can open a campaign, see the 3×4 EMPTY grid, configure their real starting layout, plan/construct/build catalog facilities in cells, see blocked prerequisites without losing the plan, switch campaigns to a completely separate grid, and reload with all data retained — covered by `tests/test_avenger_*.py`.
 
-## 6. Phase 6 — Campaign state & progression tracking
+## 6. Phase 6 — Research & Dependency Planner
 
-Goal: `campaign_object_state`, `app/domain/requirements.py` (availability / "what's missing", `ARCHITECTURE.md` §6), campaign-state quick-edit on catalog object cards/detail, the object detail page's "what does this unlock" view.
+Goal: campaign-specific research tracking and dependency planning, generated entirely from catalog relationships and prerequisite expressions (`ADR-0021`; `FR-RSH-1…8`): per-campaign research state with completion timestamp/order, an ordered, persisted, reorderable research queue with warn-don't-block validation and an explicit "suggest a valid order", a research browser (filters/search), REQUIRES/UNLOCKS views, and **Show Unlock Path** for any catalog object with an interactive dependency graph, correct AND/OR/nested semantics, alternatives shown but never ranked, campaign status decoration, path analysis and defensive cycle handling. This phase delivers the research slice of "campaign state tracking"; quantity/inventory state and the generic event log remain later work. It also leaves an explicit, empty `RecommendationProvider` seam (facts vs strategy, `ADR-0009`).
 
-**Definition of done**: Success criterion #2 passes.
+**Status: done.** Delivered: migration `41940602ac87` (`campaign_research_queue`; `completed_at`/`completion_sequence` on `campaign_object_state`); pure `app/domain/dependency_graph.py` and an extended `app/domain/requirements.py`; `app/services/dependency_index.py` (shared by the Avenger planner, which now uses the same prerequisite definition), `campaign_progress.py`, `research.py`; `app/routes/research.py`; `templates/research/*`, `static/css/research.css`, `static/js/research_queue.js` (drag-and-drop + `Alt+Arrow` + no-JS buttons) and `research_graph.js` (Cytoscape.js + dagre, vendored MIT); live **Research** nav entry; "Show Unlock Path" links from catalog and Avenger screens; pack data addition (Proving Ground projects require the Proving Ground facility); `ADR-0021`.
 
-## 7. Phase 7 — Planning
+**Definition of done**: the user can track completed research, build/reorder/validate a queue, see direct requirements and unlocks, open the complete unlock path for a weapon/armour/facility/item/research/Proving Ground project/technology as a graph with alternatives and per-node campaign status, switch campaigns and see independent progression, and keep everything across restarts — covered by `tests/test_dependency_graph.py`, `test_research_*.py`.
 
-Goal: replace the Planning nav placeholder with plans/plan items, blocked/ready derivation, requirement-tree drawer, dashboard priorities/blocked panels.
+## 7. Phase 7 — Soldiers, unit stats, weapon builds & armour builds
 
-**Definition of done**: Success criterion #3 passes.
+Goal: campaign-specific soldier roster (ruleset-aware class list and default stat profiles, editable actual stats with retained defaults), reusable typed-slot Weapon/Armour builds over catalog objects (including mod/custom objects, compatibility validation with a recorded manual override), build assignment to soldiers, and "Show Unlock Path" integration for equipment not yet unlocked (reusing Phase 6's `get_unlock_path`).
 
-## 8. Phase 8 — Soldiers, events, strategy profiles
+**Definition of done**: the 14-point acceptance list of the Phase 7 brief.
 
-Goal: Soldiers/Loadouts nav sections gain real screens; Events log; strategy profiles end-to-end.
+## 8. Phase 8 — Planning, events, strategy profiles
 
-**Definition of done**: all FR-* marked **M** are implemented and tested.
+Goal: plans/plan items with blocked/ready derivation (reusing the Phase 6 evaluator), dashboard priorities/blocked panels, the Events log, and strategy profiles end-to-end behind the `RecommendationProvider` seam.
+
+**Definition of done**: Success criterion #3 passes and all FR-* marked **M** are implemented and tested.
 
 ## 9. Phase 9 — Platform hardening
 
@@ -87,7 +89,7 @@ Goal: backup/export, pack re-import regression, security/accessibility pass, cov
 
 ## 10. Phase ordering rationale
 
-Foundation (schema+campaigns+shell) before the catalog architecture keeps the highest-risk structural guarantee — campaign isolation — proven early and in front of a real UI, before any game-content complexity (content sources, relationships, precedence) is layered on top. The catalog/content-source architecture (Phase 3) comes before the curated importer (Phase 4) because the manual-authoring path (content sources, object CRUD, relationships, images, import/export) is what proves the schema and UI are genuinely data-driven — if a user can build an equivalent of curated content by hand through the UI alone, a future importer is just another producer of the same rows, not a new code path. The Avenger Facility Planner (Phase 5) comes right after the curated data exists, because it is the first screen that exercises real catalog facilities, ruleset overrides, prerequisites and per-campaign isolation end to end and needs only a thin slice of state tracking. Full state tracking (Phase 6) before planning (Phase 7) because plans need object state to derive blocked/ready against. Each phase's "Definition of done" stays independently testable so a new session can verify prior phases are genuinely complete before continuing.
+Foundation (schema+campaigns+shell) before the catalog architecture keeps the highest-risk structural guarantee — campaign isolation — proven early and in front of a real UI, before any game-content complexity (content sources, relationships, precedence) is layered on top. The catalog/content-source architecture (Phase 3) comes before the curated importer (Phase 4) because the manual-authoring path (content sources, object CRUD, relationships, images, import/export) is what proves the schema and UI are genuinely data-driven — if a user can build an equivalent of curated content by hand through the UI alone, a future importer is just another producer of the same rows, not a new code path. The Avenger Facility Planner (Phase 5) comes right after the curated data exists, because it is the first screen that exercises real catalog facilities, ruleset overrides, prerequisites and per-campaign isolation end to end and needs only a thin slice of state tracking. Research & dependency planning (Phase 6) before soldiers/builds (Phase 7) and general planning (Phase 8) because plans need object state to derive blocked/ready against. Each phase's "Definition of done" stays independently testable so a new session can verify prior phases are genuinely complete before continuing.
 
 ## 11. Out of scope for all phases above (tracked as future `F`-priority items)
 

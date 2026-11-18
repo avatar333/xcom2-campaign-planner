@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Unlock path: {{ path.target.name }}{% endblock %}
+{% block content %}
+{% import "_components/ui.html" as ui %}
+{% import "research/_macros.html" as rs %}
+{% set t = path.target %}
+<div class="page-header">
+  <div class="rs-detail-head">
+    {{ rs.art(t, "lg") }}
+    <div>
+      <div class="page-header__eyebrow"><a href="{{ url_for('research.path_picker', campaign_id=campaign.id) }}">{{ campaign.name }} &middot; Unlock path</a></div>
+      <h1 class="page-header__title">{{ t.name }}</h1>
+      <div class="cluster">{{ rs.status_pill(t) }}<span class="rs-tag">{{ t.type_name }}</span>{% if t.source_name %}<span class="text-small text-muted">{{ t.source_name }}</span>{% endif %}</div>
+    </div>
+  </div>
+  <div class="page-header__actions">
+    <a class="btn" href="{{ url_for('research.detail', campaign_id=campaign.id, object_id=t.object_id) }}">Details</a>
+    <a class="btn" href="{{ url_for('research.path_picker', campaign_id=campaign.id) }}">Another target</a>
+  </div>
+</div>
+{% if error %}{{ ui.alert(error, "danger") }}{% endif %}
+
+{% if path.cycles %}
+<div class="rs-cycle-warning" role="alert" data-testid="cycle-warning">
+  <strong>&#9888; Circular dependency detected in the catalog data.</strong>
+  {% for cycle in path.cycles %}<div>{{ cycle | join(' \u2192 ') }} \u2192 {{ cycle[0] }}</div>{% endfor %}
+  The loop is drawn in red and can never satisfy itself; everything else is still analysed.
+</div>
+{% endif %}
+
+<div class="rs-pathgrid">
+  <section class="rs-console" aria-label="Dependency graph">
+    <div class="rs-console__bar">
+      <span class="rs-console__title">Dependency graph</span>
+      <span class="rs-console__tools">
+        <button class="btn btn--sm" type="button" id="rs-fit">Fit</button>
+        <button class="btn btn--sm" type="button" id="rs-dir" aria-pressed="false">Top&ndash;down</button>
+        <label class="rs-toggle"><input type="checkbox" id="rs-hide-done"> Hide completed</label>
+      </span>
+    </div>
+    <div id="rs-graph" class="rs-graph" role="img" aria-label="Dependency graph for {{ t.name }}. A text version follows in the plan panel."
+         data-csrf="{{ csrf_token() }}" data-campaign="{{ campaign.id }}"></div>
+    <noscript><p class="text-muted" style="padding:1rem">The interactive graph needs JavaScript. The full plan is listed in text on this page.</p></noscript>
+    <ul class="rs-legend" aria-label="Legend">
+      <li><i class="rs-key rs-key--completed"></i>&#10003; Completed</li>
+      <li><i class="rs-key rs-key--available"></i>&#9670; Available</li>
+      <li><i class="rs-key rs-key--planned"></i>&#9675; Planned</li>
+      <li><i class="rs-key rs-key--in_progress"></i>&#9654; In progress</li>
+      <li><i class="rs-key rs-key--blocked"></i>&#10005; Locked</li>
+      <li><i class="rs-key rs-key--target"></i>&#9733; Target</li>
+      <li><i class="rs-key rs-key--gate"></i>ANY ONE OF = alternatives</li>
+    </ul>
+    <div id="rs-node-panel" class="rs-node-panel" aria-live="polite"><span class="text-muted">Select a node for details and actions.</span></div>
+  </section>
+
+  <aside class="rs-plan" data-testid="path-analysis">
+    <div class="rs-panel">
+      <h2 class="rs-panel__title">Path summary</h2>
+      {% if path.target_met %}
+        <p class="rs-banner rs-banner--ok">&#10003; Everything needed for <strong>{{ t.name }}</strong> is already in place.</p>
+      {% endif %}
+      <dl class="rs-stats">
+        <div><dt>Steps needed on every route</dt><dd data-stat="outstanding">{{ path.outstanding_steps }}</dd></div>
+        <div><dt>Already satisfied</dt><dd data-stat="satisfied">{{ path.satisfied | length }}</dd></div>
+        <div><dt>Still missing</dt><dd data-stat="missing">{{ path.missing | length }}</dd></div>
+        <div><dt>Actionable now</dt><dd data-stat="actionable">{{ path.actionable | length }}</dd></div>
+        <div><dt>Blocked</dt><dd data-stat="blocked">{{ path.blocked | length }}</dd></div>
+      </dl>
+      {% if path.alternatives %}<p class="text-small text-muted">&ldquo;Required steps&rdquo; counts only what <em>every</em> route needs. Alternative branches are listed separately and none is ranked above another.</p>{% endif %}
+    </div>
+
+    {% if path.mandatory_steps %}
+    <div class="rs-panel" data-testid="mandatory-steps">
+      <h2 class="rs-panel__title">Needed on every route <span class="text-muted">(in dependency order)</span></h2>
+      <ol class="rs-steps">
+        {% for step in path.mandatory_steps %}
+        <li class="rs-step{{ ' is-actionable' if step.actionable else '' }}">{{ rs.chip(step.ref, campaign) }}
+          {% if step.actionable %}<span class="rs-note rs-note--go">can be done now</span>{% else %}<span class="rs-note">waits on earlier steps</span>{% endif %}
+          {% if step.actionable and step.ref.category == 'project' %}{{ rs.post_button(campaign, 'research.queue_add', step.ref.object_id, 'Plan', next_url=request.path) }}{% endif %}
+          {% if step.ref.type_slug == 'facility' and step.actionable %}<a class="btn btn--sm" href="{{ url_for('avenger.index', campaign_id=campaign.id) }}">Plan in Avenger</a>{% endif %}
+        </li>
+        {% endfor %}
+      </ol>
+    </div>
+    {% endif %}
+
+    {% if path.alternatives %}
+    <div class="rs-panel" data-testid="alternatives">
+      <h2 class="rs-panel__title">Alternative routes</h2>
+      {% for alt in path.alternatives %}
+      <div class="rs-alt"><div class="rs-alt__for">{{ alt.dependent.name }} needs <strong>any one</strong> of:</div>
+        <div class="rs-alt__opts">{% for opt in alt.options %}{{ rs.chip(opt, campaign) }}{% if not loop.last %}<span class="rs-or">OR</span>{% endif %}{% endfor %}</div></div>
+      {% endfor %}
+      {% if path.optional_steps %}
+        <details class="rs-optional"><summary>{{ path.optional_steps | length }} steps belong to only some routes</summary>
+          <ul>{% for step in path.optional_steps %}<li>{{ rs.chip(step.ref, campaign) }}</li>{% endfor %}</ul></details>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    {% if path.satisfied %}
+    <div class="rs-panel" data-testid="satisfied">
+      <h2 class="rs-panel__title">Already satisfied</h2>
+      <div class="rs-chips rs-chips--col">{% for ref in path.satisfied %}{{ rs.chip(ref, campaign) }}{% endfor %}</div>
+    </div>
+    {% endif %}
+  </aside>
+</div>
+<script type="application/json" id="rs-graph-data">{{ graph | tojson }}</script>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/vendor/cytoscape.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/vendor/dagre.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/vendor/cytoscape-dagre.js') }}"></script>
+<script src="{{ url_for('static', filename='js/research_graph.js') }}"></script>
+{% endblock %}

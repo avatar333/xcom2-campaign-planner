@@ -136,6 +136,15 @@ For a catalog object in a campaign: walk its inbound `prerequisite`/`requires_*`
 - A facility under construction or built is never reported as blocked (it exists in the player's game).
 - Prerequisites are read from catalog relationships (`prerequisite`, `unlocks`, `requires_research`, `requires_facility`, grouped by `group_key`) and compound groups (`ADR-0018`), including edges on objects the facility overrides; satisfied by `campaign_object_state.status ∈ {completed, owned}` / `prerequisite_override`, or a built cell for facility requirements.
 
+### 9.3 Research and dependency semantics (`ADR-0021`)
+
+- **Campaign research states**: *completed* (recorded in `campaign_object_state`, with `completed_at` and a per-campaign `completion_sequence`), *in progress*, *planned* (present in the ordered research queue), *available* (not yet acted on, all requirements met) and *locked* (an unmet requirement exists). Only completed / in progress / planned are recorded; *available* and *locked* are derived and never stored. A facility reads built / constructing / available to build.
+- **Requirement expression**: an object's requirement roots are AND-ed; a group is AND or OR per its `group_logic`; groups nest (`ADR-0018`). OR is never inferred from the absence of AND.
+- **Steps vs unlocks**: research, autopsy, Proving Ground, technology, facility (and similar) objects are *steps* the player completes; weapons, armour, items, ammo and grenades are *derived* — satisfied automatically when their requirements are. Resources are shown with amounts but never block.
+- **Unlock path**: all ancestors reachable through any alternative, with a gate node per OR; steps needed on *every* route are distinguished from steps that belong to only some alternatives. No alternative is ranked above another.
+- **Queue validation**: an item is blocked at position *n* if a requirement is unmet given everything already satisfied plus the queue items before *n*. Blocked items are warnings, never errors.
+- **Facts vs strategy**: requirements/unlocks/blockers are facts from the catalog graph; any "research this early" advice belongs to strategy profiles (`ADR-0009`) and enters only through the `RecommendationProvider` seam.
+
 ## 10. Invariants (must hold for all time, tested explicitly)
 
 1. No `catalog_*` table ever has a foreign key to `campaigns` or any `campaign_*` table.
@@ -146,3 +155,4 @@ For a catalog object in a campaign: walk its inbound `prerequisite`/`requires_*`
 6. Every `catalog_object_type` has exactly one `default_asset_id`; every rendered object resolves to a non-null image (primary asset or type default).
 7. Strategy recommendations never appear in the same code path that computes Availability (`ADR-0009`).
 8. Every campaign has exactly 12 `campaign_avenger_cells` with unique `(campaign_id, coordinate)`; a cell's facility is NULL if and only if its build state is `none`; no catalog table references the cell table (`ADR-0020`).
+9. A research queue holds each catalog object at most once per campaign; completing a project removes it; a campaign's progression (state, queue, completion order) never alters or is derived from another campaign's, and never mutates a catalog row (`ADR-0021`).

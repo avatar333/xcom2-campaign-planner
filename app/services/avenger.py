@@ -28,25 +28,18 @@ from app.domain.avenger_grid import (
     display_status,
     parse_coordinate,
 )
-from app.domain.requirements import (
-    RequirementGroup,
-    RequirementLeaf,
-    RequirementNode,
-    evaluate_requirements,
-)
+from app.domain.requirements import RequirementLeaf, evaluate_requirements
 from app.extensions import db
 from app.models import (
     Campaign,
-    CampaignObjectState,
     CatalogObject,
-    CatalogPrerequisiteGroup,
     CatalogRelationship,
     CatalogRelationshipType,
 )
 from app.repositories import avenger_cells as cells_repo
 from app.repositories import object_types as object_types_repo
-from app.services import asset_service
-from app.services import effective_catalog as effective_catalog_service
+from app.services import asset_service, campaign_progress
+from app.services.dependency_index import Blocker, DependencyIndex, describe_unmet
 
 FACILITY_TYPE_SLUG = "facility"
 ROOM_STATE_TYPE_SLUG = "avenger_room_state"
@@ -69,16 +62,6 @@ class FacilityAssignmentError(AvengerGridError):
 
 
 # ---------------------------------------------------------------- view data
-
-
-@dataclass(frozen=True)
-class Blocker:
-    """One reason a planned facility cannot be built yet. `options` lists the
-    catalog objects (id, name) that would resolve it if recorded complete --
-    several for an OR group, none for non-recordable blockers."""
-
-    text: str
-    options: tuple[tuple[int, str], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -232,67 +215,16 @@ class FacilityDetail:
 # --------------------------------------------------------------- resolution
 
 
-class _Context:
-    """Per-request snapshot of everything the planner needs from the catalog.
-
-    Built once per service call so a page render does a bounded number of
-    queries, and so every function agrees on one consistent effective catalog.
-    """
+class _Context(DependencyIndex):
+    """Avenger view of the shared dependency index (ADR-0021): adds the two
+    object types the grid is built from. Everything else -- effective catalog,
+    override resolution, requirement expressions, recorded progress -- is the
+    same code the research planner uses."""
 
     def __init__(self, campaign: Campaign) -> None:
-        self.campaign = campaign
-        self.effective = effective_catalog_service.get_effective_catalog(
-            campaign.id, version=campaign.effective_catalog_version
-        )
-        self._chain_cache: dict[int, list[int]] = {}
-        self.winner_by_member: dict[int, int] = {}
-        self.members_by_winner: dict[int, set[int]] = {}
-        for winner_id in self.effective:
-            members = set(self._chain(winner_id))
-            self.members_by_winner[winner_id] = members
-            for member_id in members:
-                self.winner_by_member[member_id] = winner_id
-
+        super().__init__(campaign)
         self.facility_type = object_types_repo.get_object_type_by_slug(FACILITY_TYPE_SLUG)
         self.room_type = object_types_repo.get_object_type_by_slug(ROOM_STATE_TYPE_SLUG)
-        self.type_by_id = {t.id: t for t in object_types_repo.list_object_types()}
-        self._source_names: dict[int, str] = {}
-
-    def _chain(self, object_id: int) -> list[int]:
-        """`object_id` plus every object it overrides/replaces, transitively."""
-        if object_id in self._chain_cache:
-            return self._chain_cache[object_id]
-        chain: list[int] = []
-        seen: set[int] = set()
-        current: int | None = object_id
-        while current is not None and current not in seen:
-            seen.add(current)
-            chain.append(current)
-            obj = db.session.get(CatalogObject, current)
-            current = None if obj is None else (obj.overrides_object_id or obj.replaces_object_id)
-        self._chain_cache[object_id] = chain
-        return chain
-
-    def winner_of(self, object_id: int) -> int | None:
-        return self.winner_by_member.get(object_id)
-
-    def source_name(self, source_id: int | None) -> str | None:
-        if source_id is None:
-            return None
-        if source_id not in self._source_names:
-            from app.repositories import content_sources as sources_repo
-
-            source = sources_repo.get_content_source(source_id)
-            self._source_names[source_id] = source.name if source else ""
-        return self._source_names[source_id] or None
-
-    def effective_of_type(self, type_id: int | None) -> list[dict]:
-        if type_id is None:
-            return []
-        return sorted(
-            (e for e in self.effective.values() if e["type_id"] == type_id),
-            key=lambda e: (e.get("tier") or 0, e["name"].lower()),
-        )
 
 
 def _hue_for(template_key: str) -> int:
@@ -357,117 +289,16 @@ def _room_option_for_id(ctx: _Context, object_id: int | None) -> RoomOption | No
 
 
 def _satisfied_ids(ctx: _Context, cells: list) -> set[int]:
-    """Normalized (winner) ids of everything currently satisfied for the
-    campaign: recorded-complete objects plus facilities already built."""
-    satisfied: set[int] = set()
-    rows = CampaignObjectState.query.filter_by(campaign_id=ctx.campaign.id).all()
-    for row in rows:
-        if row.status in SATISFIED_OBJECT_STATUSES or row.prerequisite_override:
-            satisfied.add(ctx.winner_of(row.catalog_object_id) or row.catalog_object_id)
-    for cell in cells:
-        if cell.facility_object_id is not None and cell.build_state == BUILD_STATE_BUILT:
-            satisfied.add(ctx.winner_of(cell.facility_object_id) or cell.facility_object_id)
-    return satisfied
-
-
-def _leaf_for(ctx: _Context, object_id: int, kind: str) -> RequirementLeaf:
-    winner = ctx.winner_of(object_id) or object_id
-    entry = ctx.effective.get(winner)
-    if entry is not None:
-        name = entry["name"]
-    else:
-        obj = db.session.get(CatalogObject, object_id)
-        name = obj.name if obj is not None else f"Object {object_id}"
-    return RequirementLeaf(object_id=winner, name=name, kind=kind)
-
-
-def _group_tree(ctx: _Context, group: CatalogPrerequisiteGroup) -> RequirementNode:
-    from app.repositories import prerequisite_groups as groups_repo
-
-    members: list[RequirementNode] = []
-    for member in groups_repo.list_members(group.id):
-        if member.child_group_id is not None:
-            child = groups_repo.get_group(member.child_group_id)
-            if child is not None:
-                members.append(_group_tree(ctx, child))
-        elif member.catalog_object_id is not None:
-            members.append(_leaf_for(ctx, member.catalog_object_id, "prerequisite"))
-    return RequirementGroup(logic=group.logic, members=tuple(members))
-
-
-def _requirement_roots(ctx: _Context, facility_id: int) -> list[RequirementNode]:
-    """Factual prerequisites of a facility, read from the catalog: flat
-    relationship rows (grouped by `group_key`, ADR-0004) plus compound
-    AND/OR trees (ADR-0018). Edges on any object the facility overrides are
-    inherited, because an override patches rather than copies (ADR-0013)."""
-    member_ids = set(ctx.members_by_winner.get(facility_id, {facility_id}))
-    type_ids = [
-        t.id
-        for t in CatalogRelationshipType.query.filter(
-            CatalogRelationshipType.slug.in_(PREREQUISITE_RELATIONSHIP_SLUGS)
-        ).all()
-    ]
-    edges = (
-        CatalogRelationship.query.filter(
-            CatalogRelationship.target_object_id.in_(member_ids),
-            CatalogRelationship.relationship_type_id.in_(type_ids),
-        )
-        .order_by(CatalogRelationship.sort_order.asc(), CatalogRelationship.id.asc())
-        .all()
-        if type_ids
-        else []
-    )
-    slug_by_type_id = {t.id: t.slug for t in CatalogRelationshipType.query.all()}
-
-    roots: list[RequirementNode] = []
-    seen_leaves: set[tuple[int, str | None]] = set()
-    grouped: dict[str, list[CatalogRelationship]] = {}
-    ordered_group_keys: list[str] = []
-    for edge in edges:
-        if edge.group_key:
-            if edge.group_key not in grouped:
-                ordered_group_keys.append(edge.group_key)
-            grouped.setdefault(edge.group_key, []).append(edge)
-            continue
-        leaf = _leaf_for(ctx, edge.source_object_id, slug_by_type_id[edge.relationship_type_id])
-        if (leaf.object_id, None) in seen_leaves:
-            continue
-        seen_leaves.add((leaf.object_id, None))
-        roots.append(leaf)
-    for key in ordered_group_keys:
-        group_edges = grouped[key]
-        logic = next((e.group_logic for e in group_edges if e.group_logic), "AND")
-        leaves = tuple(
-            _leaf_for(ctx, e.source_object_id, slug_by_type_id[e.relationship_type_id])
-            for e in group_edges
-        )
-        roots.append(RequirementGroup(logic=logic, members=leaves))
-
-    compound = CatalogPrerequisiteGroup.query.filter(
-        CatalogPrerequisiteGroup.target_object_id.in_(member_ids),
-        CatalogPrerequisiteGroup.parent_group_id.is_(None),
-    ).all()
-    for group in compound:
-        roots.append(_group_tree(ctx, group))
-    return roots
+    """Ids satisfied for the campaign: recorded-complete objects, built
+    facilities (read from this campaign's grid) and anything derived from them.
+    `cells` is accepted for call-site symmetry; the index reads the grid itself."""
+    del cells
+    return ctx.satisfied_ids()
 
 
 def _blockers_for(ctx: _Context, facility_id: int, satisfied: set[int]) -> tuple[Blocker, ...]:
-    evaluation = evaluate_requirements(_requirement_roots(ctx, facility_id), satisfied)
-    blockers: list[Blocker] = []
-    for unmet in evaluation.unmet:
-        recordable = tuple(
-            (leaf.object_id, leaf.name)
-            for leaf in unmet.leaves
-            if not _is_facility_id(ctx, leaf.object_id)
-        )
-        if len(unmet.leaves) == 1:
-            leaf = unmet.leaves[0]
-            noun = "facility" if _is_facility_id(ctx, leaf.object_id) else "prerequisite"
-            blockers.append(Blocker(f"{leaf.name} {noun} not recorded as complete", recordable))
-        else:
-            blockers.append(Blocker(f"None of {unmet.description} recorded as complete", recordable))
-    return tuple(blockers)
+    evaluation = evaluate_requirements(ctx.roots_for(facility_id), satisfied)
+    return tuple(describe_unmet(ctx, unmet) for unmet in evaluation.unmet)
 
 
 def _is_facility_id(ctx: _Context, object_id: int) -> bool:
@@ -726,7 +557,7 @@ def get_facility_detail(
             seen.add(other.id)
             related.append(RelatedObject(other.id, other.name, type_by_id.get(edge.relationship_type_id, "")))
     leaves = []
-    for root in _requirement_roots(ctx, option.object_id):
+    for root in ctx.roots_for(option.object_id):
         stack = [root]
         while stack:
             node = stack.pop(0)
@@ -879,23 +710,15 @@ def clear_facility(campaign: Campaign, coordinate: str) -> None:
 
 def set_prerequisite_state(campaign: Campaign, object_id: int, *, completed: bool) -> None:
     """Record (or un-record) that a prerequisite object is complete for *this*
-    campaign, in `campaign_object_state` keyed by the natural key
-    `(campaign_id, catalog_object_id)` (ADR-0010). The object must be visible in
-    the campaign's effective catalog."""
-    ctx = _Context(campaign)
-    winner = ctx.winner_of(object_id)
-    if winner is None:
-        raise AvengerGridError("That object is not part of this campaign's catalog.")
-    row = CampaignObjectState.query.filter_by(campaign_id=campaign.id, catalog_object_id=winner).first()
-    if completed:
-        if row is None:
-            row = CampaignObjectState(campaign_id=campaign.id, catalog_object_id=winner, status="completed")
-            db.session.add(row)
+    campaign. Delegates to the shared progress service so completion timestamps
+    and ordering are recorded identically to the research planner (ADR-0021)."""
+    try:
+        if completed:
+            campaign_progress.mark_completed(campaign, object_id)
         else:
-            row.status = "completed"
-    elif row is not None:
-        row.status = "unknown"
-    db.session.commit()
+            campaign_progress.reset(campaign, object_id)
+    except campaign_progress.ProgressError as exc:
+        raise AvengerGridError(str(exc)) from exc
 
 
 def ensure_grid_for_new_campaign(campaign: Campaign) -> None:

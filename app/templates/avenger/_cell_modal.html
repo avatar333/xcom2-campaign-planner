@@ -69,7 +69,8 @@
                 {% endfor %}
                 {% if cell.room_blocker %}<li>{{ cell.room_blocker }}</li>{% endif %}
               </ul>
-              <p class="text-small text-muted">The plan is kept. These only show what is still outstanding.</p>
+              <p class="text-small text-muted">The plan is kept. These only show what is still outstanding.
+                <a href="{{ url_for('research.unlock_path', campaign_id=campaign.id, object_id=cell.facility.object_id) }}">Show Unlock Path</a></p>
             {% endif %}
           {% elif cell.facility %}
             <p class="text-muted">{{ cell.facility.name }} is {{ cell.build_state_label | lower }}; no separate plan.</p>

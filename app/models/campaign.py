@@ -142,6 +142,32 @@ class CampaignAvengerCell(Model, TimestampMixin):
     campaign: Mapped[Campaign] = relationship(back_populates="avenger_cells")
 
 
+class CampaignResearchQueueItem(Model, CreatedAtMixin):
+    """One entry of a campaign's ordered research queue (ADR-0021).
+
+    The queue holds *planned* and *in-progress* projects, in the order the
+    player intends to research them. `position` is the sole ordering key and is
+    renormalised to 0..n-1 by the service on every write. Whether an entry is
+    planned or in progress lives in `campaign_object_state.status`; completion
+    removes the entry. The catalog object is never touched (ADR-0002).
+    """
+
+    __tablename__ = "campaign_research_queue"
+    __table_args__ = (
+        UniqueConstraint("campaign_id", "catalog_object_id", name="uq_campaign_research_queue_object"),
+        CheckConstraint("position >= 0", name="ck_campaign_research_queue_position"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    campaign_id: Mapped[int] = mapped_column(
+        ForeignKey("campaigns.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    catalog_object_id: Mapped[int] = mapped_column(
+        ForeignKey("catalog_objects.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    position: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+
 class CampaignObjectState(Model, TimestampMixin):
     __tablename__ = "campaign_object_state"
     __table_args__ = (
@@ -164,6 +190,11 @@ class CampaignObjectState(Model, TimestampMixin):
     state_attributes: Mapped[str] = mapped_column(String, nullable=False, default="{}")
     is_active: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=1)
+    # Phase 6 (ADR-0021): when/in what order this campaign completed the object.
+    # `completion_sequence` is a per-campaign counter (1, 2, 3 ...) so the order
+    # survives identical timestamps; both are NULL unless status is completed/owned.
+    completed_at: Mapped[str | None] = mapped_column(String, nullable=True)
+    completion_sequence: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     campaign: Mapped[Campaign] = relationship(back_populates="object_states")
 

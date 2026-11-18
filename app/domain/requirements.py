@@ -16,6 +16,10 @@ class RequirementLeaf:
     object_id: int
     name: str
     kind: str = "prerequisite"  # relationship type slug the leaf came from
+    # Non-gating leaves are *shown* (e.g. a corpse or resource cost) but never
+    # block anything: the app does not simulate stockpiles (ADR-0021).
+    gating: bool = True
+    amount: float | None = None
 
 
 @dataclass(frozen=True)
@@ -44,7 +48,7 @@ class RequirementEvaluation:
 
 def _is_satisfied(node: RequirementNode, satisfied_ids: frozenset[int]) -> bool:
     if isinstance(node, RequirementLeaf):
-        return node.object_id in satisfied_ids
+        return (not node.gating) or node.object_id in satisfied_ids
     results = [_is_satisfied(member, satisfied_ids) for member in node.members]
     if not results:
         return True
@@ -80,6 +84,16 @@ def _collect_unmet(node: RequirementNode, satisfied_ids: frozenset[int]) -> list
             unmet.extend(_collect_unmet(member, satisfied_ids))
         return unmet
     return [UnmetRequirement(description=_describe(node), leaves=_leaves(node))]
+
+
+def node_is_met(node: RequirementNode, satisfied_ids: set[int] | frozenset[int]) -> bool:
+    """Whether one requirement node (leaf or group) is satisfied."""
+    return _is_satisfied(node, frozenset(satisfied_ids))
+
+
+def iter_leaves(node: RequirementNode) -> tuple[RequirementLeaf, ...]:
+    """Every leaf beneath `node`, in authored order (includes all OR alternatives)."""
+    return _leaves(node)
 
 
 def evaluate_requirements(

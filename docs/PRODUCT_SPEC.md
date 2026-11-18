@@ -93,7 +93,15 @@ Priority: **M** = must (v1), **S** = should (v1 if capacity), **F** = future (da
 | ID | Req | Pri |
 |---|---|---|
 | FR-PLN-1 | Campaign-scoped plans containing plan items (research X, build facility Y, acquire Z, equip W on soldier S, learn ability A…) with priority, order, rationale, notes. | M |
-| FR-PLN-2 | "What does this unlock?" and "What am I missing?" explanations: recursive requirement tree with satisfied/unsatisfied leaves, honouring AND/OR groups and resource amounts. | M |
+| FR-RSH-1 | Per-campaign research state — completed (with timestamp and completion order), in progress, planned, available, locked — independent between campaigns; global definitions are never mutated by progression. | M — **implemented** (Phase 6): `campaign_object_state` + `campaign_research_queue`, `app/services/research.py`, `app/services/campaign_progress.py`. |
+| FR-RSH-2 | Ordered research queue: add, remove, reorder (drag-and-drop with accessible button/keyboard equivalents), start, complete; persisted. | M — **implemented**. |
+| FR-RSH-3 | Queue validation warns about impossible orders ("Blocked before position n: …") without preventing them, and offers an optional, explicit "suggest a valid order" that never reorders silently. | M — **implemented**. |
+| FR-RSH-4 | Research browser with image, name, category, source/ruleset, state, prerequisites and key unlocks; filtering and search. | M — **implemented**. |
+| FR-RSH-5 | REQUIRES / UNLOCKS display for any research project (projects, facilities, items, resources, weapons, armour, Proving Ground projects, technologies). | M — **implemented**. |
+| FR-RSH-6 | "Show Unlock Path" for any catalog object (weapon, armour, facility, item, research, Proving Ground project, technology, custom/mod objects): the complete recursive dependency graph with AND / OR / nested semantics, alternatives shown not ranked, campaign status on every node, missing/satisfied/actionable analysis, defensive cycle handling. | M — **implemented**: `app/domain/dependency_graph.py`, `app/services/dependency_index.py`. |
+| FR-RSH-7 | Interactive dependency graph visualisation with image/name/type/status nodes and direction-bearing edges; status never conveyed by colour alone; a full text equivalent is always present. | M — **implemented** (Cytoscape.js + dagre, vendored). |
+| FR-RSH-8 | Explicit seam separating factual dependencies from strategy recommendations; no recommendations in this phase. | M — **implemented** as `RecommendationProvider` (`ADR-0021`); empty by default. |
+| FR-PLN-2 | "What does this unlock?" and "What am I missing?" explanations *(research/equipment delivered in Phase 6 as FR-RSH-5/6; generalised plan-item use remains Phase 8)*: recursive requirement tree with satisfied/unsatisfied leaves, honouring AND/OR groups and resource amounts. | M |
 | FR-PLN-3 | Plan items are flagged **blocked** (with reasons) or **ready** automatically. Plan-item-to-plan-item manual dependencies are supported. | M |
 | FR-PLN-4 | "Next up" list: ready items ordered by user priority, optionally re-ranked by an enabled strategy profile. | S |
 | FR-PLN-5 | Strategy profiles/recommendations: optional, attributable, toggled per campaign, displayed visually distinct from facts. | S (model M) |
