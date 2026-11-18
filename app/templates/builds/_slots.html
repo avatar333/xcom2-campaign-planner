@@ -1,0 +1,17 @@
+{# htmx fragment: re-render slots when the base changes via the picker. Not currently wired into editor.html (base change reloads the page), kept for the AJAX picker route. #}
+{% import "research/_macros.html" as rs %}
+<div class="bw-slot-fragment">
+  {% for slot in slots %}
+  <div class="bw-slot-section">
+    <h3 class="bw-slot-section__title">{{ slot.label }}</h3>
+    <div class="bw-gallery">
+      {% for option in options.get(slot.slot_type, []) %}
+      <div class="bw-card bw-card--{{ option.compatibility.state }}">
+        {{ rs.art(option.ref, "md") }}
+        <span class="bw-card__name">{{ option.ref.name }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>

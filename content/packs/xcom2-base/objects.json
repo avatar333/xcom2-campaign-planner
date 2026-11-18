@@ -4,15 +4,26 @@
     "type": "avenger_room_state",
     "name": "Empty / Cleared",
     "short_description": "A cleared Avenger grid cell, ready for a facility to be built on it.",
-    "tags": ["avenger-grid", "room-state"],
-    "attributes": {"clearable": false, "blocks_construction": false, "is_default_empty": true, "gameplay_effect": "No facility built yet; any buildable facility can be constructed here."}
+    "tags": [
+      "avenger-grid",
+      "room-state"
+    ],
+    "attributes": {
+      "clearable": false,
+      "blocks_construction": false,
+      "is_default_empty": true,
+      "gameplay_effect": "No facility built yet; any buildable facility can be constructed here."
+    }
   },
   {
     "template_key": "RoomState_AlienDebris",
     "type": "avenger_room_state",
     "name": "Alien Debris",
     "short_description": "Wreckage left in the Avenger's hull from its crash/theft; must be cleared by engineers before a facility can be built.",
-    "tags": ["avenger-grid", "room-state"],
+    "tags": [
+      "avenger-grid",
+      "room-state"
+    ],
     "attributes": {
       "clearable": true,
       "blocks_construction": true,
@@ -25,7 +36,10 @@
     "type": "avenger_room_state",
     "name": "Alien Machinery",
     "short_description": "Alien technology embedded in the Avenger's hull; requires more engineer-time to clear than Alien Debris.",
-    "tags": ["avenger-grid", "room-state"],
+    "tags": [
+      "avenger-grid",
+      "room-state"
+    ],
     "attributes": {
       "clearable": true,
       "blocks_construction": true,
@@ -38,7 +52,10 @@
     "type": "avenger_room_state",
     "name": "Exposed Power Coil",
     "short_description": "A damaged power conduit; clearing it ('shielding') takes the longest of the three hazard states but grants a permanent power bonus to whatever is built there.",
-    "tags": ["avenger-grid", "room-state"],
+    "tags": [
+      "avenger-grid",
+      "room-state"
+    ],
     "attributes": {
       "clearable": true,
       "blocks_construction": true,
@@ -46,94 +63,145 @@
       "gameplay_effect": "There are always exactly two Exposed Power Coil cells on the Avenger, both in the bottom two rows. A facility built on a cleared coil costs 0 power to operate; a Power Relay built on one provides substantially more power than normal."
     }
   },
-
   {
     "template_key": "Supplies",
     "type": "resource",
     "name": "Supplies",
     "short_description": "The primary resource for building facilities, upgrades and items.",
-    "tags": ["resource", "currency"],
-    "attributes": {"resource_category": "currency"}
+    "tags": [
+      "resource",
+      "currency"
+    ],
+    "attributes": {
+      "resource_category": "currency"
+    }
   },
   {
     "template_key": "Intel",
     "type": "resource",
     "name": "Intel",
     "short_description": "Spent on the Black Market, covert actions and resistance orders.",
-    "tags": ["resource", "currency"],
-    "attributes": {"resource_category": "currency"}
+    "tags": [
+      "resource",
+      "currency"
+    ],
+    "attributes": {
+      "resource_category": "currency"
+    }
   },
   {
     "template_key": "AlienAlloys",
     "type": "resource",
     "name": "Alien Alloys",
     "short_description": "A material resource used in armor and weapon construction.",
-    "tags": ["resource", "material"],
-    "attributes": {"resource_category": "material"}
+    "tags": [
+      "resource",
+      "material"
+    ],
+    "attributes": {
+      "resource_category": "material"
+    }
   },
   {
     "template_key": "EleriumCrystals",
     "type": "resource",
     "name": "Elerium Crystals",
     "short_description": "A rare material resource required for advanced weapon/armor research and construction.",
-    "tags": ["resource", "material"],
-    "attributes": {"resource_category": "material"}
+    "tags": [
+      "resource",
+      "material"
+    ],
+    "attributes": {
+      "resource_category": "material"
+    }
   },
   {
     "template_key": "EleriumCores",
     "type": "resource",
     "name": "Elerium Cores",
     "short_description": "A late-game material resource used for top-tier equipment.",
-    "tags": ["resource", "material"],
-    "attributes": {"resource_category": "material"}
+    "tags": [
+      "resource",
+      "material"
+    ],
+    "attributes": {
+      "resource_category": "material"
+    }
   },
   {
     "template_key": "CorpseAdventTrooper",
     "type": "resource",
     "name": "ADVENT Trooper Corpse",
     "short_description": "Recovered from slain ADVENT Troopers; required for the ADVENT Trooper Autopsy.",
-    "tags": ["resource", "corpse"],
-    "attributes": {"resource_category": "corpse"}
+    "tags": [
+      "resource",
+      "corpse"
+    ],
+    "attributes": {
+      "resource_category": "corpse"
+    }
   },
   {
     "template_key": "CorpseAdventOfficer",
     "type": "resource",
     "name": "ADVENT Officer Corpse",
     "short_description": "Recovered from slain ADVENT Officers; required for the ADVENT Officer Autopsy.",
-    "tags": ["resource", "corpse"],
-    "attributes": {"resource_category": "corpse"}
+    "tags": [
+      "resource",
+      "corpse"
+    ],
+    "attributes": {
+      "resource_category": "corpse"
+    }
   },
   {
     "template_key": "CorpseSectoid",
     "type": "resource",
     "name": "Sectoid Corpse",
     "short_description": "Recovered from slain Sectoids; required for the Sectoid Autopsy.",
-    "tags": ["resource", "corpse"],
-    "attributes": {"resource_category": "corpse"}
+    "tags": [
+      "resource",
+      "corpse"
+    ],
+    "attributes": {
+      "resource_category": "corpse"
+    }
   },
   {
     "template_key": "CorpseViper",
     "type": "resource",
     "name": "Viper Corpse",
     "short_description": "Recovered from slain Vipers; required for the Viper Autopsy.",
-    "tags": ["resource", "corpse"],
-    "attributes": {"resource_category": "corpse"}
+    "tags": [
+      "resource",
+      "corpse"
+    ],
+    "attributes": {
+      "resource_category": "corpse"
+    }
   },
   {
     "template_key": "CorpseMuton",
     "type": "resource",
     "name": "Muton Corpse",
     "short_description": "Recovered from slain Mutons; required for the Muton Autopsy.",
-    "tags": ["resource", "corpse"],
-    "attributes": {"resource_category": "corpse"}
+    "tags": [
+      "resource",
+      "corpse"
+    ],
+    "attributes": {
+      "resource_category": "corpse"
+    }
   },
-
   {
     "template_key": "ProvingGround",
     "type": "facility",
     "name": "Proving Ground",
     "short_description": "Allows construction of experimental equipment (ammo, grenades, armor) via Proving Ground projects.",
-    "tags": ["facility", "avenger-grid"],
+    "tags": [
+      "facility",
+      "avenger-grid"
+    ],
     "attributes": {
       "build_cost_supplies": 125,
       "build_days": 7,
@@ -148,7 +216,10 @@
     "type": "facility",
     "name": "Guerrilla Tactics School",
     "short_description": "Trains rookies into soldier classes; sells squad-wide upgrades (e.g. extra squad size).",
-    "tags": ["facility", "avenger-grid"],
+    "tags": [
+      "facility",
+      "avenger-grid"
+    ],
     "attributes": {
       "build_cost_supplies": 85,
       "build_days": 14,
@@ -163,7 +234,10 @@
     "type": "facility",
     "name": "Laboratory",
     "short_description": "Increases research speed; boosts breakthrough chance.",
-    "tags": ["facility", "avenger-grid"],
+    "tags": [
+      "facility",
+      "avenger-grid"
+    ],
     "attributes": {
       "build_cost_supplies": 125,
       "build_days": 16,
@@ -178,7 +252,10 @@
     "type": "facility",
     "name": "Workshop",
     "short_description": "Produces Gremlins that can staff adjacent facilities as engineers.",
-    "tags": ["facility", "avenger-grid"],
+    "tags": [
+      "facility",
+      "avenger-grid"
+    ],
     "attributes": {
       "build_cost_supplies": 125,
       "build_days": 20,
@@ -193,7 +270,10 @@
     "type": "facility",
     "name": "Power Relay",
     "short_description": "Generates additional power for other facilities.",
-    "tags": ["facility", "avenger-grid"],
+    "tags": [
+      "facility",
+      "avenger-grid"
+    ],
     "attributes": {
       "build_cost_supplies": 80,
       "build_days": 12,
@@ -208,7 +288,10 @@
     "type": "facility",
     "name": "Resistance Comms",
     "short_description": "Increases resistance-contact capacity; each staffed engineer adds more contacts.",
-    "tags": ["facility", "avenger-grid"],
+    "tags": [
+      "facility",
+      "avenger-grid"
+    ],
     "attributes": {
       "build_cost_supplies": 110,
       "build_days": 16,
@@ -223,7 +306,10 @@
     "type": "facility",
     "name": "Defense Matrix",
     "short_description": "Deploys XCOM turrets for Avenger-defense missions.",
-    "tags": ["facility", "avenger-grid"],
+    "tags": [
+      "facility",
+      "avenger-grid"
+    ],
     "attributes": {
       "build_cost_supplies": 75,
       "build_days": null,
@@ -239,7 +325,10 @@
     "type": "facility",
     "name": "Psi Lab",
     "short_description": "Trains rookies as Psi Operatives.",
-    "tags": ["facility", "avenger-grid"],
+    "tags": [
+      "facility",
+      "avenger-grid"
+    ],
     "attributes": {
       "build_cost_supplies": 225,
       "build_days": 11,
@@ -254,7 +343,10 @@
     "type": "facility",
     "name": "Shadow Chamber",
     "short_description": "Performs special story-related research projects; reveals mission alien composition on the Geoscape.",
-    "tags": ["facility", "avenger-grid"],
+    "tags": [
+      "facility",
+      "avenger-grid"
+    ],
     "attributes": {
       "build_cost_supplies": 125,
       "build_days": null,
@@ -270,7 +362,11 @@
     "type": "facility",
     "name": "Advanced Warfare Center",
     "short_description": "Heals injured soldiers faster and grants a random cross-class bonus ability per soldier. Vanilla XCOM 2 only -- see ruleset_note.",
-    "tags": ["facility", "avenger-grid", "vanilla-only"],
+    "tags": [
+      "facility",
+      "avenger-grid",
+      "vanilla-only"
+    ],
     "attributes": {
       "build_cost_supplies": 115,
       "build_days": 11,
@@ -281,144 +377,225 @@
       "ruleset_note": "Does NOT exist as a buildable facility in War of the Chosen -- its healing function is replaced by the Infirmary and its ability-retraining function by the Training Center (see the `wotc` content source). This object remains importable for vanilla-ruleset campaigns only."
     }
   },
-
   {
     "template_key": "AlienBiotech",
     "type": "research_project",
     "name": "Alien Biotech",
     "short_description": "Foundational xenobiology research; unlocks autopsy projects.",
-    "tags": ["research"],
-    "attributes": {"research_category": "foundational"}
+    "tags": [
+      "research"
+    ],
+    "attributes": {
+      "research_category": "foundational"
+    }
   },
   {
     "template_key": "HybridMaterials",
     "type": "research_project",
     "name": "Hybrid Materials",
     "short_description": "Foundational materials research; a prerequisite for Magnetic Weapons and combat-armor research.",
-    "tags": ["research"],
-    "attributes": {"research_category": "foundational"}
+    "tags": [
+      "research"
+    ],
+    "attributes": {
+      "research_category": "foundational"
+    }
   },
   {
     "template_key": "AutopsyAdventTrooper",
     "type": "autopsy_project",
     "name": "ADVENT Trooper Autopsy",
     "short_description": "Unlocks the Battle Scanner.",
-    "tags": ["research", "autopsy"],
-    "attributes": {"research_category": "autopsy"}
+    "tags": [
+      "research",
+      "autopsy"
+    ],
+    "attributes": {
+      "research_category": "autopsy"
+    }
   },
   {
     "template_key": "AutopsyAdventOfficer",
     "type": "autopsy_project",
     "name": "ADVENT Officer Autopsy",
     "short_description": "Unlocks the Proving Ground facility.",
-    "tags": ["research", "autopsy"],
-    "attributes": {"research_category": "autopsy"}
+    "tags": [
+      "research",
+      "autopsy"
+    ],
+    "attributes": {
+      "research_category": "autopsy"
+    }
   },
   {
     "template_key": "AutopsySectoid",
     "type": "autopsy_project",
     "name": "Sectoid Autopsy",
     "short_description": "Unlocks Mindshield and Psionics research.",
-    "tags": ["research", "autopsy"],
-    "attributes": {"research_category": "autopsy"}
+    "tags": [
+      "research",
+      "autopsy"
+    ],
+    "attributes": {
+      "research_category": "autopsy"
+    }
   },
   {
     "template_key": "AutopsyViper",
     "type": "autopsy_project",
     "name": "Viper Autopsy",
     "short_description": "Unlocks the Battlefield Medicine Proving Ground project.",
-    "tags": ["research", "autopsy"],
-    "attributes": {"research_category": "autopsy"}
+    "tags": [
+      "research",
+      "autopsy"
+    ],
+    "attributes": {
+      "research_category": "autopsy"
+    }
   },
   {
     "template_key": "AutopsyMuton",
     "type": "autopsy_project",
     "name": "Muton Autopsy",
     "short_description": "Unlocks Plasma Grenades and the Advanced Explosives Proving Ground project.",
-    "tags": ["research", "autopsy"],
-    "attributes": {"research_category": "autopsy"}
+    "tags": [
+      "research",
+      "autopsy"
+    ],
+    "attributes": {
+      "research_category": "autopsy"
+    }
   },
   {
     "template_key": "ModularWeapons",
     "type": "research_project",
     "name": "Modular Weapons",
     "short_description": "Unlocks weapon upgrade slots.",
-    "tags": ["research", "weapons"],
-    "attributes": {"research_category": "weapons"}
+    "tags": [
+      "research",
+      "weapons"
+    ],
+    "attributes": {
+      "research_category": "weapons"
+    }
   },
   {
     "template_key": "MagnetizedWeapons",
     "type": "research_project",
     "name": "Magnetic Weapons",
     "short_description": "Unlocks Mag Pistol, Mag Rifle and Shard Gun.",
-    "tags": ["research", "weapons"],
-    "attributes": {"research_category": "weapons"}
+    "tags": [
+      "research",
+      "weapons"
+    ],
+    "attributes": {
+      "research_category": "weapons"
+    }
   },
   {
     "template_key": "GaussWeapons",
     "type": "research_project",
     "name": "Gauss Weapons",
     "short_description": "Unlocks Gauss Rifle and Mag Cannon; unlocks Elerium research.",
-    "tags": ["research", "weapons"],
-    "attributes": {"research_category": "weapons"}
+    "tags": [
+      "research",
+      "weapons"
+    ],
+    "attributes": {
+      "research_category": "weapons"
+    }
   },
   {
     "template_key": "Elerium",
     "type": "research_project",
     "name": "Elerium",
     "short_description": "Unlocks Powered Armor and Plasma Rifle research.",
-    "tags": ["research"],
-    "attributes": {"research_category": "foundational"}
+    "tags": [
+      "research"
+    ],
+    "attributes": {
+      "research_category": "foundational"
+    }
   },
   {
     "template_key": "PlasmaRifle",
     "type": "research_project",
     "name": "Plasma Rifle",
     "short_description": "Unlocks the Plasma Rifle and Beam Pistol, and further Beam weapon research.",
-    "tags": ["research", "weapons"],
-    "attributes": {"research_category": "weapons"}
+    "tags": [
+      "research",
+      "weapons"
+    ],
+    "attributes": {
+      "research_category": "weapons"
+    }
   },
   {
     "template_key": "PlatedArmor",
     "type": "research_project",
     "name": "Plated Armor",
     "short_description": "Unlocks Predator Armor.",
-    "tags": ["research", "armor"],
-    "attributes": {"research_category": "armor"}
+    "tags": [
+      "research",
+      "armor"
+    ],
+    "attributes": {
+      "research_category": "armor"
+    }
   },
   {
     "template_key": "PoweredArmor",
     "type": "research_project",
     "name": "Powered Armor",
     "short_description": "Unlocks Warden Armor.",
-    "tags": ["research", "armor"],
-    "attributes": {"research_category": "armor"}
+    "tags": [
+      "research",
+      "armor"
+    ],
+    "attributes": {
+      "research_category": "armor"
+    }
   },
   {
     "template_key": "Psionics",
     "type": "research_project",
     "name": "Psionics",
     "short_description": "Unlocks the Psi Lab facility and the Advanced Psi Amp.",
-    "tags": ["research"],
-    "attributes": {"research_category": "strategic"}
+    "tags": [
+      "research"
+    ],
+    "attributes": {
+      "research_category": "strategic"
+    }
   },
   {
     "template_key": "ResistanceCommunications",
     "type": "research_project",
     "name": "Resistance Communications",
     "short_description": "Unlocks the Resistance Comms facility. Completed after the first Guerrilla Op.",
-    "tags": ["research"],
-    "attributes": {"research_category": "strategic"}
+    "tags": [
+      "research"
+    ],
+    "attributes": {
+      "research_category": "strategic"
+    }
   },
-
   {
     "template_key": "AssaultRifle_CV",
     "type": "weapon",
     "name": "Assault Rifle",
     "short_description": "Conventional-tier assault rifle; the Specialist's default primary weapon.",
     "tier": 1,
-    "tags": ["primary", "conventional"],
-    "attributes": {"weapon_category": "assault_rifle", "clip_size": 4, "technology_tier": "conventional", "upgrade_slots": 1}
+    "tags": [
+      "primary",
+      "conventional"
+    ],
+    "attributes": {
+      "weapon_category": "assault_rifle",
+      "clip_size": 4,
+      "technology_tier": "conventional",
+      "upgrade_slots": 1
+    }
   },
   {
     "template_key": "AssaultRifle_MG",
@@ -426,8 +603,16 @@
     "name": "Mag Rifle",
     "short_description": "Magnetic-tier assault rifle.",
     "tier": 2,
-    "tags": ["primary", "magnetic"],
-    "attributes": {"weapon_category": "assault_rifle", "clip_size": 4, "technology_tier": "magnetic", "upgrade_slots": 2}
+    "tags": [
+      "primary",
+      "magnetic"
+    ],
+    "attributes": {
+      "weapon_category": "assault_rifle",
+      "clip_size": 4,
+      "technology_tier": "magnetic",
+      "upgrade_slots": 2
+    }
   },
   {
     "template_key": "AssaultRifle_BM",
@@ -435,8 +620,16 @@
     "name": "Plasma Rifle",
     "short_description": "Plasma-tier assault rifle.",
     "tier": 3,
-    "tags": ["primary", "plasma"],
-    "attributes": {"weapon_category": "assault_rifle", "clip_size": 4, "technology_tier": "plasma", "upgrade_slots": 2}
+    "tags": [
+      "primary",
+      "plasma"
+    ],
+    "attributes": {
+      "weapon_category": "assault_rifle",
+      "clip_size": 4,
+      "technology_tier": "plasma",
+      "upgrade_slots": 2
+    }
   },
   {
     "template_key": "Shotgun_CV",
@@ -444,8 +637,16 @@
     "name": "Shotgun",
     "short_description": "Conventional-tier shotgun; the Ranger's default primary weapon.",
     "tier": 1,
-    "tags": ["primary", "conventional"],
-    "attributes": {"weapon_category": "shotgun", "clip_size": 4, "technology_tier": "conventional", "upgrade_slots": 1}
+    "tags": [
+      "primary",
+      "conventional"
+    ],
+    "attributes": {
+      "weapon_category": "shotgun",
+      "clip_size": 4,
+      "technology_tier": "conventional",
+      "upgrade_slots": 1
+    }
   },
   {
     "template_key": "Shotgun_MG",
@@ -453,8 +654,16 @@
     "name": "Shard Gun",
     "short_description": "Magnetic-tier shotgun.",
     "tier": 2,
-    "tags": ["primary", "magnetic"],
-    "attributes": {"weapon_category": "shotgun", "clip_size": 4, "technology_tier": "magnetic", "upgrade_slots": 2}
+    "tags": [
+      "primary",
+      "magnetic"
+    ],
+    "attributes": {
+      "weapon_category": "shotgun",
+      "clip_size": 4,
+      "technology_tier": "magnetic",
+      "upgrade_slots": 2
+    }
   },
   {
     "template_key": "Shotgun_BM",
@@ -462,8 +671,16 @@
     "name": "Storm Gun",
     "short_description": "Plasma-tier shotgun.",
     "tier": 3,
-    "tags": ["primary", "plasma"],
-    "attributes": {"weapon_category": "shotgun", "clip_size": 4, "technology_tier": "plasma", "upgrade_slots": 2}
+    "tags": [
+      "primary",
+      "plasma"
+    ],
+    "attributes": {
+      "weapon_category": "shotgun",
+      "clip_size": 4,
+      "technology_tier": "plasma",
+      "upgrade_slots": 2
+    }
   },
   {
     "template_key": "SniperRifle_CV",
@@ -471,8 +688,16 @@
     "name": "Sniper Rifle",
     "short_description": "Conventional-tier sniper rifle; the Sharpshooter's default primary weapon.",
     "tier": 1,
-    "tags": ["primary", "conventional"],
-    "attributes": {"weapon_category": "sniper_rifle", "clip_size": 3, "technology_tier": "conventional", "upgrade_slots": 1}
+    "tags": [
+      "primary",
+      "conventional"
+    ],
+    "attributes": {
+      "weapon_category": "sniper_rifle",
+      "clip_size": 3,
+      "technology_tier": "conventional",
+      "upgrade_slots": 1
+    }
   },
   {
     "template_key": "SniperRifle_MG",
@@ -480,8 +705,16 @@
     "name": "Gauss Rifle",
     "short_description": "Magnetic-tier sniper rifle.",
     "tier": 2,
-    "tags": ["primary", "magnetic"],
-    "attributes": {"weapon_category": "sniper_rifle", "clip_size": 3, "technology_tier": "magnetic", "upgrade_slots": 2}
+    "tags": [
+      "primary",
+      "magnetic"
+    ],
+    "attributes": {
+      "weapon_category": "sniper_rifle",
+      "clip_size": 3,
+      "technology_tier": "magnetic",
+      "upgrade_slots": 2
+    }
   },
   {
     "template_key": "SniperRifle_BM",
@@ -489,8 +722,16 @@
     "name": "Plasma Lance",
     "short_description": "Plasma-tier sniper rifle.",
     "tier": 3,
-    "tags": ["primary", "plasma"],
-    "attributes": {"weapon_category": "sniper_rifle", "clip_size": 3, "technology_tier": "plasma", "upgrade_slots": 2}
+    "tags": [
+      "primary",
+      "plasma"
+    ],
+    "attributes": {
+      "weapon_category": "sniper_rifle",
+      "clip_size": 3,
+      "technology_tier": "plasma",
+      "upgrade_slots": 2
+    }
   },
   {
     "template_key": "Cannon_CV",
@@ -498,8 +739,16 @@
     "name": "Cannon",
     "short_description": "Conventional-tier LMG; the Grenadier's default primary weapon.",
     "tier": 1,
-    "tags": ["primary", "conventional"],
-    "attributes": {"weapon_category": "cannon", "clip_size": 3, "technology_tier": "conventional", "upgrade_slots": 1}
+    "tags": [
+      "primary",
+      "conventional"
+    ],
+    "attributes": {
+      "weapon_category": "cannon",
+      "clip_size": 3,
+      "technology_tier": "conventional",
+      "upgrade_slots": 1
+    }
   },
   {
     "template_key": "Cannon_MG",
@@ -507,8 +756,16 @@
     "name": "Mag Cannon",
     "short_description": "Magnetic-tier LMG.",
     "tier": 2,
-    "tags": ["primary", "magnetic"],
-    "attributes": {"weapon_category": "cannon", "clip_size": 3, "technology_tier": "magnetic", "upgrade_slots": 2}
+    "tags": [
+      "primary",
+      "magnetic"
+    ],
+    "attributes": {
+      "weapon_category": "cannon",
+      "clip_size": 3,
+      "technology_tier": "magnetic",
+      "upgrade_slots": 2
+    }
   },
   {
     "template_key": "Cannon_BM",
@@ -516,8 +773,16 @@
     "name": "Beam Cannon",
     "short_description": "Plasma-tier LMG.",
     "tier": 3,
-    "tags": ["primary", "plasma"],
-    "attributes": {"weapon_category": "cannon", "clip_size": 3, "technology_tier": "plasma", "upgrade_slots": 2}
+    "tags": [
+      "primary",
+      "plasma"
+    ],
+    "attributes": {
+      "weapon_category": "cannon",
+      "clip_size": 3,
+      "technology_tier": "plasma",
+      "upgrade_slots": 2
+    }
   },
   {
     "template_key": "Pistol_CV",
@@ -525,8 +790,15 @@
     "name": "Pistol",
     "short_description": "Conventional-tier sidearm; the Sharpshooter's secondary weapon. Cannot receive weapon upgrades.",
     "tier": 1,
-    "tags": ["secondary", "conventional"],
-    "attributes": {"weapon_category": "pistol", "technology_tier": "conventional", "upgrade_slots": 0}
+    "tags": [
+      "secondary",
+      "conventional"
+    ],
+    "attributes": {
+      "weapon_category": "pistol",
+      "technology_tier": "conventional",
+      "upgrade_slots": 0
+    }
   },
   {
     "template_key": "Pistol_MG",
@@ -534,8 +806,15 @@
     "name": "Mag Pistol",
     "short_description": "Magnetic-tier sidearm.",
     "tier": 2,
-    "tags": ["secondary", "magnetic"],
-    "attributes": {"weapon_category": "pistol", "technology_tier": "magnetic", "upgrade_slots": 0}
+    "tags": [
+      "secondary",
+      "magnetic"
+    ],
+    "attributes": {
+      "weapon_category": "pistol",
+      "technology_tier": "magnetic",
+      "upgrade_slots": 0
+    }
   },
   {
     "template_key": "Pistol_BM",
@@ -543,75 +822,134 @@
     "name": "Beam Pistol",
     "short_description": "Plasma-tier sidearm.",
     "tier": 3,
-    "tags": ["secondary", "plasma"],
-    "attributes": {"weapon_category": "pistol", "technology_tier": "plasma", "upgrade_slots": 0}
+    "tags": [
+      "secondary",
+      "plasma"
+    ],
+    "attributes": {
+      "weapon_category": "pistol",
+      "technology_tier": "plasma",
+      "upgrade_slots": 0
+    }
   },
-
   {
     "template_key": "ScopeUpgrade",
     "type": "weapon_upgrade",
     "name": "Scope",
     "short_description": "Weapon upgrade: adds an aim bonus.",
-    "tags": ["weapon-upgrade"],
-    "attributes": {"upgrade_category": "scope", "quality": "basic", "effect_summary": "Adds an aim bonus; Advanced and Superior variants add progressively more."}
+    "tags": [
+      "weapon-upgrade"
+    ],
+    "attributes": {
+      "upgrade_category": "scope",
+      "quality": "basic",
+      "effect_summary": "Adds an aim bonus; Advanced and Superior variants add progressively more."
+    },
+    "tier": 1
   },
   {
     "template_key": "LaserSightUpgrade",
     "type": "weapon_upgrade",
     "name": "Laser Sight",
     "short_description": "Weapon upgrade: adds a critical-hit chance bonus.",
-    "tags": ["weapon-upgrade"],
-    "attributes": {"upgrade_category": "laser_sight", "quality": "basic", "effect_summary": "Adds a critical-hit chance bonus; Advanced and Superior variants add progressively more."}
+    "tags": [
+      "weapon-upgrade"
+    ],
+    "attributes": {
+      "upgrade_category": "laser_sight",
+      "quality": "basic",
+      "effect_summary": "Adds a critical-hit chance bonus; Advanced and Superior variants add progressively more."
+    },
+    "tier": 1
   },
   {
     "template_key": "RepeaterUpgrade",
     "type": "weapon_upgrade",
     "name": "Repeater",
     "short_description": "Weapon upgrade: a small chance to instantly kill a non-boss target on hit.",
-    "tags": ["weapon-upgrade"],
-    "attributes": {"upgrade_category": "repeater", "quality": "basic", "effect_summary": "Small chance to instantly kill on hit; Advanced and Superior variants increase the chance."}
+    "tags": [
+      "weapon-upgrade"
+    ],
+    "attributes": {
+      "upgrade_category": "repeater",
+      "quality": "basic",
+      "effect_summary": "Small chance to instantly kill on hit; Advanced and Superior variants increase the chance."
+    },
+    "tier": 1
   },
   {
     "template_key": "HairTriggerUpgrade",
     "type": "weapon_upgrade",
     "name": "Hair Trigger",
     "short_description": "Weapon upgrade: a chance for a shot to be a free action.",
-    "tags": ["weapon-upgrade"],
-    "attributes": {"upgrade_category": "hair_trigger", "quality": "basic", "effect_summary": "Chance of a free extra shot; Advanced and Superior variants increase the chance."}
+    "tags": [
+      "weapon-upgrade"
+    ],
+    "attributes": {
+      "upgrade_category": "hair_trigger",
+      "quality": "basic",
+      "effect_summary": "Chance of a free extra shot; Advanced and Superior variants increase the chance."
+    },
+    "tier": 1
   },
   {
     "template_key": "AutoLoaderUpgrade",
     "type": "weapon_upgrade",
     "name": "Auto-Loader",
     "short_description": "Weapon upgrade: provides a free reload.",
-    "tags": ["weapon-upgrade"],
-    "attributes": {"upgrade_category": "auto_loader", "quality": "basic", "effect_summary": "Grants free reload charges; Advanced and Superior variants grant more."}
+    "tags": [
+      "weapon-upgrade"
+    ],
+    "attributes": {
+      "upgrade_category": "auto_loader",
+      "quality": "basic",
+      "effect_summary": "Grants free reload charges; Advanced and Superior variants grant more."
+    },
+    "tier": 1
   },
   {
     "template_key": "ExtendedMagazineUpgrade",
     "type": "weapon_upgrade",
     "name": "Extended Magazine",
     "short_description": "Weapon upgrade: increases ammo capacity.",
-    "tags": ["weapon-upgrade"],
-    "attributes": {"upgrade_category": "extended_magazine", "quality": "basic", "effect_summary": "Adds ammo capacity; Advanced and Superior variants add more."}
+    "tags": [
+      "weapon-upgrade"
+    ],
+    "attributes": {
+      "upgrade_category": "extended_magazine",
+      "quality": "basic",
+      "effect_summary": "Adds ammo capacity; Advanced and Superior variants add more."
+    },
+    "tier": 1
   },
   {
     "template_key": "StockUpgrade",
     "type": "weapon_upgrade",
     "name": "Stock",
     "short_description": "Weapon upgrade: guarantees some damage on a missed shot, reduced by target armor.",
-    "tags": ["weapon-upgrade"],
-    "attributes": {"upgrade_category": "stock", "quality": "basic", "effect_summary": "Guarantees minimum damage on a miss; Advanced and Superior variants guarantee more."}
+    "tags": [
+      "weapon-upgrade"
+    ],
+    "attributes": {
+      "upgrade_category": "stock",
+      "quality": "basic",
+      "effect_summary": "Guarantees minimum damage on a miss; Advanced and Superior variants guarantee more."
+    },
+    "tier": 1
   },
-
   {
     "template_key": "KevlarArmor",
     "type": "armor",
     "name": "Kevlar Armor",
     "short_description": "Starting armor; no research prerequisite.",
     "tier": 1,
-    "tags": ["armor", "starting"],
-    "attributes": {"utility_slots": 1}
+    "tags": [
+      "armor",
+      "starting"
+    ],
+    "attributes": {
+      "utility_slots": 1
+    }
   },
   {
     "template_key": "PredatorArmor",
@@ -619,8 +957,12 @@
     "name": "Predator Armor",
     "short_description": "Mid-tier armor; grants an additional utility slot.",
     "tier": 2,
-    "tags": ["armor"],
-    "attributes": {"utility_slots": 2}
+    "tags": [
+      "armor"
+    ],
+    "attributes": {
+      "utility_slots": 2
+    }
   },
   {
     "template_key": "WardenArmor",
@@ -628,16 +970,22 @@
     "name": "Warden Armor",
     "short_description": "Powered-armor tier; grants an additional utility slot and an armor bonus.",
     "tier": 3,
-    "tags": ["armor"],
-    "attributes": {"utility_slots": 2}
+    "tags": [
+      "armor"
+    ],
+    "attributes": {
+      "utility_slots": 2
+    }
   },
-
   {
     "template_key": "Ranger",
     "type": "soldier_class",
     "name": "Ranger",
     "short_description": "Close-quarters specialist; shotgun and sword.",
-    "tags": ["soldier-class", "vanilla"],
+    "tags": [
+      "soldier-class",
+      "vanilla"
+    ],
     "attributes": {
       "primary_weapon_categories": "Shotgun (also Assault Rifle at higher tech tiers via some ability trees)",
       "secondary_equipment": "Sword / Arc Blade / Fusion Blade",
@@ -650,7 +998,10 @@
     "type": "soldier_class",
     "name": "Sharpshooter",
     "short_description": "Long-range specialist; sniper rifle and pistol.",
-    "tags": ["soldier-class", "vanilla"],
+    "tags": [
+      "soldier-class",
+      "vanilla"
+    ],
     "attributes": {
       "primary_weapon_categories": "Sniper Rifle",
       "secondary_equipment": "Pistol",
@@ -663,7 +1014,10 @@
     "type": "soldier_class",
     "name": "Grenadier",
     "short_description": "Area-damage and armor-shredding specialist; cannon and grenade launcher.",
-    "tags": ["soldier-class", "vanilla"],
+    "tags": [
+      "soldier-class",
+      "vanilla"
+    ],
     "attributes": {
       "primary_weapon_categories": "Cannon / Grenade Launcher",
       "secondary_equipment": "Grenades (via Launch Grenade ability)",
@@ -676,7 +1030,10 @@
     "type": "soldier_class",
     "name": "Specialist",
     "short_description": "Support/hacking specialist; assault rifle and Gremlin drone.",
-    "tags": ["soldier-class", "vanilla"],
+    "tags": [
+      "soldier-class",
+      "vanilla"
+    ],
     "attributes": {
       "primary_weapon_categories": "Assault Rifle",
       "secondary_equipment": "GREMLIN",
@@ -689,7 +1046,10 @@
     "type": "soldier_class",
     "name": "Psi Operative",
     "short_description": "Psionic specialist; trained at the Psi Lab rather than the GTS, with abilities unlocked through psionic training rather than rank-up choices.",
-    "tags": ["soldier-class", "vanilla"],
+    "tags": [
+      "soldier-class",
+      "vanilla"
+    ],
     "attributes": {
       "primary_weapon_categories": "Assault Rifle",
       "secondary_equipment": "Psi Amp",
@@ -702,7 +1062,11 @@
     "type": "soldier_class",
     "name": "Rookie",
     "short_description": "The unclassed baseline a newly recruited soldier starts as, before being trained into a class at the Guerrilla Tactics School (or the Psi Lab, for Psi Operatives). Used to attach ruleset/difficulty-aware default stats (see catalog_soldier_stat_profiles) that a soldier-creation flow initializes from.",
-    "tags": ["soldier-class", "vanilla", "baseline"],
+    "tags": [
+      "soldier-class",
+      "vanilla",
+      "baseline"
+    ],
     "attributes": {
       "primary_weapon_categories": "Assault Rifle (default)",
       "secondary_equipment": "None",
@@ -710,13 +1074,14 @@
       "roster_origin": "vanilla"
     }
   },
-
   {
     "template_key": "BattleScanner",
     "type": "proving_ground_project",
     "name": "Battle Scanner",
     "short_description": "Proving Ground project unlocked by the ADVENT Trooper Autopsy; produces the Battle Scanner utility item.",
-    "tags": ["proving-ground"],
+    "tags": [
+      "proving-ground"
+    ],
     "attributes": {}
   },
   {
@@ -724,7 +1089,9 @@
     "type": "proving_ground_project",
     "name": "Battlefield Medicine",
     "short_description": "Proving Ground project unlocked by the Viper Autopsy; produces the Nanomedikit.",
-    "tags": ["proving-ground"],
+    "tags": [
+      "proving-ground"
+    ],
     "attributes": {}
   },
   {
@@ -732,7 +1099,9 @@
     "type": "proving_ground_project",
     "name": "Advanced Explosives",
     "short_description": "Proving Ground project unlocked by the Muton Autopsy; produces upgraded (Mk2) grenade variants.",
-    "tags": ["proving-ground"],
+    "tags": [
+      "proving-ground"
+    ],
     "attributes": {}
   },
   {
@@ -740,59 +1109,85 @@
     "type": "proving_ground_project",
     "name": "Skulljack",
     "short_description": "Proving Ground project requiring an ADVENT Officer corpse; produces the Skulljack utility item used to hack the Codex's brain.",
-    "tags": ["proving-ground"],
+    "tags": [
+      "proving-ground"
+    ],
     "attributes": {}
   },
-
   {
     "template_key": "BattleScannerItem",
     "type": "utility_item",
     "name": "Battle Scanner",
     "short_description": "Deployable scanner that reveals nearby enemy signatures, including Faceless and burrowed Chryssalids.",
-    "tags": ["utility"],
-    "attributes": {"effect_summary": "Reveals enemy signatures in an area around the deployed scanner."}
+    "tags": [
+      "utility"
+    ],
+    "attributes": {
+      "effect_summary": "Reveals enemy signatures in an area around the deployed scanner."
+    }
   },
   {
     "template_key": "NanoMedikit",
     "type": "utility_item",
     "name": "Nanomedikit",
     "short_description": "Upgraded Medikit, produced by the Battlefield Medicine Proving Ground project.",
-    "tags": ["utility"],
-    "attributes": {"effect_summary": "Heals more HP per charge than the basic Medikit."}
+    "tags": [
+      "utility"
+    ],
+    "attributes": {
+      "effect_summary": "Heals more HP per charge than the basic Medikit."
+    }
   },
   {
     "template_key": "Medikit",
     "type": "utility_item",
     "name": "Medikit",
     "short_description": "Basic healing item; available from the start of the campaign.",
-    "tags": ["utility", "starting"],
-    "attributes": {"effect_summary": "Heals HP; Specialists can deploy it remotely via the Gremlin's Medic Protocol ability."}
+    "tags": [
+      "utility",
+      "starting"
+    ],
+    "attributes": {
+      "effect_summary": "Heals HP; Specialists can deploy it remotely via the Gremlin's Medic Protocol ability."
+    }
   },
   {
     "template_key": "Mindshield",
     "type": "utility_item",
     "name": "Mindshield",
     "short_description": "Unlocked by the Sectoid Autopsy; protects the wearer against negative mental effects (panic, mind control).",
-    "tags": ["utility"],
-    "attributes": {"effect_summary": "Immunity to panic and mind control."}
+    "tags": [
+      "utility"
+    ],
+    "attributes": {
+      "effect_summary": "Immunity to panic and mind control."
+    }
   },
   {
     "template_key": "Skulljack",
     "type": "utility_item",
     "name": "Skulljack",
     "short_description": "Produced by the Skulljack Proving Ground project; used in melee to hack an enemy's neural implant.",
-    "tags": ["utility"],
-    "attributes": {"effect_summary": "Melee neural-hack attack, required for the Codex Brain story research."}
+    "tags": [
+      "utility"
+    ],
+    "attributes": {
+      "effect_summary": "Melee neural-hack attack, required for the Codex Brain story research."
+    }
   },
-
   {
     "template_key": "FragGrenade",
     "type": "grenade",
     "name": "Frag Grenade",
     "short_description": "Basic explosive grenade; available from the start of the campaign.",
     "tier": 1,
-    "tags": ["grenade", "starting"],
-    "attributes": {"technology_tier": "conventional"}
+    "tags": [
+      "grenade",
+      "starting"
+    ],
+    "attributes": {
+      "technology_tier": "conventional"
+    }
   },
   {
     "template_key": "FlashbangGrenade",
@@ -800,8 +1195,13 @@
     "name": "Flashbang Grenade",
     "short_description": "Disorients enemies in the blast radius; available from the start of the campaign.",
     "tier": 1,
-    "tags": ["grenade", "starting"],
-    "attributes": {"technology_tier": "conventional"}
+    "tags": [
+      "grenade",
+      "starting"
+    ],
+    "attributes": {
+      "technology_tier": "conventional"
+    }
   },
   {
     "template_key": "SmokeGrenade",
@@ -809,8 +1209,13 @@
     "name": "Smoke Grenade",
     "short_description": "Grants defensive bonuses to units in the smoke cloud; available from the start of the campaign.",
     "tier": 1,
-    "tags": ["grenade", "starting"],
-    "attributes": {"technology_tier": "conventional"}
+    "tags": [
+      "grenade",
+      "starting"
+    ],
+    "attributes": {
+      "technology_tier": "conventional"
+    }
   },
   {
     "template_key": "PlasmaGrenade",
@@ -818,16 +1223,21 @@
     "name": "Plasma Grenade",
     "short_description": "Advanced-tier grenade unlocked via the Muton Autopsy and Advanced Explosives.",
     "tier": 2,
-    "tags": ["grenade"],
-    "attributes": {"technology_tier": "plasma"}
+    "tags": [
+      "grenade"
+    ],
+    "attributes": {
+      "technology_tier": "plasma"
+    }
   },
-
   {
     "template_key": "APRounds",
     "type": "ammo",
     "name": "AP Rounds",
     "short_description": "Weapon ammo upgrade unlocked by Alien Biotech; grants armor-piercing damage.",
-    "tags": ["ammo"],
+    "tags": [
+      "ammo"
+    ],
     "attributes": {}
   },
   {
@@ -835,16 +1245,20 @@
     "type": "ammo",
     "name": "Tracer Rounds",
     "short_description": "Weapon ammo upgrade unlocked by Hybrid Materials; improves aim.",
-    "tags": ["ammo"],
+    "tags": [
+      "ammo"
+    ],
     "attributes": {}
   },
-
   {
     "template_key": "AdventTrooper",
     "type": "enemy",
     "name": "ADVENT Trooper",
     "short_description": "Standard ADVENT infantry unit; its corpse is required for the ADVENT Trooper Autopsy.",
-    "tags": ["enemy", "advent"],
+    "tags": [
+      "enemy",
+      "advent"
+    ],
     "attributes": {}
   },
   {
@@ -852,7 +1266,10 @@
     "type": "enemy",
     "name": "ADVENT Officer",
     "short_description": "ADVENT command unit; its corpse is required for the ADVENT Officer Autopsy, which unlocks the Proving Ground.",
-    "tags": ["enemy", "advent"],
+    "tags": [
+      "enemy",
+      "advent"
+    ],
     "attributes": {}
   },
   {
@@ -860,7 +1277,10 @@
     "type": "enemy",
     "name": "Sectoid",
     "short_description": "Early-game alien psionic unit; its corpse is required for the Sectoid Autopsy, which unlocks Psionics research.",
-    "tags": ["enemy", "alien"],
+    "tags": [
+      "enemy",
+      "alien"
+    ],
     "attributes": {}
   },
   {
@@ -868,7 +1288,10 @@
     "type": "enemy",
     "name": "Viper",
     "short_description": "Alien unit with a tongue-pull grab attack; its corpse is required for the Viper Autopsy, which unlocks Battlefield Medicine.",
-    "tags": ["enemy", "alien"],
+    "tags": [
+      "enemy",
+      "alien"
+    ],
     "attributes": {}
   },
   {
@@ -876,8 +1299,322 @@
     "type": "enemy",
     "name": "Muton",
     "short_description": "Heavy alien infantry unit; its corpse is required for the Muton Autopsy, which unlocks Plasma Grenades and Advanced Explosives.",
-    "tags": ["enemy", "alien"],
+    "tags": [
+      "enemy",
+      "alien"
+    ],
     "attributes": {}
+  },
+  {
+    "template_key": "Rank_Rookie",
+    "type": "soldier_rank",
+    "name": "Rookie",
+    "tier": 0,
+    "short_description": "XCOM 2 soldier rank: Rookie.",
+    "tags": [
+      "soldier-rank"
+    ],
+    "attributes": {}
+  },
+  {
+    "template_key": "Rank_Squaddie",
+    "type": "soldier_rank",
+    "name": "Squaddie",
+    "tier": 1,
+    "short_description": "XCOM 2 soldier rank: Squaddie.",
+    "tags": [
+      "soldier-rank"
+    ],
+    "attributes": {}
+  },
+  {
+    "template_key": "Rank_Corporal",
+    "type": "soldier_rank",
+    "name": "Corporal",
+    "tier": 2,
+    "short_description": "XCOM 2 soldier rank: Corporal.",
+    "tags": [
+      "soldier-rank"
+    ],
+    "attributes": {}
+  },
+  {
+    "template_key": "Rank_Sergeant",
+    "type": "soldier_rank",
+    "name": "Sergeant",
+    "tier": 3,
+    "short_description": "XCOM 2 soldier rank: Sergeant.",
+    "tags": [
+      "soldier-rank"
+    ],
+    "attributes": {}
+  },
+  {
+    "template_key": "Rank_Lieutenant",
+    "type": "soldier_rank",
+    "name": "Lieutenant",
+    "tier": 4,
+    "short_description": "XCOM 2 soldier rank: Lieutenant.",
+    "tags": [
+      "soldier-rank"
+    ],
+    "attributes": {}
+  },
+  {
+    "template_key": "Rank_Captain",
+    "type": "soldier_rank",
+    "name": "Captain",
+    "tier": 5,
+    "short_description": "XCOM 2 soldier rank: Captain.",
+    "tags": [
+      "soldier-rank"
+    ],
+    "attributes": {}
+  },
+  {
+    "template_key": "Rank_Major",
+    "type": "soldier_rank",
+    "name": "Major",
+    "tier": 6,
+    "short_description": "XCOM 2 soldier rank: Major.",
+    "tags": [
+      "soldier-rank"
+    ],
+    "attributes": {}
+  },
+  {
+    "template_key": "Rank_Colonel",
+    "type": "soldier_rank",
+    "name": "Colonel",
+    "tier": 7,
+    "short_description": "XCOM 2 soldier rank: Colonel.",
+    "tags": [
+      "soldier-rank"
+    ],
+    "attributes": {}
+  },
+  {
+    "template_key": "ScopeUpgrade_Advanced",
+    "type": "weapon_upgrade",
+    "name": "Advanced Scope",
+    "tier": 2,
+    "short_description": "Advanced tier of the Scope weapon upgrade. Adds an aim bonus; Advanced and Superior variants add progressively more.",
+    "tags": [
+      "weapon-upgrade",
+      "advanced"
+    ],
+    "attributes": {
+      "upgrade_category": "scope",
+      "quality": "advanced",
+      "effect_summary": "Adds an aim bonus; Advanced and Superior variants add progressively more."
+    }
+  },
+  {
+    "template_key": "ScopeUpgrade_Superior",
+    "type": "weapon_upgrade",
+    "name": "Superior Scope",
+    "tier": 3,
+    "short_description": "Superior tier of the Scope weapon upgrade. Adds an aim bonus; Advanced and Superior variants add progressively more.",
+    "tags": [
+      "weapon-upgrade",
+      "superior"
+    ],
+    "attributes": {
+      "upgrade_category": "scope",
+      "quality": "superior",
+      "effect_summary": "Adds an aim bonus; Advanced and Superior variants add progressively more."
+    }
+  },
+  {
+    "template_key": "LaserSightUpgrade_Advanced",
+    "type": "weapon_upgrade",
+    "name": "Advanced Laser Sight",
+    "tier": 2,
+    "short_description": "Advanced tier of the Laser Sight weapon upgrade. Adds a critical-hit chance bonus; Advanced and Superior variants add progressively more.",
+    "tags": [
+      "weapon-upgrade",
+      "advanced"
+    ],
+    "attributes": {
+      "upgrade_category": "laser_sight",
+      "quality": "advanced",
+      "effect_summary": "Adds a critical-hit chance bonus; Advanced and Superior variants add progressively more."
+    }
+  },
+  {
+    "template_key": "LaserSightUpgrade_Superior",
+    "type": "weapon_upgrade",
+    "name": "Superior Laser Sight",
+    "tier": 3,
+    "short_description": "Superior tier of the Laser Sight weapon upgrade. Adds a critical-hit chance bonus; Advanced and Superior variants add progressively more.",
+    "tags": [
+      "weapon-upgrade",
+      "superior"
+    ],
+    "attributes": {
+      "upgrade_category": "laser_sight",
+      "quality": "superior",
+      "effect_summary": "Adds a critical-hit chance bonus; Advanced and Superior variants add progressively more."
+    }
+  },
+  {
+    "template_key": "RepeaterUpgrade_Advanced",
+    "type": "weapon_upgrade",
+    "name": "Advanced Repeater",
+    "tier": 2,
+    "short_description": "Advanced tier of the Repeater weapon upgrade. Small chance to instantly kill on hit; Advanced and Superior variants increase the chance.",
+    "tags": [
+      "weapon-upgrade",
+      "advanced"
+    ],
+    "attributes": {
+      "upgrade_category": "repeater",
+      "quality": "advanced",
+      "effect_summary": "Small chance to instantly kill on hit; Advanced and Superior variants increase the chance."
+    }
+  },
+  {
+    "template_key": "RepeaterUpgrade_Superior",
+    "type": "weapon_upgrade",
+    "name": "Superior Repeater",
+    "tier": 3,
+    "short_description": "Superior tier of the Repeater weapon upgrade. Small chance to instantly kill on hit; Advanced and Superior variants increase the chance.",
+    "tags": [
+      "weapon-upgrade",
+      "superior"
+    ],
+    "attributes": {
+      "upgrade_category": "repeater",
+      "quality": "superior",
+      "effect_summary": "Small chance to instantly kill on hit; Advanced and Superior variants increase the chance."
+    }
+  },
+  {
+    "template_key": "HairTriggerUpgrade_Advanced",
+    "type": "weapon_upgrade",
+    "name": "Advanced Hair Trigger",
+    "tier": 2,
+    "short_description": "Advanced tier of the Hair Trigger weapon upgrade. Chance of a free extra shot; Advanced and Superior variants increase the chance.",
+    "tags": [
+      "weapon-upgrade",
+      "advanced"
+    ],
+    "attributes": {
+      "upgrade_category": "hair_trigger",
+      "quality": "advanced",
+      "effect_summary": "Chance of a free extra shot; Advanced and Superior variants increase the chance."
+    }
+  },
+  {
+    "template_key": "HairTriggerUpgrade_Superior",
+    "type": "weapon_upgrade",
+    "name": "Superior Hair Trigger",
+    "tier": 3,
+    "short_description": "Superior tier of the Hair Trigger weapon upgrade. Chance of a free extra shot; Advanced and Superior variants increase the chance.",
+    "tags": [
+      "weapon-upgrade",
+      "superior"
+    ],
+    "attributes": {
+      "upgrade_category": "hair_trigger",
+      "quality": "superior",
+      "effect_summary": "Chance of a free extra shot; Advanced and Superior variants increase the chance."
+    }
+  },
+  {
+    "template_key": "AutoLoaderUpgrade_Advanced",
+    "type": "weapon_upgrade",
+    "name": "Advanced Auto-Loader",
+    "tier": 2,
+    "short_description": "Advanced tier of the Auto-Loader weapon upgrade. Grants free reload charges; Advanced and Superior variants grant more.",
+    "tags": [
+      "weapon-upgrade",
+      "advanced"
+    ],
+    "attributes": {
+      "upgrade_category": "auto_loader",
+      "quality": "advanced",
+      "effect_summary": "Grants free reload charges; Advanced and Superior variants grant more."
+    }
+  },
+  {
+    "template_key": "AutoLoaderUpgrade_Superior",
+    "type": "weapon_upgrade",
+    "name": "Superior Auto-Loader",
+    "tier": 3,
+    "short_description": "Superior tier of the Auto-Loader weapon upgrade. Grants free reload charges; Advanced and Superior variants grant more.",
+    "tags": [
+      "weapon-upgrade",
+      "superior"
+    ],
+    "attributes": {
+      "upgrade_category": "auto_loader",
+      "quality": "superior",
+      "effect_summary": "Grants free reload charges; Advanced and Superior variants grant more."
+    }
+  },
+  {
+    "template_key": "ExtendedMagazineUpgrade_Advanced",
+    "type": "weapon_upgrade",
+    "name": "Advanced Extended Magazine",
+    "tier": 2,
+    "short_description": "Advanced tier of the Extended Magazine weapon upgrade. Adds ammo capacity; Advanced and Superior variants add more.",
+    "tags": [
+      "weapon-upgrade",
+      "advanced"
+    ],
+    "attributes": {
+      "upgrade_category": "extended_magazine",
+      "quality": "advanced",
+      "effect_summary": "Adds ammo capacity; Advanced and Superior variants add more."
+    }
+  },
+  {
+    "template_key": "ExtendedMagazineUpgrade_Superior",
+    "type": "weapon_upgrade",
+    "name": "Superior Extended Magazine",
+    "tier": 3,
+    "short_description": "Superior tier of the Extended Magazine weapon upgrade. Adds ammo capacity; Advanced and Superior variants add more.",
+    "tags": [
+      "weapon-upgrade",
+      "superior"
+    ],
+    "attributes": {
+      "upgrade_category": "extended_magazine",
+      "quality": "superior",
+      "effect_summary": "Adds ammo capacity; Advanced and Superior variants add more."
+    }
+  },
+  {
+    "template_key": "StockUpgrade_Advanced",
+    "type": "weapon_upgrade",
+    "name": "Advanced Stock",
+    "tier": 2,
+    "short_description": "Advanced tier of the Stock weapon upgrade. Guarantees minimum damage on a miss; Advanced and Superior variants guarantee more.",
+    "tags": [
+      "weapon-upgrade",
+      "advanced"
+    ],
+    "attributes": {
+      "upgrade_category": "stock",
+      "quality": "advanced",
+      "effect_summary": "Guarantees minimum damage on a miss; Advanced and Superior variants guarantee more."
+    }
+  },
+  {
+    "template_key": "StockUpgrade_Superior",
+    "type": "weapon_upgrade",
+    "name": "Superior Stock",
+    "tier": 3,
+    "short_description": "Superior tier of the Stock weapon upgrade. Guarantees minimum damage on a miss; Advanced and Superior variants guarantee more.",
+    "tags": [
+      "weapon-upgrade",
+      "superior"
+    ],
+    "attributes": {
+      "upgrade_category": "stock",
+      "quality": "superior",
+      "effect_summary": "Guarantees minimum damage on a miss; Advanced and Superior variants guarantee more."
+    }
   }
 ]
-

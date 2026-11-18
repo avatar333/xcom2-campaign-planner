@@ -115,3 +115,14 @@ The research planner and unlock paths read these generic conventions; a pack dri
 - **Facilities**: use `requires_facility` (facility as `from`) so a Proving Ground project or similar shows the facility it needs; a facility is satisfied by a *built* cell in the campaign's Avenger grid.
 - **Research metadata**: `research_category` (string) on research/autopsy objects drives the category filter; `short_description` is searchable.
 
+## 11. Data conventions consumed by Soldiers & Equipment Builds (Phase 7, `ADR-0022`)
+
+No class, rank, slot kind or compatibility fact is hard-coded; a pack supplies all of it:
+
+- **Classes and ranks**: `soldier_class` objects as already used since Phase 4; a new type `soldier_rank` (promotion ladder, `tier` orders it within a ruleset). A ruleset that redefines ranks authors its **own** `soldier_rank` objects rather than `replaces`-ing specific vanilla ranks unless a verified 1:1 mapping is known — LWotC's 9-rank ladder is authored standalone precisely because no such mapping was verified.
+- **Default stats**: `catalog_soldier_stat_profiles` rows (Phase 4) attached to the class object, optionally per `difficulty`. A stat a pack does not state for a class/difficulty is simply absent — the soldier creation form leaves it blank rather than guessing.
+- **Build slot counts**: `upgrade_slots` on `weapon` objects sizes the `weapon_upgrade` slot type; `utility_slots` on `armor` objects sizes the `utility` slot type. A base object of *any* type may declare a `build_slots` JSON attribute (`[{"slot_type": "...", "count": N, "accepts": ["type_slug", ...], "label": "..."}]`) to introduce slot kinds the built-in registry does not special-case — this is how a mod adds a brand-new component category with zero code changes.
+- **Component compatibility**: `compatible_weapon_categories` (comma-separated string) on a component, matched against the base's `weapon_category`; or an explicit `compatible_with` relationship between the component and specific base objects (ruleset-scoped like every relationship). Absent data on both means "unverified" (shown, allowed, never silently assumed compatible). `exclusive_group` (string) makes two components with the same value conflict; `allows_duplicates_in_build` (boolean) controls whether the same component may be attached more than once — absent means "allowed".
+- **Computed-summary attributes**: a component's `aim_bonus`/`crit_bonus`/`clip_size_bonus` are added into the base's `crit_chance`/`clip_size` (or shown as a bare delta when there is no base attribute to add to, e.g. `aim_bonus`); everything else, including every shipped base pack's weapon-upgrade `effect_summary`, is displayed as descriptive text only and never summed.
+
+

@@ -73,7 +73,9 @@ Goal: campaign-specific research tracking and dependency planning, generated ent
 
 Goal: campaign-specific soldier roster (ruleset-aware class list and default stat profiles, editable actual stats with retained defaults), reusable typed-slot Weapon/Armour builds over catalog objects (including mod/custom objects, compatibility validation with a recorded manual override), build assignment to soldiers, and "Show Unlock Path" integration for equipment not yet unlocked (reusing Phase 6's `get_unlock_path`).
 
-**Definition of done**: the 14-point acceptance list of the Phase 7 brief.
+**Status: done.** Delivered: migration `827415332929` (`campaign_soldier_stats`, `campaign_builds`, `campaign_build_slots`, `campaign_soldier_builds`; `campaign_soldiers.surname`/`callsign`/`rank_object_id`); pure `app/domain/builds.py` (compatibility rules, computed summary); `app/services/soldiers.py` and `builds.py` (shared `BuildContext`/`DependencyIndex`, so Research/Avenger/Soldiers agree on one notion of campaign status); `app/routes/soldiers.py` (`soldiers_bp` + `builds_bp`); `templates/soldiers/*`, `builds/*`, `static/css/soldiers.css`; live **Soldiers** and **Build Library** nav entries; new catalog type `soldier_rank` and build-related attributes (`build_slots`, `compatible_weapon_categories`, `exclusive_group`, `allows_duplicates_in_build`) added to packs, with vanilla/LWotC ranks and Advanced/Superior weapon-upgrade tiers authored from verified sources (`docs/DATA_SOURCING.md`) — most real compatibility facts were not verifiable, so shipped upgrades are deliberately flagged "unverified" rather than guessed; the mechanism itself is proven by synthetic test packs that do supply the data. `ADR-0022`.
+
+**Definition of done**: the 14-point acceptance list of the Phase 7 brief — covered by `tests/test_builds_domain.py`, `test_soldiers_service.py`, `test_builds_service.py`, `test_soldiers_routes.py`.
 
 ## 8. Phase 8 — Planning, events, strategy profiles
 

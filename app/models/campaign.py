@@ -10,7 +10,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, CheckConstraint, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import CreatedAtMixin, Model, TimestampMixin
@@ -276,6 +284,12 @@ class CampaignSoldier(Model, TimestampMixin):
         ForeignKey("catalog_objects.id", ondelete="SET NULL"), nullable=True
     )
     rank: Mapped[str | None] = mapped_column(String, nullable=True)
+    # Phase 7 (ADR-0022)
+    surname: Mapped[str | None] = mapped_column(String, nullable=True)
+    callsign: Mapped[str | None] = mapped_column(String, nullable=True)
+    rank_object_id: Mapped[int | None] = mapped_column(
+        ForeignKey("catalog_objects.id", ondelete="SET NULL"), nullable=True
+    )
     status: Mapped[str] = mapped_column(String, nullable=False, default="active")
     portrait_asset_id: Mapped[int | None] = mapped_column(
         ForeignKey("assets.id", ondelete="SET NULL"), nullable=True
@@ -286,6 +300,116 @@ class CampaignSoldier(Model, TimestampMixin):
     loadouts: Mapped[list[CampaignSoldierLoadout]] = relationship(
         back_populates="soldier", cascade="all, delete-orphan"
     )
+    stats: Mapped[list[CampaignSoldierStat]] = relationship(cascade="all, delete-orphan")
+    build_assignments: Mapped[list[CampaignSoldierBuild]] = relationship(cascade="all, delete-orphan")
+
+
+class CampaignSoldierStat(Model, TimestampMixin):
+    """One tracked stat of one soldier (ADR-0022). `actual_value` is what the
+    player's real unit has; `default_value` is the catalog default captured *at
+    creation* and never recomputed, so manual values are never recalculated
+    away and "actual vs class default" comparisons stay possible. NULL means
+    unknown / not tracked -- the app never invents a value."""
+
+    __tablename__ = "campaign_soldier_stats"
+    __table_args__ = (
+        UniqueConstraint("soldier_id", "stat_key", name="uq_campaign_soldier_stats"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    campaign_id: Mapped[int] = mapped_column(
+        ForeignKey("campaigns.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    soldier_id: Mapped[int] = mapped_column(
+        ForeignKey("campaign_soldiers.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    stat_key: Mapped[str] = mapped_column(String, nullable=False)
+    actual_value: Mapped[float | None] = mapped_column(Float, nullable=True)
+    default_value: Mapped[float | None] = mapped_column(Float, nullable=True)
+    is_confirmed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=0)
+
+
+class CampaignBuild(Model, TimestampMixin):
+    """A reusable, named equipment build (weapon, armour, or any future type)
+    owned by one campaign (ADR-0022). `build_type` is an open string resolved
+    through a registry in code, never a CHECK list, so a new kind of build needs
+    no schema change. The build points at a catalog base object; its attached
+    components live in `campaign_build_slots`."""
+
+    __tablename__ = "campaign_builds"
+    __table_args__ = (
+        UniqueConstraint("campaign_id", "build_type", "name", name="uq_campaign_builds_name"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    campaign_id: Mapped[int] = mapped_column(
+        ForeignKey("campaigns.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    build_type: Mapped[str] = mapped_column(String, nullable=False)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    purpose: Mapped[str | None] = mapped_column(String, nullable=True)
+    notes: Mapped[str | None] = mapped_column(String, nullable=True)
+    base_object_id: Mapped[int] = mapped_column(
+        ForeignKey("catalog_objects.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+
+    slots: Mapped[list[CampaignBuildSlot]] = relationship(
+        back_populates="build", cascade="all, delete-orphan", order_by="CampaignBuildSlot.slot_type, CampaignBuildSlot.slot_index"
+    )
+
+
+class CampaignBuildSlot(Model):
+    """One filled, typed slot of a build: Build -> typed slot -> attached
+    catalog object. `slot_type` is data (e.g. "weapon_upgrade", "utility", or a
+    mod's own type), never a column per component kind. `is_override` records
+    that the user deliberately attached something the catalog's compatibility
+    data does not permit/confirm (ADR-0022)."""
+
+    __tablename__ = "campaign_build_slots"
+    __table_args__ = (
+        UniqueConstraint("build_id", "slot_type", "slot_index", name="uq_campaign_build_slots"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    campaign_id: Mapped[int] = mapped_column(
+        ForeignKey("campaigns.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    build_id: Mapped[int] = mapped_column(
+        ForeignKey("campaign_builds.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    slot_type: Mapped[str] = mapped_column(String, nullable=False)
+    slot_index: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    attached_object_id: Mapped[int] = mapped_column(
+        ForeignKey("catalog_objects.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    is_override: Mapped[bool] = mapped_column(Boolean, nullable=False, default=0)
+
+    build: Mapped[CampaignBuild] = relationship(back_populates="slots")
+
+
+class CampaignSoldierBuild(Model, TimestampMixin):
+    """Assignment of a saved build to a soldier (ADR-0022). The soldier points
+    at the *shared* build (no copy), so the build is reusable and edits are seen
+    by every assigned soldier. `assignment_slot` distinguishes e.g. a primary
+    from a future secondary weapon without a schema change."""
+
+    __tablename__ = "campaign_soldier_builds"
+    __table_args__ = (
+        UniqueConstraint("soldier_id", "build_type", "assignment_slot", name="uq_campaign_soldier_builds"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    campaign_id: Mapped[int] = mapped_column(
+        ForeignKey("campaigns.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    soldier_id: Mapped[int] = mapped_column(
+        ForeignKey("campaign_soldiers.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    build_id: Mapped[int] = mapped_column(
+        ForeignKey("campaign_builds.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    build_type: Mapped[str] = mapped_column(String, nullable=False)
+    assignment_slot: Mapped[str] = mapped_column(String, nullable=False, default="primary")
 
 
 class CampaignSoldierLoadout(Model, CreatedAtMixin):

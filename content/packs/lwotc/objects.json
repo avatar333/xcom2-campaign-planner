@@ -4,8 +4,15 @@
     "type": "facility",
     "name": "Guerrilla Tactics School (LWOTC)",
     "short_description": "LWOTC rebalances the Guerrilla Tactics School's cost and power consumption compared to WotC.",
-    "tags": ["facility", "avenger-grid", "lwotc"],
-    "overrides": ["xcom2-base", "OfficerTrainingSchool"],
+    "tags": [
+      "facility",
+      "avenger-grid",
+      "lwotc"
+    ],
+    "overrides": [
+      "xcom2-base",
+      "OfficerTrainingSchool"
+    ],
     "patch": {
       "attributes": {
         "build_cost_supplies": 150,
@@ -19,8 +26,16 @@
     "type": "facility",
     "name": "Resistance Ring (LWOTC)",
     "short_description": "LWOTC keeps the Resistance Ring's base cost but changes its engineer-slot upgrade behaviour (one upgrade slot instead of WotC's two).",
-    "tags": ["facility", "avenger-grid", "lwotc", "wotc-only"],
-    "overrides": ["wotc", "ResistanceRing"],
+    "tags": [
+      "facility",
+      "avenger-grid",
+      "lwotc",
+      "wotc-only"
+    ],
+    "overrides": [
+      "wotc",
+      "ResistanceRing"
+    ],
     "patch": {
       "attributes": {
         "ruleset_note": "LWOTC removes the second Resistance Ring engineer-slot upgrade present in vanilla WotC (see FacilityUpgradeTable comment 'Second upgrade currently removed from LWOTC' in XComLW_Overhaul.ini, pinned commit 4872d8e); engineers reduce Covert Action duration by 25% per engineer instead of WotC's 33%/50%."
@@ -32,21 +47,31 @@
     "type": "facility",
     "name": "Infirmary (LWOTC)",
     "short_description": "LWOTC-specific Infirmary upgrade: the Recovery Chamber.",
-    "tags": ["facility", "avenger-grid", "lwotc", "wotc-only"],
-    "overrides": ["wotc", "Infirmary"],
+    "tags": [
+      "facility",
+      "avenger-grid",
+      "lwotc",
+      "wotc-only"
+    ],
+    "overrides": [
+      "wotc",
+      "Infirmary"
+    ],
     "patch": {
       "attributes": {
         "ruleset_note": "LWOTC adds an Infirmary_RecoveryChamber upgrade (-2 power, 80 supplies) per XComLW_Overhaul.ini FacilityUpgradeTable, pinned commit 4872d8e."
       }
     }
   },
-
   {
     "template_key": "LWS_Gunner",
     "type": "soldier_class",
     "name": "Gunner",
     "short_description": "LWOTC-exclusive class: heavy automatic-weapons specialist, suppression and sustained direct damage with cannons.",
-    "tags": ["soldier-class", "lwotc"],
+    "tags": [
+      "soldier-class",
+      "lwotc"
+    ],
     "attributes": {
       "primary_weapon_categories": "Cannon",
       "secondary_equipment": "Combat Knife",
@@ -59,7 +84,10 @@
     "type": "soldier_class",
     "name": "Technical",
     "short_description": "LWOTC-exclusive class: brings heavy-weapon gauntlets (Rocket Launcher, Flamethrower) to a regular soldier loadout.",
-    "tags": ["soldier-class", "lwotc"],
+    "tags": [
+      "soldier-class",
+      "lwotc"
+    ],
     "attributes": {
       "primary_weapon_categories": "Rifle / SMG / Shotgun",
       "secondary_equipment": "Gauntlet (Rocket Launcher / Flamethrower)",
@@ -72,7 +100,10 @@
     "type": "soldier_class",
     "name": "Shinobi",
     "short_description": "LWOTC-exclusive class: stealth and short-range combat specialist, closest analogue to the vanilla Ranger.",
-    "tags": ["soldier-class", "lwotc"],
+    "tags": [
+      "soldier-class",
+      "lwotc"
+    ],
     "attributes": {
       "primary_weapon_categories": "Rifle / SMG / Shotgun",
       "secondary_equipment": "Sword",
@@ -85,7 +116,10 @@
     "type": "soldier_class",
     "name": "Assault",
     "short_description": "LWOTC starter class (one of the 8 LWOTC squaddie-promotion options per Soldier_Overview_(LWOTC)); close-range rifle/SMG/shotgun specialist.",
-    "tags": ["soldier-class", "lwotc"],
+    "tags": [
+      "soldier-class",
+      "lwotc"
+    ],
     "attributes": {
       "primary_weapon_categories": "Rifle / SMG / Shotgun",
       "secondary_equipment": "Combat Knife",
@@ -93,13 +127,16 @@
       "roster_origin": "lwotc"
     }
   },
-
   {
     "template_key": "LaserWeapons",
     "type": "research_project",
     "name": "Laser Weapons",
     "short_description": "LWOTC-added research tier between Modular Weapons and Magnetic Weapons; unlocks laser-tier primary weapons. Does not exist in vanilla XCOM 2/WotC.",
-    "tags": ["research", "weapons", "lwotc"],
+    "tags": [
+      "research",
+      "weapons",
+      "lwotc"
+    ],
     "attributes": {
       "research_category": "weapons",
       "ruleset_note": "LWOTC-exclusive tech per XComLW_Overhaul.ini TechTable (LaserWeapons: PrereqTech1=ModularWeapons, PrereqTech2=HybridMaterials, ResearchPointCost=4000, RequiredScienceScore=10), pinned commit 4872d8e."
@@ -110,7 +147,11 @@
     "type": "research_project",
     "name": "Advanced Laser Weapons",
     "short_description": "LWOTC-added research tier unlocking the full laser weapon set. Does not exist in vanilla XCOM 2/WotC.",
-    "tags": ["research", "weapons", "lwotc"],
+    "tags": [
+      "research",
+      "weapons",
+      "lwotc"
+    ],
     "attributes": {
       "research_category": "weapons",
       "ruleset_note": "LWOTC-exclusive tech per XComLW_Overhaul.ini TechTable (AdvancedLasers: PrereqTech1=LaserWeapons, ResearchPointCost=4000, RequiredScienceScore=10), pinned commit 4872d8e."
@@ -121,7 +162,11 @@
     "type": "research_project",
     "name": "Coilguns",
     "short_description": "LWOTC-added research tier between Gauss Weapons and Plasma Rifle; unlocks coilgun-tier primary weapons. Does not exist in vanilla XCOM 2/WotC (which goes Gauss -> Elerium -> Plasma directly).",
-    "tags": ["research", "weapons", "lwotc"],
+    "tags": [
+      "research",
+      "weapons",
+      "lwotc"
+    ],
     "attributes": {
       "research_category": "weapons",
       "ruleset_note": "LWOTC-exclusive tech per XComLW_Overhaul.ini TechTable (Coilguns: PrereqTech1=GaussWeapons, PrereqTech2=Tech_Elerium, ResearchPointCost=18000, RequiredScienceScore=30), pinned commit 4872d8e."
@@ -132,7 +177,11 @@
     "type": "research_project",
     "name": "Advanced Coilguns",
     "short_description": "LWOTC-added research tier unlocking the full coilgun weapon set.",
-    "tags": ["research", "weapons", "lwotc"],
+    "tags": [
+      "research",
+      "weapons",
+      "lwotc"
+    ],
     "attributes": {
       "research_category": "weapons",
       "ruleset_note": "LWOTC-exclusive tech per XComLW_Overhaul.ini TechTable (AdvancedCoilguns: PrereqTech1=Coilguns, ResearchPointCost=18000, RequiredScienceScore=30), pinned commit 4872d8e."
@@ -143,12 +192,171 @@
     "type": "research_project",
     "name": "Plasma Rifle (LWOTC)",
     "short_description": "LWOTC changes Plasma Rifle's prerequisite to an OR of Advanced Coilguns / Advanced Laser Weapons, and raises its cost substantially compared to vanilla/WotC.",
-    "tags": ["research", "weapons", "lwotc"],
-    "overrides": ["xcom2-base", "PlasmaRifle"],
+    "tags": [
+      "research",
+      "weapons",
+      "lwotc"
+    ],
+    "overrides": [
+      "xcom2-base",
+      "PlasmaRifle"
+    ],
     "patch": {
       "attributes": {
         "ruleset_note": "LWOTC per XComLW_Overhaul.ini TechTable (PlasmaRifle: PrereqTech1=AdvancedCoilguns, PrereqTech2=AdvancedLasers, ResearchPointCost=22000, RequiredScienceScore=40, AlloyCost=20, CrystalCost=30, CoreCost=3), pinned commit 4872d8e -- see prerequisite_groups.json for the OR-group representation of this either-or requirement."
       }
+    }
+  },
+  {
+    "template_key": "Rank_LW_LCPL",
+    "type": "soldier_rank",
+    "name": "Lance Corporal",
+    "tier": 2,
+    "short_description": "LWOTC rank LCPL (Lance Corporal).",
+    "tags": [
+      "soldier-rank",
+      "lwotc"
+    ],
+    "attributes": {}
+  },
+  {
+    "template_key": "Rank_LW_CPL",
+    "type": "soldier_rank",
+    "name": "Corporal",
+    "tier": 3,
+    "short_description": "LWOTC rank CPL (Corporal).",
+    "tags": [
+      "soldier-rank",
+      "lwotc"
+    ],
+    "attributes": {}
+  },
+  {
+    "template_key": "Rank_LW_SGT",
+    "type": "soldier_rank",
+    "name": "Sergeant",
+    "tier": 4,
+    "short_description": "LWOTC rank SGT (Sergeant).",
+    "tags": [
+      "soldier-rank",
+      "lwotc"
+    ],
+    "attributes": {}
+  },
+  {
+    "template_key": "Rank_LW_SSGT",
+    "type": "soldier_rank",
+    "name": "Staff Sergeant",
+    "tier": 5,
+    "short_description": "LWOTC rank SSGT (Staff Sergeant).",
+    "tags": [
+      "soldier-rank",
+      "lwotc"
+    ],
+    "attributes": {}
+  },
+  {
+    "template_key": "Rank_LW_TSGT",
+    "type": "soldier_rank",
+    "name": "Technical Sergeant",
+    "tier": 6,
+    "short_description": "LWOTC rank TSGT (Technical Sergeant).",
+    "tags": [
+      "soldier-rank",
+      "lwotc"
+    ],
+    "attributes": {}
+  },
+  {
+    "template_key": "Rank_LW_GSGT",
+    "type": "soldier_rank",
+    "name": "Gunnery Sergeant",
+    "tier": 7,
+    "short_description": "LWOTC rank GSGT (Gunnery Sergeant).",
+    "tags": [
+      "soldier-rank",
+      "lwotc"
+    ],
+    "attributes": {}
+  },
+  {
+    "template_key": "Rank_LW_MSGT",
+    "type": "soldier_rank",
+    "name": "Master Sergeant",
+    "tier": 8,
+    "short_description": "LWOTC rank MSGT (Master Sergeant).",
+    "tags": [
+      "soldier-rank",
+      "lwotc"
+    ],
+    "attributes": {}
+  },
+  {
+    "template_key": "LWS_Ranger",
+    "type": "soldier_class",
+    "name": "Ranger",
+    "short_description": "Long War of the Chosen version of the Ranger class (LWS_Ranger); replaces the vanilla class in this ruleset. Starting stats are not recorded in the catalog.",
+    "tags": [
+      "soldier-class",
+      "lwotc"
+    ],
+    "replaces": [
+      "xcom2-base",
+      "Ranger"
+    ],
+    "attributes": {
+      "roster_origin": "lwotc"
+    }
+  },
+  {
+    "template_key": "LWS_Sharpshooter",
+    "type": "soldier_class",
+    "name": "Sharpshooter",
+    "short_description": "Long War of the Chosen version of the Sharpshooter class (LWS_Sharpshooter); replaces the vanilla class in this ruleset. Starting stats are not recorded in the catalog.",
+    "tags": [
+      "soldier-class",
+      "lwotc"
+    ],
+    "replaces": [
+      "xcom2-base",
+      "Sharpshooter"
+    ],
+    "attributes": {
+      "roster_origin": "lwotc"
+    }
+  },
+  {
+    "template_key": "LWS_Grenadier",
+    "type": "soldier_class",
+    "name": "Grenadier",
+    "short_description": "Long War of the Chosen version of the Grenadier class (LWS_Grenadier); replaces the vanilla class in this ruleset. Starting stats are not recorded in the catalog.",
+    "tags": [
+      "soldier-class",
+      "lwotc"
+    ],
+    "replaces": [
+      "xcom2-base",
+      "Grenadier"
+    ],
+    "attributes": {
+      "roster_origin": "lwotc"
+    }
+  },
+  {
+    "template_key": "LWS_Specialist",
+    "type": "soldier_class",
+    "name": "Specialist",
+    "short_description": "Long War of the Chosen version of the Specialist class (LWS_Specialist); replaces the vanilla class in this ruleset. Starting stats are not recorded in the catalog.",
+    "tags": [
+      "soldier-class",
+      "lwotc"
+    ],
+    "replaces": [
+      "xcom2-base",
+      "Specialist"
+    ],
+    "attributes": {
+      "roster_origin": "lwotc"
     }
   }
 ]

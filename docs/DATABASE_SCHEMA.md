@@ -323,7 +323,10 @@ Indexes: `INDEX(campaign_id)`, `INDEX(plan_id, sort_order)`, `INDEX(catalog_obje
 | campaign_id | INTEGER NOT NULL FK → campaigns.id ON DELETE CASCADE | |
 | name | TEXT NOT NULL | |
 | class_object_id | INTEGER NULL FK → catalog_objects.id ON DELETE SET NULL | references a `soldier_class` object |
-| rank | TEXT NULL | |
+| rank | TEXT NULL | superseded by `rank_object_id` (Phase 7); kept, unused by new code, per the forward-only migration policy (`ADR-0007`) |
+| surname | TEXT NULL | Phase 7 (`ADR-0022`) |
+| callsign | TEXT NULL | Phase 7 |
+| rank_object_id | INTEGER NULL FK → catalog_objects.id ON DELETE SET NULL | Phase 7: references a `soldier_rank` object, ruleset-aware like `class_object_id` |
 | status | TEXT NOT NULL DEFAULT 'active' | CHECK IN (`active`,`wounded`,`dead`,`retired`) |
 | portrait_asset_id | INTEGER NULL FK → assets.id ON DELETE SET NULL | |
 | notes | TEXT NULL | |
@@ -331,6 +334,62 @@ Indexes: `INDEX(campaign_id)`, `INDEX(plan_id, sort_order)`, `INDEX(catalog_obje
 | updated_at | TEXT NOT NULL | |
 
 Indexes: `INDEX(campaign_id)`.
+
+### 3.7.1 `campaign_soldier_stats` (Phase 7, `ADR-0022`)
+One tracked stat of one soldier. `default_value` is the catalog class default captured **once at creation** and never recomputed; `actual_value` is the player's confirmed/edited real value. NULL means unknown/not tracked — never guessed.
+
+| Column | Type | Notes |
+|---|---|---|
+| id | INTEGER PK | |
+| campaign_id | INTEGER NOT NULL FK → campaigns.id ON DELETE CASCADE | |
+| soldier_id | INTEGER NOT NULL FK → campaign_soldiers.id ON DELETE CASCADE | |
+| stat_key | TEXT NOT NULL | one of `catalog.SOLDIER_STAT_KEYS` (Phase 4) |
+| actual_value | REAL NULL | the player's real soldier's value |
+| default_value | REAL NULL | catalog default at creation time; frozen, never recalculated |
+| is_confirmed | INTEGER NOT NULL DEFAULT 0 | false while showing an unconfirmed catalog default |
+
+Constraints: `UNIQUE(soldier_id, stat_key)`. Indexes: `campaign_id`, `soldier_id`.
+
+### 3.7.2 `campaign_builds` / `campaign_build_slots` / `campaign_soldier_builds` (Phase 7, `ADR-0022`)
+The generic equipment-build model: `Build -> base catalog object -> typed slots -> attached catalog objects`, plus the assignment of a build to a soldier.
+
+**`campaign_builds`**
+| Column | Type | Notes |
+|---|---|---|
+| id | INTEGER PK | |
+| campaign_id | INTEGER NOT NULL FK → campaigns.id ON DELETE CASCADE | |
+| build_type | TEXT NOT NULL | open string (`"weapon"`, `"armor"`, ...), resolved via a code registry, never a CHECK enum |
+| name | TEXT NOT NULL | |
+| purpose | TEXT NULL | |
+| notes | TEXT NULL | |
+| base_object_id | INTEGER NOT NULL FK → catalog_objects.id ON DELETE RESTRICT | |
+
+Constraints: `UNIQUE(campaign_id, build_type, name)`. Indexes: `campaign_id`, `base_object_id`.
+
+**`campaign_build_slots`**
+| Column | Type | Notes |
+|---|---|---|
+| id | INTEGER PK | |
+| campaign_id | INTEGER NOT NULL FK → campaigns.id ON DELETE CASCADE | |
+| build_id | INTEGER NOT NULL FK → campaign_builds.id ON DELETE CASCADE | |
+| slot_type | TEXT NOT NULL | data, e.g. `"weapon_upgrade"`, `"utility"`, or any mod-introduced slot kind |
+| slot_index | INTEGER NOT NULL DEFAULT 0 | |
+| attached_object_id | INTEGER NOT NULL FK → catalog_objects.id ON DELETE RESTRICT | |
+| is_override | INTEGER NOT NULL DEFAULT 0 | true = the player accepted a known compatibility issue manually |
+
+Constraints: `UNIQUE(build_id, slot_type, slot_index)`. Indexes: `campaign_id`, `build_id`, `attached_object_id`.
+
+**`campaign_soldier_builds`**
+| Column | Type | Notes |
+|---|---|---|
+| id | INTEGER PK | |
+| campaign_id | INTEGER NOT NULL FK → campaigns.id ON DELETE CASCADE | |
+| soldier_id | INTEGER NOT NULL FK → campaign_soldiers.id ON DELETE CASCADE | |
+| build_id | INTEGER NOT NULL FK → campaign_builds.id ON DELETE RESTRICT | points at the live build; never a snapshot (`ADR-0022` §4) |
+| build_type | TEXT NOT NULL | denormalised from the build, lets a soldier have one assignment per type |
+| assignment_slot | TEXT NOT NULL DEFAULT 'primary' | reserved for a future primary/secondary distinction |
+
+Constraints: `UNIQUE(soldier_id, build_type, assignment_slot)`. Indexes: `campaign_id`, `soldier_id`, `build_id`.
 
 ### 3.8 `campaign_soldier_loadouts`
 | Column | Type | Notes |
@@ -437,8 +496,12 @@ campaigns ─┬─< campaign_content_sources >─ content_sources
            ├─< campaign_research_queue >─ catalog_objects
            ├─< campaign_events >─ catalog_objects (nullable)
            ├─< campaign_plans ─< campaign_plan_items >─ catalog_objects (self: depends_on_plan_item_id)
-           ├─< campaign_soldiers >─ catalog_objects (class), assets (portrait)
-           │      └─< campaign_soldier_loadouts >─ catalog_objects (item)
+           ├─< campaign_soldiers >─ catalog_objects (class, rank), assets (portrait)
+           │      ├─< campaign_soldier_loadouts >─ catalog_objects (item)
+           │      ├─< campaign_soldier_stats
+           │      └─< campaign_soldier_builds >─ campaign_builds
+           ├─< campaign_builds >─ catalog_objects (base)
+           │      └─< campaign_build_slots >─ catalog_objects (attached)
            └─< campaign_strategy_profiles >─ strategy_profiles >─ strategy_recommendations >─ catalog_objects
 ```
 
@@ -466,6 +529,7 @@ Resolved (Phase 2, see `IMPLEMENTATION_PLAN.md`): seeding is done by an idempote
 | `56a40f219e11` | Phase 4: added `content_sources.source_repository`/`source_ref`/`source_commit_sha` (§1.1, provenance pinning, `ADR-0019`); added `catalog_prerequisite_groups`/`catalog_prerequisite_group_members` (§1.9, compound AND/OR prerequisites, `ADR-0018`); added `catalog_soldier_stat_profiles` (§1.10, soldier stat profiles); added `assets.source_name`/`original_filename`/`import_status` (§2.1, asset manifest fields). |
 
 | `447c666ac239` | Phase 5: added `campaign_avenger_cells` (§3.10, per-campaign 3×4 Avenger grid with separate room state / facility assignment / build state, `ADR-0020`). Pure addition; no existing table changed. |
+| `827415332929` | Phase 7: added `campaign_soldier_stats`, `campaign_builds`, `campaign_build_slots`, `campaign_soldier_builds` (§3.7.1/3.7.2) and `campaign_soldiers.surname`/`callsign`/`rank_object_id` (§3.7), `ADR-0022`. Pure additions; existing rows unaffected. |
 | `41940602ac87` | Phase 6: added `campaign_research_queue` (§3.11) and `campaign_object_state.completed_at` / `completion_sequence` (§3.3) for research tracking, `ADR-0021`. Pure additions; existing rows unaffected. |
 
 ## 11. Curated game-data population (Phase 4, see `docs/DATA_INGESTION.md`)

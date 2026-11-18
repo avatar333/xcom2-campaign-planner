@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit Soldier' if soldier else 'New Soldier' }}{% endblock %}
+{% block content %}
+{% import "_components/ui.html" as ui %}
+{% import "research/_macros.html" as rs %}
+{% import "soldiers/_macros.html" as sd %}
+<div class="page-header">
+  <div>
+    <div class="page-header__eyebrow">{{ campaign.name }} &middot; Soldiers</div>
+    <h1 class="page-header__title">{{ 'Edit Soldier' if soldier else 'New Soldier' }}</h1>
+  </div>
+</div>
+{% if error %}{{ ui.alert(error, "danger") }}{% endif %}
+
+<form method="post" enctype="multipart/form-data" class="sd-form" x-data="{ classId: {{ (soldier.class_object_id if soldier else form.get('class_object_id')) or 'null' }} }" data-testid="soldier-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="sd-form__grid">
+    <div class="form-field">
+      <label for="name">Name <span class="text-muted">(required)</span></label>
+      <input type="text" id="name" name="name" class="form-control" value="{{ form.get('name', soldier.name if soldier else '') }}" required>
+    </div>
+    <div class="form-field">
+      <label for="surname">Surname</label>
+      <input type="text" id="surname" name="surname" class="form-control" value="{{ form.get('surname', soldier.surname if soldier else '') }}">
+    </div>
+    <div class="form-field">
+      <label for="callsign">Callsign</label>
+      <input type="text" id="callsign" name="callsign" class="form-control" value="{{ form.get('callsign', soldier.callsign if soldier else '') }}">
+    </div>
+    <div class="form-field">
+      <label for="status">Status</label>
+      <select id="status" name="status" class="form-control">
+        {% for s in ("active", "wounded", "dead", "retired") %}
+          <option value="{{ s }}" {{ 'selected' if (form.get('status', soldier.status if soldier else 'active')) == s }}>{{ s | title }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="form-field">
+    <label>Portrait <span class="text-muted">(optional)</span></label>
+    <div class="sd-portrait-row">
+      {% if soldier %}{{ sd.portrait(soldier, "md") }}{% endif %}
+      <input type="file" name="portrait_file" accept="image/png,image/jpeg,image/webp,image/gif" class="form-control">
+    </div>
+  </div>
+
+  <div class="form-field">
+    <label>Class <span class="text-muted">(from this campaign's enabled sources)</span></label>
+    {% if classes %}
+    <div class="sd-pick-gallery" data-testid="class-gallery">
+      {% for c in classes %}
+      <label class="sd-pick-card {{ 'is-selected' if (soldier.class_object_id if soldier else form.get('class_object_id') | int(0)) == c.object_id else '' }}">
+        <input type="radio" name="class_object_id" value="{{ c.object_id }}" x-model="classId" {{ 'checked' if (soldier.class_object_id if soldier else form.get('class_object_id') | int(0)) == c.object_id }}>
+        {{ rs.art(c, "md") }}
+        <span class="sd-pick-card__name">{{ c.name }}</span>
+      </label>
+      {% endfor %}
+    </div>
+    {% else %}
+      {{ ui.alert("No soldier classes are available to this campaign's enabled content sources.", "warning") }}
+    {% endif %}
+  </div>
+
+  <div class="form-field">
+    <label for="rank_object_id">Rank</label>
+    <select id="rank_object_id" name="rank_object_id" class="form-control">
+      <option value="">No rank</option>
+      {% for r in ranks %}<option value="{{ r.object_id }}" {{ 'selected' if (soldier.rank_object_id if soldier else form.get('rank_object_id') | int(0)) == r.object_id }}>{{ r.name }}</option>{% endfor %}
+    </select>
+  </div>
+
+  <div class="form-field">
+    <label for="notes">Notes</label>
+    <textarea id="notes" name="notes" class="form-control" rows="3">{{ form.get('notes', soldier.notes if soldier else '') }}</textarea>
+  </div>
+
+  <div class="form-actions">
+    <button class="btn btn--primary" type="submit" data-testid="save-soldier">{{ 'Save' if soldier else 'Create Soldier' }}</button>
+    <a class="btn" href="{{ url_for('soldiers.soldier_detail', campaign_id=campaign.id, soldier_id=soldier.id) if soldier else url_for('soldiers.index', campaign_id=campaign.id) }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

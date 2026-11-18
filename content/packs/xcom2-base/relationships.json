@@ -1,76 +1,800 @@
 [
-  {"type": "requires_facility", "from": ["xcom2-base", "AutopsyAdventOfficer"], "to": ["xcom2-base", "ProvingGround"]},
-
-  {"type": "requires_research", "from": ["xcom2-base", "AlienBiotech"], "to": ["xcom2-base", "AutopsyAdventTrooper"]},
-  {"type": "requires_research", "from": ["xcom2-base", "AlienBiotech"], "to": ["xcom2-base", "AutopsyAdventOfficer"]},
-  {"type": "requires_research", "from": ["xcom2-base", "AlienBiotech"], "to": ["xcom2-base", "AutopsySectoid"]},
-  {"type": "requires_research", "from": ["xcom2-base", "AlienBiotech"], "to": ["xcom2-base", "AutopsyViper"]},
-  {"type": "requires_research", "from": ["xcom2-base", "AlienBiotech"], "to": ["xcom2-base", "AutopsyMuton"]},
-
-  {"type": "requires_resource", "from": ["xcom2-base", "CorpseAdventTrooper"], "to": ["xcom2-base", "AutopsyAdventTrooper"], "amount": 1},
-  {"type": "requires_resource", "from": ["xcom2-base", "CorpseAdventOfficer"], "to": ["xcom2-base", "AutopsyAdventOfficer"], "amount": 1},
-  {"type": "requires_resource", "from": ["xcom2-base", "CorpseSectoid"], "to": ["xcom2-base", "AutopsySectoid"], "amount": 1},
-  {"type": "requires_resource", "from": ["xcom2-base", "CorpseViper"], "to": ["xcom2-base", "AutopsyViper"], "amount": 1},
-  {"type": "requires_resource", "from": ["xcom2-base", "CorpseMuton"], "to": ["xcom2-base", "AutopsyMuton"], "amount": 1},
-
-  {"type": "requires_research", "from": ["xcom2-base", "ModularWeapons"], "to": ["xcom2-base", "MagnetizedWeapons"]},
-  {"type": "requires_research", "from": ["xcom2-base", "HybridMaterials"], "to": ["xcom2-base", "MagnetizedWeapons"]},
-  {"type": "requires_research", "from": ["xcom2-base", "AutopsyAdventOfficer"], "to": ["xcom2-base", "MagnetizedWeapons"]},
-  {"type": "requires_research", "from": ["xcom2-base", "MagnetizedWeapons"], "to": ["xcom2-base", "GaussWeapons"]},
-  {"type": "requires_research", "from": ["xcom2-base", "GaussWeapons"], "to": ["xcom2-base", "Elerium"]},
-  {"type": "requires_research", "from": ["xcom2-base", "HybridMaterials"], "to": ["xcom2-base", "Elerium"]},
-  {"type": "requires_research", "from": ["xcom2-base", "Elerium"], "to": ["xcom2-base", "PlasmaRifle"]},
-
-  {"type": "requires_research", "from": ["xcom2-base", "HybridMaterials"], "to": ["xcom2-base", "PlatedArmor"]},
-  {"type": "requires_research", "from": ["xcom2-base", "PlatedArmor"], "to": ["xcom2-base", "PoweredArmor"]},
-  {"type": "requires_research", "from": ["xcom2-base", "Elerium"], "to": ["xcom2-base", "PoweredArmor"]},
-
-  {"type": "requires_research", "from": ["xcom2-base", "AutopsySectoid"], "to": ["xcom2-base", "Psionics"]},
-
-  {"type": "unlocks", "from": ["xcom2-base", "MagnetizedWeapons"], "to": ["xcom2-base", "AssaultRifle_MG"]},
-  {"type": "unlocks", "from": ["xcom2-base", "MagnetizedWeapons"], "to": ["xcom2-base", "Shotgun_MG"]},
-  {"type": "unlocks", "from": ["xcom2-base", "MagnetizedWeapons"], "to": ["xcom2-base", "Pistol_MG"]},
-  {"type": "unlocks", "from": ["xcom2-base", "GaussWeapons"], "to": ["xcom2-base", "SniperRifle_MG"]},
-  {"type": "unlocks", "from": ["xcom2-base", "GaussWeapons"], "to": ["xcom2-base", "Cannon_MG"]},
-  {"type": "unlocks", "from": ["xcom2-base", "PlasmaRifle"], "to": ["xcom2-base", "AssaultRifle_BM"]},
-  {"type": "unlocks", "from": ["xcom2-base", "PlasmaRifle"], "to": ["xcom2-base", "Pistol_BM"]},
-  {"type": "unlocks", "from": ["xcom2-base", "PlatedArmor"], "to": ["xcom2-base", "PredatorArmor"]},
-  {"type": "unlocks", "from": ["xcom2-base", "PoweredArmor"], "to": ["xcom2-base", "WardenArmor"]},
-  {"type": "unlocks", "from": ["xcom2-base", "Psionics"], "to": ["xcom2-base", "PsiChamber"]},
-  {"type": "unlocks", "from": ["xcom2-base", "ResistanceCommunications"], "to": ["xcom2-base", "ResistanceComms"]},
-
-  {"type": "class_can_equip", "from": ["xcom2-base", "Ranger"], "to": ["xcom2-base", "Shotgun_CV"]},
-  {"type": "class_can_equip", "from": ["xcom2-base", "Ranger"], "to": ["xcom2-base", "Shotgun_MG"]},
-  {"type": "class_can_equip", "from": ["xcom2-base", "Ranger"], "to": ["xcom2-base", "Shotgun_BM"]},
-  {"type": "class_can_equip", "from": ["xcom2-base", "Sharpshooter"], "to": ["xcom2-base", "SniperRifle_CV"]},
-  {"type": "class_can_equip", "from": ["xcom2-base", "Sharpshooter"], "to": ["xcom2-base", "SniperRifle_MG"]},
-  {"type": "class_can_equip", "from": ["xcom2-base", "Sharpshooter"], "to": ["xcom2-base", "SniperRifle_BM"]},
-  {"type": "class_can_equip", "from": ["xcom2-base", "Sharpshooter"], "to": ["xcom2-base", "Pistol_CV"]},
-  {"type": "class_can_equip", "from": ["xcom2-base", "Sharpshooter"], "to": ["xcom2-base", "Pistol_MG"]},
-  {"type": "class_can_equip", "from": ["xcom2-base", "Sharpshooter"], "to": ["xcom2-base", "Pistol_BM"]},
-  {"type": "class_can_equip", "from": ["xcom2-base", "Grenadier"], "to": ["xcom2-base", "Cannon_CV"]},
-  {"type": "class_can_equip", "from": ["xcom2-base", "Grenadier"], "to": ["xcom2-base", "Cannon_MG"]},
-  {"type": "class_can_equip", "from": ["xcom2-base", "Grenadier"], "to": ["xcom2-base", "Cannon_BM"]},
-  {"type": "class_can_equip", "from": ["xcom2-base", "Specialist"], "to": ["xcom2-base", "AssaultRifle_CV"]},
-  {"type": "class_can_equip", "from": ["xcom2-base", "Specialist"], "to": ["xcom2-base", "AssaultRifle_MG"]},
-  {"type": "class_can_equip", "from": ["xcom2-base", "Specialist"], "to": ["xcom2-base", "AssaultRifle_BM"]},
-  {"type": "class_can_equip", "from": ["xcom2-base", "PsiOperative"], "to": ["xcom2-base", "AssaultRifle_CV"]},
-
-  {"type": "unlocks", "from": ["xcom2-base", "AutopsyAdventTrooper"], "to": ["xcom2-base", "BattleScanner"]},
-  {"type": "produced_by", "from": ["xcom2-base", "BattleScanner"], "to": ["xcom2-base", "BattleScannerItem"]},
-  {"type": "unlocks", "from": ["xcom2-base", "AutopsyViper"], "to": ["xcom2-base", "BattlefieldMedicine"]},
-  {"type": "produced_by", "from": ["xcom2-base", "BattlefieldMedicine"], "to": ["xcom2-base", "NanoMedikit"]},
-  {"type": "unlocks", "from": ["xcom2-base", "AutopsyMuton"], "to": ["xcom2-base", "AdvancedExplosives"]},
-  {"type": "produced_by", "from": ["xcom2-base", "AdvancedExplosives"], "to": ["xcom2-base", "PlasmaGrenade"]},
-  {"type": "requires_facility", "from": ["xcom2-base", "AutopsyAdventOfficer"], "to": ["xcom2-base", "Skulljack_Project"]},
-  {"type": "requires_facility", "from": ["xcom2-base", "ProvingGround"], "to": ["xcom2-base", "BattleScanner"]},
-  {"type": "requires_facility", "from": ["xcom2-base", "ProvingGround"], "to": ["xcom2-base", "BattlefieldMedicine"]},
-  {"type": "requires_facility", "from": ["xcom2-base", "ProvingGround"], "to": ["xcom2-base", "AdvancedExplosives"]},
-  {"type": "requires_facility", "from": ["xcom2-base", "ProvingGround"], "to": ["xcom2-base", "Skulljack_Project"]},
-  {"type": "requires_resource", "from": ["xcom2-base", "CorpseAdventOfficer"], "to": ["xcom2-base", "Skulljack_Project"], "amount": 1},
-  {"type": "produced_by", "from": ["xcom2-base", "Skulljack_Project"], "to": ["xcom2-base", "Skulljack"]},
-
-  {"type": "unlocks", "from": ["xcom2-base", "AutopsySectoid"], "to": ["xcom2-base", "Mindshield"]},
-  {"type": "unlocks", "from": ["xcom2-base", "AlienBiotech"], "to": ["xcom2-base", "APRounds"]},
-  {"type": "unlocks", "from": ["xcom2-base", "HybridMaterials"], "to": ["xcom2-base", "TracerRounds"]}
+  {
+    "type": "requires_facility",
+    "from": [
+      "xcom2-base",
+      "AutopsyAdventOfficer"
+    ],
+    "to": [
+      "xcom2-base",
+      "ProvingGround"
+    ]
+  },
+  {
+    "type": "requires_research",
+    "from": [
+      "xcom2-base",
+      "AlienBiotech"
+    ],
+    "to": [
+      "xcom2-base",
+      "AutopsyAdventTrooper"
+    ]
+  },
+  {
+    "type": "requires_research",
+    "from": [
+      "xcom2-base",
+      "AlienBiotech"
+    ],
+    "to": [
+      "xcom2-base",
+      "AutopsyAdventOfficer"
+    ]
+  },
+  {
+    "type": "requires_research",
+    "from": [
+      "xcom2-base",
+      "AlienBiotech"
+    ],
+    "to": [
+      "xcom2-base",
+      "AutopsySectoid"
+    ]
+  },
+  {
+    "type": "requires_research",
+    "from": [
+      "xcom2-base",
+      "AlienBiotech"
+    ],
+    "to": [
+      "xcom2-base",
+      "AutopsyViper"
+    ]
+  },
+  {
+    "type": "requires_research",
+    "from": [
+      "xcom2-base",
+      "AlienBiotech"
+    ],
+    "to": [
+      "xcom2-base",
+      "AutopsyMuton"
+    ]
+  },
+  {
+    "type": "requires_resource",
+    "from": [
+      "xcom2-base",
+      "CorpseAdventTrooper"
+    ],
+    "to": [
+      "xcom2-base",
+      "AutopsyAdventTrooper"
+    ],
+    "amount": 1
+  },
+  {
+    "type": "requires_resource",
+    "from": [
+      "xcom2-base",
+      "CorpseAdventOfficer"
+    ],
+    "to": [
+      "xcom2-base",
+      "AutopsyAdventOfficer"
+    ],
+    "amount": 1
+  },
+  {
+    "type": "requires_resource",
+    "from": [
+      "xcom2-base",
+      "CorpseSectoid"
+    ],
+    "to": [
+      "xcom2-base",
+      "AutopsySectoid"
+    ],
+    "amount": 1
+  },
+  {
+    "type": "requires_resource",
+    "from": [
+      "xcom2-base",
+      "CorpseViper"
+    ],
+    "to": [
+      "xcom2-base",
+      "AutopsyViper"
+    ],
+    "amount": 1
+  },
+  {
+    "type": "requires_resource",
+    "from": [
+      "xcom2-base",
+      "CorpseMuton"
+    ],
+    "to": [
+      "xcom2-base",
+      "AutopsyMuton"
+    ],
+    "amount": 1
+  },
+  {
+    "type": "requires_research",
+    "from": [
+      "xcom2-base",
+      "ModularWeapons"
+    ],
+    "to": [
+      "xcom2-base",
+      "MagnetizedWeapons"
+    ]
+  },
+  {
+    "type": "requires_research",
+    "from": [
+      "xcom2-base",
+      "HybridMaterials"
+    ],
+    "to": [
+      "xcom2-base",
+      "MagnetizedWeapons"
+    ]
+  },
+  {
+    "type": "requires_research",
+    "from": [
+      "xcom2-base",
+      "AutopsyAdventOfficer"
+    ],
+    "to": [
+      "xcom2-base",
+      "MagnetizedWeapons"
+    ]
+  },
+  {
+    "type": "requires_research",
+    "from": [
+      "xcom2-base",
+      "MagnetizedWeapons"
+    ],
+    "to": [
+      "xcom2-base",
+      "GaussWeapons"
+    ]
+  },
+  {
+    "type": "requires_research",
+    "from": [
+      "xcom2-base",
+      "GaussWeapons"
+    ],
+    "to": [
+      "xcom2-base",
+      "Elerium"
+    ]
+  },
+  {
+    "type": "requires_research",
+    "from": [
+      "xcom2-base",
+      "HybridMaterials"
+    ],
+    "to": [
+      "xcom2-base",
+      "Elerium"
+    ]
+  },
+  {
+    "type": "requires_research",
+    "from": [
+      "xcom2-base",
+      "Elerium"
+    ],
+    "to": [
+      "xcom2-base",
+      "PlasmaRifle"
+    ]
+  },
+  {
+    "type": "requires_research",
+    "from": [
+      "xcom2-base",
+      "HybridMaterials"
+    ],
+    "to": [
+      "xcom2-base",
+      "PlatedArmor"
+    ]
+  },
+  {
+    "type": "requires_research",
+    "from": [
+      "xcom2-base",
+      "PlatedArmor"
+    ],
+    "to": [
+      "xcom2-base",
+      "PoweredArmor"
+    ]
+  },
+  {
+    "type": "requires_research",
+    "from": [
+      "xcom2-base",
+      "Elerium"
+    ],
+    "to": [
+      "xcom2-base",
+      "PoweredArmor"
+    ]
+  },
+  {
+    "type": "requires_research",
+    "from": [
+      "xcom2-base",
+      "AutopsySectoid"
+    ],
+    "to": [
+      "xcom2-base",
+      "Psionics"
+    ]
+  },
+  {
+    "type": "unlocks",
+    "from": [
+      "xcom2-base",
+      "MagnetizedWeapons"
+    ],
+    "to": [
+      "xcom2-base",
+      "AssaultRifle_MG"
+    ]
+  },
+  {
+    "type": "unlocks",
+    "from": [
+      "xcom2-base",
+      "MagnetizedWeapons"
+    ],
+    "to": [
+      "xcom2-base",
+      "Shotgun_MG"
+    ]
+  },
+  {
+    "type": "unlocks",
+    "from": [
+      "xcom2-base",
+      "MagnetizedWeapons"
+    ],
+    "to": [
+      "xcom2-base",
+      "Pistol_MG"
+    ]
+  },
+  {
+    "type": "unlocks",
+    "from": [
+      "xcom2-base",
+      "GaussWeapons"
+    ],
+    "to": [
+      "xcom2-base",
+      "SniperRifle_MG"
+    ]
+  },
+  {
+    "type": "unlocks",
+    "from": [
+      "xcom2-base",
+      "GaussWeapons"
+    ],
+    "to": [
+      "xcom2-base",
+      "Cannon_MG"
+    ]
+  },
+  {
+    "type": "unlocks",
+    "from": [
+      "xcom2-base",
+      "PlasmaRifle"
+    ],
+    "to": [
+      "xcom2-base",
+      "AssaultRifle_BM"
+    ]
+  },
+  {
+    "type": "unlocks",
+    "from": [
+      "xcom2-base",
+      "PlasmaRifle"
+    ],
+    "to": [
+      "xcom2-base",
+      "Pistol_BM"
+    ]
+  },
+  {
+    "type": "unlocks",
+    "from": [
+      "xcom2-base",
+      "PlatedArmor"
+    ],
+    "to": [
+      "xcom2-base",
+      "PredatorArmor"
+    ]
+  },
+  {
+    "type": "unlocks",
+    "from": [
+      "xcom2-base",
+      "PoweredArmor"
+    ],
+    "to": [
+      "xcom2-base",
+      "WardenArmor"
+    ]
+  },
+  {
+    "type": "unlocks",
+    "from": [
+      "xcom2-base",
+      "Psionics"
+    ],
+    "to": [
+      "xcom2-base",
+      "PsiChamber"
+    ]
+  },
+  {
+    "type": "unlocks",
+    "from": [
+      "xcom2-base",
+      "ResistanceCommunications"
+    ],
+    "to": [
+      "xcom2-base",
+      "ResistanceComms"
+    ]
+  },
+  {
+    "type": "class_can_equip",
+    "from": [
+      "xcom2-base",
+      "Ranger"
+    ],
+    "to": [
+      "xcom2-base",
+      "Shotgun_CV"
+    ]
+  },
+  {
+    "type": "class_can_equip",
+    "from": [
+      "xcom2-base",
+      "Ranger"
+    ],
+    "to": [
+      "xcom2-base",
+      "Shotgun_MG"
+    ]
+  },
+  {
+    "type": "class_can_equip",
+    "from": [
+      "xcom2-base",
+      "Ranger"
+    ],
+    "to": [
+      "xcom2-base",
+      "Shotgun_BM"
+    ]
+  },
+  {
+    "type": "class_can_equip",
+    "from": [
+      "xcom2-base",
+      "Sharpshooter"
+    ],
+    "to": [
+      "xcom2-base",
+      "SniperRifle_CV"
+    ]
+  },
+  {
+    "type": "class_can_equip",
+    "from": [
+      "xcom2-base",
+      "Sharpshooter"
+    ],
+    "to": [
+      "xcom2-base",
+      "SniperRifle_MG"
+    ]
+  },
+  {
+    "type": "class_can_equip",
+    "from": [
+      "xcom2-base",
+      "Sharpshooter"
+    ],
+    "to": [
+      "xcom2-base",
+      "SniperRifle_BM"
+    ]
+  },
+  {
+    "type": "class_can_equip",
+    "from": [
+      "xcom2-base",
+      "Sharpshooter"
+    ],
+    "to": [
+      "xcom2-base",
+      "Pistol_CV"
+    ]
+  },
+  {
+    "type": "class_can_equip",
+    "from": [
+      "xcom2-base",
+      "Sharpshooter"
+    ],
+    "to": [
+      "xcom2-base",
+      "Pistol_MG"
+    ]
+  },
+  {
+    "type": "class_can_equip",
+    "from": [
+      "xcom2-base",
+      "Sharpshooter"
+    ],
+    "to": [
+      "xcom2-base",
+      "Pistol_BM"
+    ]
+  },
+  {
+    "type": "class_can_equip",
+    "from": [
+      "xcom2-base",
+      "Grenadier"
+    ],
+    "to": [
+      "xcom2-base",
+      "Cannon_CV"
+    ]
+  },
+  {
+    "type": "class_can_equip",
+    "from": [
+      "xcom2-base",
+      "Grenadier"
+    ],
+    "to": [
+      "xcom2-base",
+      "Cannon_MG"
+    ]
+  },
+  {
+    "type": "class_can_equip",
+    "from": [
+      "xcom2-base",
+      "Grenadier"
+    ],
+    "to": [
+      "xcom2-base",
+      "Cannon_BM"
+    ]
+  },
+  {
+    "type": "class_can_equip",
+    "from": [
+      "xcom2-base",
+      "Specialist"
+    ],
+    "to": [
+      "xcom2-base",
+      "AssaultRifle_CV"
+    ]
+  },
+  {
+    "type": "class_can_equip",
+    "from": [
+      "xcom2-base",
+      "Specialist"
+    ],
+    "to": [
+      "xcom2-base",
+      "AssaultRifle_MG"
+    ]
+  },
+  {
+    "type": "class_can_equip",
+    "from": [
+      "xcom2-base",
+      "Specialist"
+    ],
+    "to": [
+      "xcom2-base",
+      "AssaultRifle_BM"
+    ]
+  },
+  {
+    "type": "class_can_equip",
+    "from": [
+      "xcom2-base",
+      "PsiOperative"
+    ],
+    "to": [
+      "xcom2-base",
+      "AssaultRifle_CV"
+    ]
+  },
+  {
+    "type": "unlocks",
+    "from": [
+      "xcom2-base",
+      "AutopsyAdventTrooper"
+    ],
+    "to": [
+      "xcom2-base",
+      "BattleScanner"
+    ]
+  },
+  {
+    "type": "produced_by",
+    "from": [
+      "xcom2-base",
+      "BattleScanner"
+    ],
+    "to": [
+      "xcom2-base",
+      "BattleScannerItem"
+    ]
+  },
+  {
+    "type": "unlocks",
+    "from": [
+      "xcom2-base",
+      "AutopsyViper"
+    ],
+    "to": [
+      "xcom2-base",
+      "BattlefieldMedicine"
+    ]
+  },
+  {
+    "type": "produced_by",
+    "from": [
+      "xcom2-base",
+      "BattlefieldMedicine"
+    ],
+    "to": [
+      "xcom2-base",
+      "NanoMedikit"
+    ]
+  },
+  {
+    "type": "unlocks",
+    "from": [
+      "xcom2-base",
+      "AutopsyMuton"
+    ],
+    "to": [
+      "xcom2-base",
+      "AdvancedExplosives"
+    ]
+  },
+  {
+    "type": "produced_by",
+    "from": [
+      "xcom2-base",
+      "AdvancedExplosives"
+    ],
+    "to": [
+      "xcom2-base",
+      "PlasmaGrenade"
+    ]
+  },
+  {
+    "type": "requires_facility",
+    "from": [
+      "xcom2-base",
+      "AutopsyAdventOfficer"
+    ],
+    "to": [
+      "xcom2-base",
+      "Skulljack_Project"
+    ]
+  },
+  {
+    "type": "requires_facility",
+    "from": [
+      "xcom2-base",
+      "ProvingGround"
+    ],
+    "to": [
+      "xcom2-base",
+      "BattleScanner"
+    ]
+  },
+  {
+    "type": "requires_facility",
+    "from": [
+      "xcom2-base",
+      "ProvingGround"
+    ],
+    "to": [
+      "xcom2-base",
+      "BattlefieldMedicine"
+    ]
+  },
+  {
+    "type": "requires_facility",
+    "from": [
+      "xcom2-base",
+      "ProvingGround"
+    ],
+    "to": [
+      "xcom2-base",
+      "AdvancedExplosives"
+    ]
+  },
+  {
+    "type": "requires_facility",
+    "from": [
+      "xcom2-base",
+      "ProvingGround"
+    ],
+    "to": [
+      "xcom2-base",
+      "Skulljack_Project"
+    ]
+  },
+  {
+    "type": "requires_resource",
+    "from": [
+      "xcom2-base",
+      "CorpseAdventOfficer"
+    ],
+    "to": [
+      "xcom2-base",
+      "Skulljack_Project"
+    ],
+    "amount": 1
+  },
+  {
+    "type": "produced_by",
+    "from": [
+      "xcom2-base",
+      "Skulljack_Project"
+    ],
+    "to": [
+      "xcom2-base",
+      "Skulljack"
+    ]
+  },
+  {
+    "type": "unlocks",
+    "from": [
+      "xcom2-base",
+      "AutopsySectoid"
+    ],
+    "to": [
+      "xcom2-base",
+      "Mindshield"
+    ]
+  },
+  {
+    "type": "unlocks",
+    "from": [
+      "xcom2-base",
+      "AlienBiotech"
+    ],
+    "to": [
+      "xcom2-base",
+      "APRounds"
+    ]
+  },
+  {
+    "type": "unlocks",
+    "from": [
+      "xcom2-base",
+      "HybridMaterials"
+    ],
+    "to": [
+      "xcom2-base",
+      "TracerRounds"
+    ]
+  },
+  {
+    "type": "unlocks",
+    "from": [
+      "xcom2-base",
+      "ModularWeapons"
+    ],
+    "to": [
+      "xcom2-base",
+      "ScopeUpgrade"
+    ]
+  },
+  {
+    "type": "unlocks",
+    "from": [
+      "xcom2-base",
+      "ModularWeapons"
+    ],
+    "to": [
+      "xcom2-base",
+      "LaserSightUpgrade"
+    ]
+  },
+  {
+    "type": "unlocks",
+    "from": [
+      "xcom2-base",
+      "ModularWeapons"
+    ],
+    "to": [
+      "xcom2-base",
+      "RepeaterUpgrade"
+    ]
+  },
+  {
+    "type": "unlocks",
+    "from": [
+      "xcom2-base",
+      "ModularWeapons"
+    ],
+    "to": [
+      "xcom2-base",
+      "HairTriggerUpgrade"
+    ]
+  },
+  {
+    "type": "unlocks",
+    "from": [
+      "xcom2-base",
+      "ModularWeapons"
+    ],
+    "to": [
+      "xcom2-base",
+      "AutoLoaderUpgrade"
+    ]
+  },
+  {
+    "type": "unlocks",
+    "from": [
+      "xcom2-base",
+      "ModularWeapons"
+    ],
+    "to": [
+      "xcom2-base",
+      "ExtendedMagazineUpgrade"
+    ]
+  },
+  {
+    "type": "unlocks",
+    "from": [
+      "xcom2-base",
+      "ModularWeapons"
+    ],
+    "to": [
+      "xcom2-base",
+      "StockUpgrade"
+    ]
+  }
 ]

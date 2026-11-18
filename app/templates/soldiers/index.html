@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Soldiers{% endblock %}
+{% block content %}
+{% import "_components/ui.html" as ui %}
+{% import "soldiers/_macros.html" as sd %}
+<div class="page-header">
+  <div>
+    <div class="page-header__eyebrow">{{ campaign.name }} &middot; Soldiers</div>
+    <h1 class="page-header__title">Soldier Roster</h1>
+    <p class="page-header__subtitle">Individual soldiers belong only to <strong>{{ campaign.name }}</strong>.</p>
+  </div>
+  <div class="page-header__actions">
+    <a class="btn btn--primary" href="{{ url_for('soldiers.new_soldier', campaign_id=campaign.id) }}" data-testid="new-soldier">+ New Soldier</a>
+  </div>
+</div>
+
+{% if soldiers %}
+<div class="sd-grid" data-testid="soldier-grid">
+  {% for v in soldiers %}
+  <a class="sd-card sd-card--{{ v.status }}" href="{{ url_for('soldiers.soldier_detail', campaign_id=campaign.id, soldier_id=v.id) }}">
+    {{ sd.portrait(v, "lg") }}
+    <div class="sd-card__body">
+      <div class="sd-card__name">{{ v.display_name }}</div>
+      <div class="sd-card__meta">
+        {% if v.class_ref %}{{ v.class_ref.name }}{% else %}<span class="text-muted">No class</span>{% endif %}
+        {% if v.rank_ref %}&middot; {{ v.rank_ref.name }}{% endif %}
+      </div>
+      <div class="sd-card__stats">{% for s in v.key_stats %}{{ sd.stat_pill(s) }}{% endfor %}</div>
+      <div class="sd-card__equip">
+        <span class="sd-card__equip-label">Weapon</span>{{ sd.build_chip(v.assignment('weapon'), campaign) }}
+        <span class="sd-card__equip-label">Armour</span>{{ sd.build_chip(v.assignment('armor'), campaign) }}
+      </div>
+    </div>
+    {% if v.status != 'active' %}<span class="sd-card__status">{{ v.status | title }}</span>{% endif %}
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+  {{ ui.empty_state("No soldiers yet", "Create your first soldier to start building a roster for " ~ campaign.name ~ ".", action_label="+ New Soldier", action_url=url_for('soldiers.new_soldier', campaign_id=campaign.id)) }}
+{% endif %}
+{% endblock %}

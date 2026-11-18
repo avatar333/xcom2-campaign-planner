@@ -1,0 +1,31 @@
+{% import "research/_macros.html" as rs %}
+
+{% macro portrait(soldier_or_view, size="md") %}
+  {% set asset_id = soldier_or_view.portrait_asset_id %}
+  <span class="sd-portrait sd-portrait--{{ size }}">
+    {% if asset_id %}<img src="{{ url_for('catalog.serve_asset', asset_id=asset_id) }}" alt="">
+    {% else %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0116 0v2"/></svg>{% endif %}
+  </span>
+{% endmacro %}
+
+{% macro stat_pill(stat_row) %}
+<span class="sd-stat sd-stat--{{ stat_row.state }}" title="{{ stat_row.label }}{% if stat_row.default is not none %} (class default {{ stat_row.default | round(0, 'floor') | int }}){% endif %}">
+  <span class="sd-stat__label">{{ stat_row.label }}</span>
+  <span class="sd-stat__value">{{ stat_row.actual | round(0, 'floor') | int if stat_row.actual is not none else '&mdash;' | safe }}</span>
+</span>
+{% endmacro %}
+
+{% macro build_chip(build_view, campaign) %}
+{% if build_view %}
+<a class="sd-build-chip sd-build-chip--{{ build_view.availability }}" href="{{ url_for('builds.build_detail', campaign_id=campaign.id, build_id=build_view.id) }}">
+  {{ rs.art(build_view.base, "sm") }}
+  <span class="sd-build-chip__text">
+    <span class="sd-build-chip__name">{{ build_view.name }}</span>
+    <span class="sd-build-chip__base">{{ build_view.base.name }}</span>
+  </span>
+  <span class="sd-build-chip__avail">{{ build_view.availability_label }}</span>
+</a>
+{% else %}
+<span class="sd-build-chip sd-build-chip--empty">Not assigned</span>
+{% endif %}
+{% endmacro %}

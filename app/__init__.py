@@ -56,6 +56,7 @@ def create_app(config_name: str | None = None, instance_path: str | None = None)
     from app.routes.dashboard import dashboard_bp
     from app.routes.planning import planning_bp
     from app.routes.research import research_bp
+    from app.routes.soldiers import builds_bp, soldiers_bp
 
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(campaigns_bp)
@@ -64,6 +65,8 @@ def create_app(config_name: str | None = None, instance_path: str | None = None)
     app.register_blueprint(planning_bp)
     app.register_blueprint(avenger_bp)
     app.register_blueprint(research_bp)
+    app.register_blueprint(soldiers_bp)
+    app.register_blueprint(builds_bp)
 
     @app.context_processor
     def inject_nav_context():

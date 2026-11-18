@@ -3,85 +3,267 @@
     "slug": "weapon",
     "name": "Weapon",
     "attributes": [
-      {"key": "weapon_category", "data_type": "string", "display_hint": "badge"},
-      {"key": "damage_min", "data_type": "integer", "display_hint": "stat_block"},
-      {"key": "damage_max", "data_type": "integer", "display_hint": "stat_block"},
-      {"key": "crit_chance", "data_type": "integer", "unit": "%", "display_hint": "stat_block"},
-      {"key": "clip_size", "data_type": "integer", "display_hint": "stat_block"},
-      {"key": "upgrade_slots", "data_type": "integer", "display_hint": "stat_block"},
-      {"key": "technology_tier", "data_type": "string", "display_hint": "badge"}
+      {
+        "key": "weapon_category",
+        "data_type": "string",
+        "display_hint": "badge"
+      },
+      {
+        "key": "damage_min",
+        "data_type": "integer",
+        "display_hint": "stat_block"
+      },
+      {
+        "key": "damage_max",
+        "data_type": "integer",
+        "display_hint": "stat_block"
+      },
+      {
+        "key": "crit_chance",
+        "data_type": "integer",
+        "unit": "%",
+        "display_hint": "stat_block"
+      },
+      {
+        "key": "clip_size",
+        "data_type": "integer",
+        "display_hint": "stat_block"
+      },
+      {
+        "key": "upgrade_slots",
+        "data_type": "integer",
+        "display_hint": "stat_block"
+      },
+      {
+        "key": "technology_tier",
+        "data_type": "string",
+        "display_hint": "badge"
+      },
+      {
+        "key": "build_slots",
+        "data_type": "text",
+        "display_hint": "hidden"
+      }
     ]
   },
   {
     "slug": "weapon_upgrade",
     "name": "Weapon Upgrade",
     "attributes": [
-      {"key": "upgrade_category", "data_type": "string", "display_hint": "badge"},
-      {"key": "quality", "data_type": "enum", "enum_values": ["basic", "advanced", "superior"], "display_hint": "badge"},
-      {"key": "effect_summary", "data_type": "text", "display_hint": "paragraph"}
+      {
+        "key": "upgrade_category",
+        "data_type": "string",
+        "display_hint": "badge"
+      },
+      {
+        "key": "quality",
+        "data_type": "enum",
+        "enum_values": [
+          "basic",
+          "advanced",
+          "superior"
+        ],
+        "display_hint": "badge"
+      },
+      {
+        "key": "effect_summary",
+        "data_type": "text",
+        "display_hint": "paragraph"
+      },
+      {
+        "key": "compatible_weapon_categories",
+        "data_type": "string",
+        "display_hint": "hidden"
+      },
+      {
+        "key": "exclusive_group",
+        "data_type": "string",
+        "display_hint": "hidden"
+      },
+      {
+        "key": "aim_bonus",
+        "data_type": "integer",
+        "display_hint": "hidden"
+      },
+      {
+        "key": "crit_bonus",
+        "data_type": "integer",
+        "display_hint": "hidden"
+      },
+      {
+        "key": "clip_size_bonus",
+        "data_type": "integer",
+        "display_hint": "hidden"
+      },
+      {
+        "key": "allows_duplicates_in_build",
+        "data_type": "boolean",
+        "display_hint": "hidden"
+      }
     ]
   },
   {
     "slug": "armor",
     "name": "Armor",
     "attributes": [
-      {"key": "utility_slots", "data_type": "integer", "display_hint": "stat_block"},
-      {"key": "armor_points", "data_type": "integer", "display_hint": "stat_block"},
-      {"key": "special_property", "data_type": "text", "display_hint": "paragraph"}
+      {
+        "key": "utility_slots",
+        "data_type": "integer",
+        "display_hint": "stat_block"
+      },
+      {
+        "key": "armor_points",
+        "data_type": "integer",
+        "display_hint": "stat_block"
+      },
+      {
+        "key": "special_property",
+        "data_type": "text",
+        "display_hint": "paragraph"
+      },
+      {
+        "key": "build_slots",
+        "data_type": "text",
+        "display_hint": "hidden"
+      }
     ]
   },
   {
     "slug": "facility",
     "name": "Facility",
     "attributes": [
-      {"key": "build_cost_supplies", "data_type": "integer", "unit": "supplies", "display_hint": "stat_block"},
-      {"key": "build_days", "data_type": "integer", "unit": "days", "display_hint": "stat_block"},
-      {"key": "power_cost", "data_type": "integer", "display_hint": "stat_block"},
-      {"key": "staffing_slots", "data_type": "string", "display_hint": "paragraph"},
-      {"key": "buildable_in_avenger_grid", "data_type": "boolean", "default_value": true, "display_hint": "hidden"},
-      {"key": "allows_duplicates", "data_type": "boolean", "default_value": false, "display_hint": "hidden"},
-      {"key": "ruleset_note", "data_type": "text", "display_hint": "paragraph"}
+      {
+        "key": "build_cost_supplies",
+        "data_type": "integer",
+        "unit": "supplies",
+        "display_hint": "stat_block"
+      },
+      {
+        "key": "build_days",
+        "data_type": "integer",
+        "unit": "days",
+        "display_hint": "stat_block"
+      },
+      {
+        "key": "power_cost",
+        "data_type": "integer",
+        "display_hint": "stat_block"
+      },
+      {
+        "key": "staffing_slots",
+        "data_type": "string",
+        "display_hint": "paragraph"
+      },
+      {
+        "key": "buildable_in_avenger_grid",
+        "data_type": "boolean",
+        "default_value": true,
+        "display_hint": "hidden"
+      },
+      {
+        "key": "allows_duplicates",
+        "data_type": "boolean",
+        "default_value": false,
+        "display_hint": "hidden"
+      },
+      {
+        "key": "ruleset_note",
+        "data_type": "text",
+        "display_hint": "paragraph"
+      }
     ]
   },
   {
     "slug": "research_project",
     "name": "Research Project",
     "attributes": [
-      {"key": "research_category", "data_type": "string", "display_hint": "badge"},
-      {"key": "is_golden_path", "data_type": "boolean", "default_value": false, "display_hint": "badge"},
-      {"key": "repeatable", "data_type": "boolean", "default_value": false, "display_hint": "hidden"}
+      {
+        "key": "research_category",
+        "data_type": "string",
+        "display_hint": "badge"
+      },
+      {
+        "key": "is_golden_path",
+        "data_type": "boolean",
+        "default_value": false,
+        "display_hint": "badge"
+      },
+      {
+        "key": "repeatable",
+        "data_type": "boolean",
+        "default_value": false,
+        "display_hint": "hidden"
+      }
     ]
   },
   {
     "slug": "utility_item",
     "name": "Utility Item",
     "attributes": [
-      {"key": "effect_summary", "data_type": "text", "display_hint": "paragraph"}
+      {
+        "key": "effect_summary",
+        "data_type": "text",
+        "display_hint": "paragraph"
+      }
     ]
   },
   {
     "slug": "grenade",
     "name": "Grenade",
     "attributes": [
-      {"key": "effect_summary", "data_type": "text", "display_hint": "paragraph"},
-      {"key": "technology_tier", "data_type": "string", "display_hint": "badge"}
+      {
+        "key": "effect_summary",
+        "data_type": "text",
+        "display_hint": "paragraph"
+      },
+      {
+        "key": "technology_tier",
+        "data_type": "string",
+        "display_hint": "badge"
+      }
     ]
   },
   {
     "slug": "resource",
     "name": "Resource",
     "attributes": [
-      {"key": "resource_category", "data_type": "string", "display_hint": "badge"}
+      {
+        "key": "resource_category",
+        "data_type": "string",
+        "display_hint": "badge"
+      }
     ]
   },
   {
     "slug": "soldier_class",
     "name": "Soldier Class",
     "attributes": [
-      {"key": "primary_weapon_categories", "data_type": "text", "display_hint": "paragraph"},
-      {"key": "secondary_equipment", "data_type": "text", "display_hint": "paragraph"},
-      {"key": "training_method", "data_type": "string", "display_hint": "badge"},
-      {"key": "roster_origin", "data_type": "enum", "enum_values": ["vanilla", "wotc_faction", "dlc", "lwotc"], "display_hint": "badge"}
+      {
+        "key": "primary_weapon_categories",
+        "data_type": "text",
+        "display_hint": "paragraph"
+      },
+      {
+        "key": "secondary_equipment",
+        "data_type": "text",
+        "display_hint": "paragraph"
+      },
+      {
+        "key": "training_method",
+        "data_type": "string",
+        "display_hint": "badge"
+      },
+      {
+        "key": "roster_origin",
+        "data_type": "enum",
+        "enum_values": [
+          "vanilla",
+          "wotc_faction",
+          "dlc",
+          "lwotc"
+        ],
+        "display_hint": "badge"
+      }
     ]
   },
   {
@@ -89,11 +271,40 @@
     "name": "Avenger Room State",
     "description": "Non-facility Avenger grid room/environment states (Phase 4 brief): what a grid cell contains before/instead of a buildable facility. Distinct from catalog_object_types used for facilities.",
     "attributes": [
-      {"key": "clearable", "data_type": "boolean", "default_value": true, "display_hint": "hidden"},
-      {"key": "blocks_construction", "data_type": "boolean", "default_value": false, "display_hint": "hidden"},
-      {"key": "is_default_empty", "data_type": "boolean", "default_value": false, "display_hint": "hidden"},
-      {"key": "clear_reward", "data_type": "text", "display_hint": "paragraph"},
-      {"key": "gameplay_effect", "data_type": "text", "display_hint": "paragraph"}
+      {
+        "key": "clearable",
+        "data_type": "boolean",
+        "default_value": true,
+        "display_hint": "hidden"
+      },
+      {
+        "key": "blocks_construction",
+        "data_type": "boolean",
+        "default_value": false,
+        "display_hint": "hidden"
+      },
+      {
+        "key": "is_default_empty",
+        "data_type": "boolean",
+        "default_value": false,
+        "display_hint": "hidden"
+      },
+      {
+        "key": "clear_reward",
+        "data_type": "text",
+        "display_hint": "paragraph"
+      },
+      {
+        "key": "gameplay_effect",
+        "data_type": "text",
+        "display_hint": "paragraph"
+      }
     ]
+  },
+  {
+    "slug": "soldier_rank",
+    "name": "Soldier Rank",
+    "description": "A promotion rank. `tier` orders ranks within a ruleset; a ruleset may replace another's ranks.",
+    "attributes": []
   }
 ]

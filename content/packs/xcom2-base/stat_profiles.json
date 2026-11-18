@@ -1,30 +1,172 @@
 [
   {
-    "target": ["xcom2-base", "Rookie"],
+    "target": [
+      "xcom2-base",
+      "Rookie"
+    ],
     "stat_key": "health",
     "difficulty": "rookie",
     "stat_default": 6,
     "is_randomized": false
   },
   {
-    "target": ["xcom2-base", "Rookie"],
+    "target": [
+      "xcom2-base",
+      "Rookie"
+    ],
     "stat_key": "health",
     "difficulty": "veteran",
     "stat_default": 5,
     "is_randomized": false
   },
   {
-    "target": ["xcom2-base", "Rookie"],
+    "target": [
+      "xcom2-base",
+      "Rookie"
+    ],
     "stat_key": "health",
     "difficulty": "commander",
     "stat_default": 4,
     "is_randomized": false
   },
   {
-    "target": ["xcom2-base", "Rookie"],
+    "target": [
+      "xcom2-base",
+      "Rookie"
+    ],
     "stat_key": "health",
     "difficulty": "legend",
     "stat_default": 4,
+    "is_randomized": false
+  },
+  {
+    "target": [
+      "xcom2-base",
+      "Ranger"
+    ],
+    "stat_key": "aim",
+    "difficulty": null,
+    "stat_default": 68,
+    "is_randomized": false
+  },
+  {
+    "target": [
+      "xcom2-base",
+      "Grenadier"
+    ],
+    "stat_key": "aim",
+    "difficulty": null,
+    "stat_default": 67,
+    "is_randomized": false
+  },
+  {
+    "target": [
+      "xcom2-base",
+      "Sharpshooter"
+    ],
+    "stat_key": "aim",
+    "difficulty": null,
+    "stat_default": 75,
+    "is_randomized": false
+  },
+  {
+    "target": [
+      "xcom2-base",
+      "Specialist"
+    ],
+    "stat_key": "aim",
+    "difficulty": null,
+    "stat_default": 68,
+    "is_randomized": false
+  },
+  {
+    "target": [
+      "xcom2-base",
+      "Rookie"
+    ],
+    "stat_key": "aim",
+    "difficulty": null,
+    "stat_default": 65,
+    "is_randomized": false
+  },
+  {
+    "target": [
+      "xcom2-base",
+      "Ranger"
+    ],
+    "stat_key": "health",
+    "difficulty": "rookie",
+    "stat_default": 7,
+    "is_randomized": false
+  },
+  {
+    "target": [
+      "xcom2-base",
+      "Ranger"
+    ],
+    "stat_key": "health",
+    "difficulty": "legend",
+    "stat_default": 5,
+    "is_randomized": false
+  },
+  {
+    "target": [
+      "xcom2-base",
+      "Grenadier"
+    ],
+    "stat_key": "health",
+    "difficulty": "rookie",
+    "stat_default": 7,
+    "is_randomized": false
+  },
+  {
+    "target": [
+      "xcom2-base",
+      "Grenadier"
+    ],
+    "stat_key": "health",
+    "difficulty": "legend",
+    "stat_default": 5,
+    "is_randomized": false
+  },
+  {
+    "target": [
+      "xcom2-base",
+      "Sharpshooter"
+    ],
+    "stat_key": "health",
+    "difficulty": "rookie",
+    "stat_default": 7,
+    "is_randomized": false
+  },
+  {
+    "target": [
+      "xcom2-base",
+      "Sharpshooter"
+    ],
+    "stat_key": "health",
+    "difficulty": "legend",
+    "stat_default": 5,
+    "is_randomized": false
+  },
+  {
+    "target": [
+      "xcom2-base",
+      "Specialist"
+    ],
+    "stat_key": "health",
+    "difficulty": "rookie",
+    "stat_default": 7,
+    "is_randomized": false
+  },
+  {
+    "target": [
+      "xcom2-base",
+      "Specialist"
+    ],
+    "stat_key": "health",
+    "difficulty": "legend",
+    "stat_default": 5,
     "is_randomized": false
   }
 ]

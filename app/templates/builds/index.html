@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Build Library{% endblock %}
+{% block content %}
+{% import "_components/ui.html" as ui %}
+{% import "research/_macros.html" as rs %}
+<div class="page-header">
+  <div>
+    <div class="page-header__eyebrow">{{ campaign.name }} &middot; Build Library</div>
+    <h1 class="page-header__title">Build Library</h1>
+    <p class="page-header__subtitle">Reusable Weapon and Armour Builds for <strong>{{ campaign.name }}</strong>.</p>
+  </div>
+  <div class="page-header__actions">
+    {% for key, spec in build_types.items() %}
+      <a class="btn btn--primary" href="{{ url_for('builds.new_build', campaign_id=campaign.id, build_type=key) }}" data-testid="new-build-{{ key }}">+ New {{ spec.label }}</a>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="rs-filters">
+  <a class="btn btn--sm {{ 'btn--primary' if not selected_type else '' }}" href="{{ url_for('builds.index', campaign_id=campaign.id) }}">All</a>
+  {% for key, spec in build_types.items() %}
+    <a class="btn btn--sm {{ 'btn--primary' if selected_type == key else '' }}" href="{{ url_for('builds.index', campaign_id=campaign.id, type=key) }}">{{ spec.plural }}</a>
+  {% endfor %}
+</div>
+
+{% if views %}
+<div class="bl-grid" data-testid="build-grid">
+  {% for v in views %}
+  <a class="bl-card bl-card--{{ v.availability }}" href="{{ url_for('builds.build_detail', campaign_id=campaign.id, build_id=v.id) }}">
+    {{ rs.art(v.base, "lg") }}
+    <div class="bl-card__body">
+      <div class="bl-card__type">{{ v.type_label }}</div>
+      <div class="bl-card__name">{{ v.name }}</div>
+      <div class="bl-card__base">{{ v.base.name }}</div>
+      {% if v.purpose %}<div class="bl-card__purpose">{{ v.purpose }}</div>{% endif %}
+      <div class="bl-card__components">
+        {% for c in v.components %}{{ rs.art(c.ref, "sm") }}{% endfor %}
+        {% if not v.components %}<span class="text-small text-muted">No components</span>{% endif %}
+      </div>
+      <div class="bl-card__footer">
+        <span class="bl-card__avail bl-card__avail--{{ v.availability }}">{{ v.availability_label }}</span>
+        {% if v.assigned %}<span class="text-small text-muted">{{ v.assigned | length }} soldier{{ 's' if v.assigned | length != 1 }}</span>{% endif %}
+        {% if not v.validation.is_valid %}<span class="bl-card__warn" title="{{ v.validation.errors[0].message }}">&#9888;</span>{% endif %}
+      </div>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+  {{ ui.empty_state("No builds yet", "Create a named Weapon or Armour Build to reuse across soldiers.") }}
+{% endif %}
+{% endblock %}

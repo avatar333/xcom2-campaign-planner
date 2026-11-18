@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if build else 'New' }} {{ type_spec.label }}{% endblock %}
+{% block content %}
+{% import "_components/ui.html" as ui %}
+{% import "research/_macros.html" as rs %}
+<div class="page-header">
+  <div>
+    <div class="page-header__eyebrow"><a href="{{ url_for('builds.index', campaign_id=campaign.id) }}">{{ campaign.name }} &middot; Build Library</a></div>
+    <h1 class="page-header__title">{{ 'Edit' if build else 'New' }} {{ type_spec.label }}</h1>
+  </div>
+</div>
+{% if error %}{{ ui.alert(error, "danger") }}{% endif %}
+
+<form method="post" class="bw-form" data-testid="build-editor"
+      x-data="{
+        step: {{ 3 if selected_base_id else 1 }},
+        baseId: {{ selected_base_id or 'null' }},
+        attachments: {{ (attachments.items() | map('list') | list) | tojson }},
+        get(slotType, idx) { const hit = this.attachments.find(([k]) => k[0] === slotType && k[1] === idx); return hit ? hit[1] : null; },
+        choose(slotType, idx, id) {
+          this.attachments = this.attachments.filter(([k]) => !(k[0] === slotType && k[1] === idx));
+          if (id) this.attachments.push([[slotType, idx], id]);
+        },
+      }">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="base_object_id" :value="baseId">
+  <template x-for="[key, id] in attachments" :key="key[0] + '-' + key[1]">
+    <input type="hidden" :name="'slot__' + key[0] + '__' + key[1]" :value="id">
+  </template>
+
+  <nav class="bw-steps">
+    <button type="button" class="bw-step" :class="{ 'is-active': step === 1 }" @click="step = 1">1. Choose {{ type_spec.label.split(' ')[0] | lower }}</button>
+    <button type="button" class="bw-step" :class="{ 'is-active': step === 2 }" @click="step = 2" :disabled="!baseId">2. Slots</button>
+    <button type="button" class="bw-step" :class="{ 'is-active': step === 3 }" @click="step = 3" :disabled="!baseId">3. Components</button>
+    <button type="button" class="bw-step" :class="{ 'is-active': step === 4 }" @click="step = 4" :disabled="!baseId">4. Name &amp; Purpose</button>
+  </nav>
+
+  <section x-show="step === 1" data-testid="step-base">
+    <h2 class="rs-panel__title">Choose {{ type_spec.label.split(' ')[0] }}</h2>
+    {% if bases %}
+    <div class="bw-gallery">
+      {% for b in bases %}
+      <a class="bw-card bw-card--{{ b.status }} {{ 'is-selected' if selected_base_id == b.object_id else '' }}"
+         href="?base_object_id={{ b.object_id }}">
+        {{ rs.art(b, "md") }}
+        <span class="bw-card__name">{{ b.name }}</span>
+        {{ rs.status_pill(b) }}
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+      {{ ui.empty_state("Nothing buildable", "No " ~ type_spec.label.split(' ')[0] | lower ~ " objects are available to this campaign's content sources.") }}
+    {% endif %}
+    {% if selected_base_id %}<div class="form-actions"><button type="button" class="btn btn--primary" @click="step = 2">Next: Slots</button></div>{% endif %}
+  </section>
+
+  <section x-show="step === 2" data-testid="step-slots">
+    <h2 class="rs-panel__title">Slots</h2>
+    {% if slots %}
+      <ul class="bw-slotlist">
+        {% for slot in slots %}
+          <li>{{ slot.label }}<span class="text-small text-muted">{% if not slot.verified %} (slot count not confirmed by the catalog for this base &mdash; shown anyway){% endif %}</span></li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-muted">This base has no component slots recorded.</p>
+    {% endif %}
+    <div class="form-actions">
+      <button type="button" class="btn" @click="step = 1">Back</button>
+      <button type="button" class="btn btn--primary" @click="step = 3">Next: Components</button>
+    </div>
+  </section>
+
+  <section x-show="step === 3" data-testid="step-components">
+    <h2 class="rs-panel__title">Components</h2>
+    {% for slot in slots %}
+    <div class="bw-slot-section">
+      <h3 class="bw-slot-section__title">{{ slot.label }}</h3>
+      <div class="bw-gallery">
+        <label class="bw-card bw-card--empty" :class="{ 'is-selected': get('{{ slot.slot_type }}', {{ slot.index }}) === null }">
+          <input type="radio" name="_display_{{ slot.slot_type }}_{{ slot.index }}" x-on:change="choose('{{ slot.slot_type }}', {{ slot.index }}, null)" :checked="get('{{ slot.slot_type }}', {{ slot.index }}) === null" class="sr-only">
+          <span class="bw-card__name">None</span>
+        </label>
+        {% for option in options.get(slot.slot_type, []) %}
+        <label class="bw-card bw-card--{{ option.compatibility.state }}" :class="{ 'is-selected': get('{{ slot.slot_type }}', {{ slot.index }}) === {{ option.ref.object_id }} }" title="{{ option.compatibility.reason }}">
+          <input type="radio" name="_display_{{ slot.slot_type }}_{{ slot.index }}" x-on:change="choose('{{ slot.slot_type }}', {{ slot.index }}, {{ option.ref.object_id }})"
+                 :checked="get('{{ slot.slot_type }}', {{ slot.index }}) === {{ option.ref.object_id }}" class="sr-only">
+          {{ rs.art(option.ref, "md") }}
+          <span class="bw-card__name">{{ option.ref.name }}{% if option.quality %} <span class="text-muted">({{ option.quality }})</span>{% endif %}</span>
+          {% if option.compatibility.state == "incompatible" %}
+            <span class="bw-compat bw-compat--bad">&#10005; Not compatible</span>
+            <label class="bw-override"><input type="checkbox" name="override__{{ slot.slot_type }}__{{ slot.index }}" value="1" :disabled="get('{{ slot.slot_type }}', {{ slot.index }}) !== {{ option.ref.object_id }}"> Allow anyway (manual override)</label>
+          {% elif option.compatibility.state == "unverified" %}
+            <span class="bw-compat bw-compat--unknown">? Unverified</span>
+          {% else %}
+            <span class="bw-compat bw-compat--good">&#10003; Compatible</span>
+          {% endif %}
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+    {% else %}
+      <p class="text-muted">No component slots to fill.</p>
+    {% endfor %}
+    <div class="form-actions">
+      <button type="button" class="btn" @click="step = 2">Back</button>
+      <button type="button" class="btn btn--primary" @click="step = 4">Next: Name &amp; Purpose</button>
+    </div>
+  </section>
+
+  <section x-show="step === 4" data-testid="step-details">
+    <h2 class="rs-panel__title">Name &amp; Purpose</h2>
+    <div class="form-field">
+      <label for="name">Build name <span class="text-muted">(required)</span></label>
+      <input type="text" id="name" name="name" class="form-control" value="{{ request.form.get('name', build.name if build else '') }}" required>
+    </div>
+    <div class="form-field">
+      <label for="purpose">Purpose / role</label>
+      <input type="text" id="purpose" name="purpose" class="form-control" value="{{ request.form.get('purpose', build.purpose if build else '') }}" placeholder="e.g. Maximum close-range critical damage">
+    </div>
+    <div class="form-field">
+      <label for="notes">Notes</label>
+      <textarea id="notes" name="notes" class="form-control" rows="3">{{ request.form.get('notes', build.notes if build else '') }}</textarea>
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn" @click="step = 3">Back</button>
+      <button class="btn btn--primary" type="submit" name="step" value="save" data-testid="save-build">Save Build</button>
+      <a class="btn" href="{{ url_for('builds.build_detail', campaign_id=campaign.id, build_id=build.id) if build else url_for('builds.index', campaign_id=campaign.id) }}">Cancel</a>
+    </div>
+  </section>
+</form>
+{% endblock %}

@@ -25,3 +25,4 @@ Format: lightweight [MADR](https://adr.github.io/)-style — Context, Decision, 
 | [ADR-0019](ADR-0019-content-source-revision-pinning.md) | Content-source revision pinning and provenance fields | Accepted (Phase 4) |
 | [ADR-0020](ADR-0020-avenger-grid-model.md) | Campaign Avenger grid: separate room state, facility assignment and build lifecycle | Accepted (Phase 5) |
 | [ADR-0021](ADR-0021-research-dependency-graph.md) | Research queue, completion tracking and the generic dependency graph | Accepted (Phase 6) |
+| [ADR-0022](ADR-0022-soldiers-stats-and-builds.md) | Soldier roster, stat provenance, and the generic equipment-build model | Accepted (Phase 7) |

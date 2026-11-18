@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}{{ view.display_name }}{% endblock %}
+{% block content %}
+{% import "_components/ui.html" as ui %}
+{% import "research/_macros.html" as rs %}
+{% import "soldiers/_macros.html" as sd %}
+<div class="page-header">
+  <div class="sd-detail-head">
+    {{ sd.portrait(view, "xl") }}
+    <div>
+      <div class="page-header__eyebrow"><a href="{{ url_for('soldiers.index', campaign_id=campaign.id) }}">{{ campaign.name }} &middot; Soldiers</a></div>
+      <h1 class="page-header__title">{{ view.display_name }}</h1>
+      <div class="cluster">
+        {% if view.class_ref %}{{ rs.chip(view.class_ref, campaign, show_status=false) }}{% endif %}
+        {% if view.rank_ref %}<span class="rs-tag">{{ view.rank_ref.name }}</span>{% endif %}
+        {{ ui.badge(view.status | title, "ready" if view.status == "active" else "unknown") }}
+      </div>
+    </div>
+  </div>
+  <div class="page-header__actions">
+    <a class="btn" href="{{ url_for('soldiers.edit_soldier', campaign_id=campaign.id, soldier_id=soldier.id) }}">Edit</a>
+    <form method="post" action="{{ url_for('soldiers.delete_soldier', campaign_id=campaign.id, soldier_id=soldier.id) }}" onsubmit="return confirm('Delete this soldier?');">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn--danger" type="submit">Delete</button>
+    </form>
+  </div>
+</div>
+{% if error %}{{ ui.alert(error, "danger") }}{% endif %}
+
+<div class="sd-layout">
+  <section class="sd-panel" data-testid="stats-panel">
+    <h2 class="sd-panel__title">Stats</h2>
+    {% if view.has_unconfirmed_defaults %}
+      {{ ui.alert("These are class defaults, shown until you confirm or edit them to match your actual soldier.", "warning") }}
+    {% endif %}
+    <form method="post" action="{{ url_for('soldiers.update_stats', campaign_id=campaign.id, soldier_id=soldier.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="sd-stat-grid">
+        {% for s in view.stats %}
+        <div class="form-field sd-stat-field sd-stat-field--{{ s.state }}">
+          <label for="stat_{{ s.key }}">{{ s.label }}
+            {% if s.state == 'default' %}<span class="sd-stat-tag">default</span>{% elif s.state == 'custom' %}<span class="sd-stat-tag sd-stat-tag--custom">edited</span>{% elif s.state == 'confirmed' %}<span class="sd-stat-tag sd-stat-tag--ok">confirmed</span>{% endif %}
+          </label>
+          <input type="number" step="1" id="stat_{{ s.key }}" name="{{ s.key }}" class="form-control" value="{{ s.actual | round(0, 'floor') | int if s.actual is not none else '' }}" placeholder="&mdash;">
+          {% if s.default is not none %}<span class="text-small text-muted">Class default: {{ s.default | round(0, 'floor') | int }}{% if s.difference and s.difference != 0 %} &middot; {{ '+' if s.difference > 0 else '' }}{{ s.difference | round(0, 'floor') | int }} vs default{% endif %}</span>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      <div class="form-actions"><button class="btn btn--primary" type="submit" data-testid="save-stats">Save Stats</button></div>
+    </form>
+  </section>
+
+  <section class="sd-panel" data-testid="equipment-panel">
+    <h2 class="sd-panel__title">Equipment</h2>
+    {% for a in view.assignments %}
+    <div class="sd-equip-slot">
+      <div class="sd-equip-slot__label">{{ a.type_label }}{% if a.assignment_slot != 'primary' %} ({{ a.assignment_slot | title }}){% endif %}</div>
+      {{ sd.build_chip(a.build, campaign) }}
+      {% if a.build and not a.build.is_available %}
+        <div class="sd-planned-note">
+          <span>Not yet unlocked.</span>
+          <a class="btn btn--sm" href="{{ url_for('research.unlock_path', campaign_id=campaign.id, object_id=a.build.base.object_id) }}">Show Unlock Path</a>
+        </div>
+      {% endif %}
+      <form method="post" action="{{ url_for('soldiers.assign_build', campaign_id=campaign.id, soldier_id=soldier.id, build_type=a.build_type, slot=a.assignment_slot) }}" class="sd-assign-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <select name="build_id" class="form-control">
+          <option value="">No {{ a.type_label | lower }}</option>
+          {% for b in builds_by_type.get(a.build_type, []) %}
+            <option value="{{ b.id }}" {{ 'selected' if a.build and a.build.id == b.id }}>{{ b.name }}</option>
+          {% endfor %}
+        </select>
+        <button class="btn btn--sm" type="submit">Assign</button>
+      </form>
+    </div>
+    {% endfor %}
+    <a class="btn btn--sm" href="{{ url_for('builds.index', campaign_id=campaign.id) }}">Manage builds&hellip;</a>
+  </section>
+
+  {% if soldier.notes %}
+  <section class="sd-panel sd-panel--wide">
+    <h2 class="sd-panel__title">Notes</h2>
+    <p>{{ soldier.notes }}</p>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

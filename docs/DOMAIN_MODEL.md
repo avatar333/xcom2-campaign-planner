@@ -58,7 +58,7 @@ A **user source** is simply a source with `kind='user'`, created implicitly the 
 
 Object types are rows, not code (`ADR-0003`). The seed list to ship with the base/WotC/LWotC packs (non-exhaustive, extensible by any pack):
 
-`weapon`, `weapon_upgrade`, `armor`, `utility_item`, `ammo`, `grenade`, `resource`, `research_project`, `autopsy_project`, `proving_ground_project`, `facility`, `facility_upgrade`, `soldier_class`, `ability`, `technology`, `enemy`, `mission`, `strategy_upgrade`, `covert_action` *(LWotC)*, `faction`, `dark_event`.
+`weapon`, `weapon_upgrade`, `armor`, `utility_item`, `ammo`, `grenade`, `resource`, `research_project`, `autopsy_project`, `proving_ground_project`, `facility`, `facility_upgrade`, `soldier_class`, `soldier_rank` *(Phase 7)*, `ability`, `technology`, `enemy`, `mission`, `strategy_upgrade`, `covert_action` *(LWotC)*, `faction`, `dark_event`.
 
 Each `catalog_object_type` row: `slug`, `name`, `description`, `icon_asset_id` (type-level fallback glyph), `sort_order`, `is_builtin`. Each type owns zero or more `catalog_attribute_definitions` (key, data_type ∈ {`string`,`integer`,`number`,`boolean`,`enum`,`text`}, `enum_values` JSON when applicable, `unit`, `is_required`, `default_value`, `display_hint` ∈ {`badge`,`stat_block`,`paragraph`,`hidden`,...}, `sort_order`).
 
@@ -78,6 +78,8 @@ Type-specific facts live in the validated `attributes` JSON (`ADR-0012`), e.g.:
 - `research_project`: `science_score`, `credit_cost`, `breakthrough` (bool).
 - `facility`: `power_cost`, `grid_slot_requirement`, `staff_slots`.
 - `soldier_class`: `role_tags`, `abilities_by_rank` (reference list, cross-checked against `ability` objects via relationships, not duplicated here).
+- `soldier_rank` (Phase 7, `ADR-0022`): a ruleset's promotion ladder; `tier` orders ranks within a ruleset. A total-conversion ruleset authors its own rank objects rather than overriding vanilla's (no verified 1:1 mapping exists between e.g. LWotC's 9-rank ladder and vanilla's 8).
+- `weapon`/`weapon_upgrade`/`armor` gain build-related attributes in Phase 7: `upgrade_slots`/`utility_slots` size a build's typed component slots; `build_slots` (JSON) lets any base object declare additional mod-defined slot kinds; `compatible_weapon_categories`, `compatible_with` (relationship), `exclusive_group`, `allows_duplicates_in_build` express known build-compatibility facts (`ADR-0022`) — absent data means "unverified", never an assumed match.
 
 ## 6. Relationships
 
@@ -120,7 +122,9 @@ A campaign owns, exclusively:
 - `campaign_object_state` — per-object mutable state, keyed `(campaign_id, catalog_object_id)`: `status` ∈ {`unknown`,`locked`,`available`,`in_progress`,`completed`,`owned`} (semantics may differ slightly by object type but the enum is generic — e.g. `completed` for research, `owned` for items with `quantity`), `quantity` (nullable integer, meaningful for items/resources), `prerequisite_override` (user asserts a prerequisite is satisfied by an external effect), `notes`, `state_attributes` JSON (campaign-specific type-varying state, same validation pattern as catalog attributes but against a *state* schema), `is_active` (false when the owning object's source got disabled — `FR-CMP-3`), timestamps.
 - `campaign_events` — append-only log: `event_type`, `catalog_object_id` (nullable), `summary`, `in_game_label` (free text, no simulated calendar — `PRODUCT_SPEC.md` A7), `occurred_at`.
 - `campaign_plans` / `campaign_plan_items` — `plan_items`: `catalog_object_id`, `action_hint` (free text, e.g. "equip on Sgt. Reyes"), `priority`, `sort_order`, `rationale`, `depends_on_plan_item_id` (nullable self-FK, manual dependency), `status` (derived `blocked`/`ready` cached + recomputed on demand).
-- `campaign_soldiers` / `campaign_soldier_loadouts` — soldier: `name`, `class_object_id` (nullable FK into catalog `soldier_class` objects), `rank`, `status`, `portrait_asset_id`. Loadout: `slot`, `item_object_id`, `is_planned` (true = future build, false = current).
+- `campaign_soldiers` / `campaign_soldier_loadouts` — soldier: `name`, `surname`, `callsign`, `class_object_id` (nullable FK into catalog `soldier_class` objects), `rank_object_id` (Phase 7, FK into catalog `soldier_rank` objects; the legacy free-text `rank` column is superseded but kept), `status`, `portrait_asset_id`. Loadout: `slot`, `item_object_id`, `is_planned` (true = future build, false = current) -- superseded by the Phase 7 build-assignment model below for weapon/armour equipment, kept for other slot kinds not yet migrated.
+- `campaign_soldier_stats` (Phase 7, `ADR-0022`) — one row per tracked stat (`health`, `aim`, ...): `actual_value` (the player's real soldier), `default_value` (the catalog class default, captured once at creation and never recomputed), `is_confirmed`. A stat with no catalog default and no user entry simply has no row.
+- `campaign_builds` / `campaign_build_slots` / `campaign_soldier_builds` (Phase 7, `ADR-0022`) — the generic equipment-build model: a named, campaign-owned build (`build_type` open-ended, e.g. `weapon`/`armor`) over a catalog base object, with typed slots (`slot_type` + `slot_index`) holding attached catalog objects (`is_override` when the player accepted a known compatibility issue), assigned to a soldier by `(build_type, assignment_slot)`. Assignments reference the live build, never a snapshot.
 - `campaign_avenger_cells` — the campaign's own 12-cell Avenger construction grid (3 columns × 4 rows, stable coordinates `R1C1`…`R4C3`, `ADR-0020`). Each cell holds three **independent** facts: a *room state* (catalog `avenger_room_state`, e.g. cleared / Alien Debris / Alien Machinery / Exposed Power Coil; unset until the player records it), a *facility assignment* (catalog `facility`), and a *build state* (`none` → `planned` → `constructing` → `built`). "Available to build" and "Blocked" are derived for planned facilities, never stored.
 - `campaign_strategy_profiles` — which optional strategy profiles are enabled for this campaign (`ADR-0009`).
 
@@ -145,6 +149,13 @@ For a catalog object in a campaign: walk its inbound `prerequisite`/`requires_*`
 - **Queue validation**: an item is blocked at position *n* if a requirement is unmet given everything already satisfied plus the queue items before *n*. Blocked items are warnings, never errors.
 - **Facts vs strategy**: requirements/unlocks/blockers are facts from the catalog graph; any "research this early" advice belongs to strategy profiles (`ADR-0009`) and enters only through the `RecommendationProvider` seam.
 
+### 9.4 Equipment builds (`ADR-0022`)
+
+- A build's slots, their count and what they accept come entirely from catalog attributes (`upgrade_slots`/`utility_slots`/`build_slots`) and a small code registry of build *types* (not component kinds); no slot kind is ever a dedicated database column.
+- Compatibility between a component and a base is **known-compatible**, **known-incompatible**, or **unverified** (no data either way) -- only known-incompatible blocks, and only until the player explicitly accepts a manual override, which is recorded (`is_override=1`), never silent.
+- A build's availability ("available" vs. "PLANNED / NOT YET AVAILABLE") is derived from whether its base and every attached component are unlock-satisfied for the campaign (Phase 6 dependency index); it is never stored and never prevents saving, editing or assigning the build.
+- A numeric build summary is computed only for attribute pairs whose arithmetic is explicitly known; a component's free-text effect is shown, never parsed or summed.
+
 ## 10. Invariants (must hold for all time, tested explicitly)
 
 1. No `catalog_*` table ever has a foreign key to `campaigns` or any `campaign_*` table.
@@ -156,3 +167,4 @@ For a catalog object in a campaign: walk its inbound `prerequisite`/`requires_*`
 7. Strategy recommendations never appear in the same code path that computes Availability (`ADR-0009`).
 8. Every campaign has exactly 12 `campaign_avenger_cells` with unique `(campaign_id, coordinate)`; a cell's facility is NULL if and only if its build state is `none`; no catalog table references the cell table (`ADR-0020`).
 9. A research queue holds each catalog object at most once per campaign; completing a project removes it; a campaign's progression (state, queue, completion order) never alters or is derived from another campaign's, and never mutates a catalog row (`ADR-0021`).
+10. A soldier's stats and build assignments belong to exactly one campaign; a `campaign_soldier_stats.default_value` is written once at creation and is never overwritten by a later class change; a build assigned to a soldier is never silently deleted or unassigned (`ADR-0022`).

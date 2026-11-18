@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}{{ view.name }}{% endblock %}
+{% block content %}
+{% import "_components/ui.html" as ui %}
+{% import "research/_macros.html" as rs %}
+<div class="page-header">
+  <div class="rs-detail-head">
+    {{ rs.art(view.base, "lg") }}
+    <div>
+      <div class="page-header__eyebrow"><a href="{{ url_for('builds.index', campaign_id=campaign.id) }}">{{ campaign.name }} &middot; Build Library</a></div>
+      <h1 class="page-header__title">{{ view.name }}</h1>
+      <div class="cluster"><span class="rs-tag">{{ view.type_label }}</span>{{ rs.status_pill(view.base) }}
+        <span class="bl-card__avail bl-card__avail--{{ view.availability }}">{{ view.availability_label }}</span></div>
+    </div>
+  </div>
+  <div class="page-header__actions">
+    <a class="btn" href="{{ url_for('builds.edit_build', campaign_id=campaign.id, build_id=build.id) }}">Edit</a>
+    <form method="post" action="{{ url_for('builds.delete_build', campaign_id=campaign.id, build_id=build.id) }}" onsubmit="return this.querySelector('[name=unassign]') ? confirm('Unassign from {{ view.assigned | length }} soldier(s) and delete?') : confirm('Delete this build?');">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% if view.assigned %}<input type="hidden" name="unassign" value="1">{% endif %}
+      <button class="btn btn--danger" type="submit">Delete</button>
+    </form>
+  </div>
+</div>
+{% if error %}{{ ui.alert(error, "danger") }}{% endif %}
+{% if view.purpose %}<p>{{ view.purpose }}</p>{% endif %}
+{% if view.notes %}<p class="text-muted">{{ view.notes }}</p>{% endif %}
+
+{% if not view.is_available %}
+<div class="av-banner av-banner--soft">
+  <strong>PLANNED / NOT YET AVAILABLE.</strong> {{ view.missing | length }} item(s) in this build are not yet unlocked.
+  <a class="btn btn--sm" href="{{ url_for('research.unlock_path', campaign_id=campaign.id, object_id=view.missing[0].object_id) }}">Show Unlock Path</a>
+</div>
+{% endif %}
+
+{% if not view.validation.is_valid %}
+{{ ui.alert("This build has unresolved compatibility issues: " ~ (view.validation.errors | map(attribute='message') | join('; ')), "danger") }}
+{% endif %}
+{% if view.overrides %}
+{{ ui.alert((view.overrides | length) ~ " component(s) use a manual compatibility override.", "warning") }}
+{% endif %}
+
+<div class="bl-detail">
+  <section class="rs-panel">
+    <h2 class="rs-panel__title">Components</h2>
+    {% if view.components %}
+    <div class="bw-gallery">
+      {% for c in view.components %}
+      <div class="bw-card bw-card--{{ c.compatibility.state }}">
+        {{ rs.art(c.ref, "md") }}
+        <span class="bw-card__name">{{ c.ref.name }}</span>
+        <span class="text-small text-muted">{{ c.slot.label }}</span>
+        {% if c.is_override %}<span class="bw-compat bw-compat--override">Manual override</span>
+        {% elif c.compatibility.state == "unverified" %}<span class="bw-compat bw-compat--unknown">? Unverified</span>
+        {% elif c.compatibility.state == "compatible" %}<span class="bw-compat bw-compat--good">&#10003; Compatible</span>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}<p class="text-muted">No components attached.</p>{% endif %}
+  </section>
+
+  <section class="rs-panel">
+    <h2 class="rs-panel__title">Summary</h2>
+    {% if view.summary.base_lines %}
+    <h3 class="bl-summary__label">Base ({{ view.base.name }})</h3>
+    <dl class="av-stats">{% for l in view.summary.base_lines %}<div><dt>{{ l.label }}</dt><dd>{{ l.value }}</dd></div>{% endfor %}</dl>
+    {% endif %}
+    {% if view.summary.component_lines %}
+    <h3 class="bl-summary__label">Components</h3>
+    <ul class="bl-summary__list">{% for l in view.summary.component_lines %}<li><strong>{{ l.label }}:</strong> {{ l.value }}{% if l.detail %} <span class="text-small text-muted">({{ l.detail }})</span>{% endif %}</li>{% endfor %}</ul>
+    {% endif %}
+    {% if view.summary.combined %}
+    <h3 class="bl-summary__label">Combined</h3>
+    <dl class="av-stats">{% for l in view.summary.combined %}<div><dt>{{ l.label }}</dt><dd>{{ l.value }}</dd></div>{% endfor %}</dl>
+    {% endif %}
+    {% for n in view.summary.notes %}<p class="text-small text-muted">{{ n }}</p>{% endfor %}
+  </section>
+
+  {% if view.assigned %}
+  <section class="rs-panel bl-detail__wide">
+    <h2 class="rs-panel__title">Assigned soldiers</h2>
+    <ul>{% for soldier_id, name in view.assigned %}<li><a href="{{ url_for('soldiers.soldier_detail', campaign_id=campaign.id, soldier_id=soldier_id) }}">{{ name }}</a></li>{% endfor %}</ul>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

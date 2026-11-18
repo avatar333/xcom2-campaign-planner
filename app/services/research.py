@@ -598,7 +598,7 @@ def list_path_targets(campaign: Campaign, *, q: str = "", type_slug: str = "", l
     refs: list[ObjectRef] = []
     for entry in sorted(index.effective.values(), key=lambda e: (e["name"].lower(), e["id"])):
         ref = index.ref(entry["id"])
-        if ref.category == "resource" or ref.type_slug == "avenger_room_state":
+        if ref.category == "resource" or ref.type_slug in ("avenger_room_state", "soldier_rank"):
             continue
         if type_slug and ref.type_slug != type_slug:
             continue
@@ -615,7 +615,7 @@ def path_target_types(campaign: Campaign) -> list[tuple[str, str]]:
     found: dict[str, str] = {}
     for entry in index.effective.values():
         slug = index.type_by_id[entry["type_id"]].slug
-        if category_of(slug) == "resource" or slug == "avenger_room_state":
+        if category_of(slug) == "resource" or slug in ("avenger_room_state", "soldier_rank"):
             continue
         found[slug] = index.type_by_id[entry["type_id"]].name
     return sorted(found.items(), key=lambda kv: kv[1].lower())

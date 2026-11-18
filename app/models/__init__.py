@@ -8,6 +8,8 @@ from app.models.assets import Asset, ObjectAsset
 from app.models.campaign import (
     Campaign,
     CampaignAvengerCell,
+    CampaignBuild,
+    CampaignBuildSlot,
     CampaignContentSource,
     CampaignEvent,
     CampaignObjectState,
@@ -15,7 +17,9 @@ from app.models.campaign import (
     CampaignPlanItem,
     CampaignResearchQueueItem,
     CampaignSoldier,
+    CampaignSoldierBuild,
     CampaignSoldierLoadout,
+    CampaignSoldierStat,
     CampaignStrategyProfile,
 )
 from app.models.catalog import (
@@ -37,6 +41,8 @@ __all__ = [
     "Asset",
     "Campaign",
     "CampaignAvengerCell",
+    "CampaignBuild",
+    "CampaignBuildSlot",
     "CampaignContentSource",
     "CampaignEvent",
     "CampaignObjectState",
@@ -44,7 +50,9 @@ __all__ = [
     "CampaignPlanItem",
     "CampaignResearchQueueItem",
     "CampaignSoldier",
+    "CampaignSoldierBuild",
     "CampaignSoldierLoadout",
+    "CampaignSoldierStat",
     "CampaignStrategyProfile",
     "CatalogAttributeDefinition",
     "CatalogObject",

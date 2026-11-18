@@ -35,6 +35,7 @@ app/
     requirements.py        pure requirement-tree evaluation (AND/OR, "why is this unmet"); Phase 5 implements the generic evaluator, availability walk-up arrives with state tracking (ADR-0004, ADR-0018, DOMAIN_MODEL §9.1)
     dependency_graph.py    pure recursive dependency traversal: gates, statuses, path analysis, cycle detection (ADR-0021)
     avenger_grid.py        pure 3x4 grid geometry, coordinates, build-state vocabulary (ADR-0020)
+    builds.py               pure build-compatibility rules (SlotSpec/ComponentFacts/validate_build) and the computed-summary arithmetic (ADR-0022)
     effective_catalog.py   source precedence resolution + caching (ADR-0013)
     attributes.py          validate JSON attributes against catalog_attribute_definitions (ADR-0012)
     plans.py                plan-item blocked/ready derivation
@@ -51,6 +52,8 @@ app/
     campaign_progress.py    single writer of completed/in-progress state with completion timestamp+order
     research.py             Research & Dependency Planner: browser, queue, validation, unlock path, graph payload, RecommendationProvider seam (ADR-0021)
     avenger.py              Avenger Facility Planner: grid init, configure/reset, facility options (effective catalog), assignment, build lifecycle, prerequisite + duplicate evaluation, summary (ADR-0020)
+    soldiers.py             campaign soldier roster, ruleset-aware class/rank choices, default+actual stat provenance (ADR-0022)
+    builds.py               generic Weapon/Armour equipment builds: slots from catalog data, compatibility validation + manual override, availability, computed summary, build assignment (ADR-0022)
   importer/
     schema.py               JSON Schema for pack.json/objects.json/relationships.json
     validator.py             dry-run diagnostics (FR-SRC-7)
@@ -59,7 +62,7 @@ app/
     storage.py               content-addressed filesystem store
     thumbnail.py              Pillow-based re-encode/resize (strip EXIF)
   routes/
-    catalog.py, content.py, campaigns.py, planning.py, avenger.py (/campaigns/<id>/avenger/*), research.py (/campaigns/<id>/research/*), soldiers.py, assets.py, api.py (JSON endpoints for progressive-enhancement JS)
+    catalog.py, content.py, campaigns.py, planning.py, avenger.py (/campaigns/<id>/avenger/*), research.py (/campaigns/<id>/research/*), soldiers.py (/campaigns/<id>/soldiers/*, /campaigns/<id>/builds/* -- the soldiers_bp and builds_bp blueprints, ADR-0022), assets.py, api.py (JSON endpoints for progressive-enhancement JS)
   templates/            Jinja templates, see UI_UX_SPEC.md for structure
   static/               CSS (custom properties, dark theme), JS modules, SVG fallback glyphs
   cli.py                 flask db migrate / content import|validate|list / seed-dev commands
