@@ -23,3 +23,4 @@ Format: lightweight [MADR](https://adr.github.io/)-style — Context, Decision, 
 | [ADR-0017](ADR-0017-catalog-interchange-format.md) | A lean, user-facing catalog interchange format, separate from the curated pack format | Accepted (Phase 3) |
 | [ADR-0018](ADR-0018-compound-prerequisite-groups.md) | Compound (nested AND/OR) prerequisite expression tree | Accepted (Phase 4) |
 | [ADR-0019](ADR-0019-content-source-revision-pinning.md) | Content-source revision pinning and provenance fields | Accepted (Phase 4) |
+| [ADR-0020](ADR-0020-avenger-grid-model.md) | Campaign Avenger grid: separate room state, facility assignment and build lifecycle | Accepted (Phase 5) |

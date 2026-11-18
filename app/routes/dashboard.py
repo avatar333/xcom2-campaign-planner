@@ -1,6 +1,6 @@
 """Dashboard routes. Global landing page + campaign-specific dashboard
 (UI_UX_SPEC.md §3.1). Full dashboard widgets (priorities/blocked/events)
-arrive with Planning (Phase 5); this phase renders the campaign header,
+arrive with Planning (Phase 7); this phase renders the campaign header,
 enabled-sources summary and empty states.
 """
 from __future__ import annotations

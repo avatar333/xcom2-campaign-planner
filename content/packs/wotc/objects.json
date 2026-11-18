@@ -86,5 +86,14 @@
       "training_method": "covert_action",
       "roster_origin": "wotc_faction"
     }
+  },
+  {
+    "template_key": "AdvancedWarfareCenter_NotInWotC",
+    "type": "facility",
+    "name": "Advanced Warfare Center (not buildable in War of the Chosen)",
+    "short_description": "War of the Chosen removes the vanilla Advanced Warfare Center: healing moves to the Infirmary and ability retraining to the Training Center. Campaigns with this source enabled can no longer plan it.",
+    "tags": ["facility", "wotc", "removed-in-wotc"],
+    "overrides": ["xcom2-base", "AdvancedWarfareCenter"],
+    "patch": {"attributes": {"buildable_in_avenger_grid": false}}
   }
 ]

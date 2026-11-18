@@ -7,6 +7,7 @@ and the campaign<->strategy link table last.
 from app.models.assets import Asset, ObjectAsset
 from app.models.campaign import (
     Campaign,
+    CampaignAvengerCell,
     CampaignContentSource,
     CampaignEvent,
     CampaignObjectState,
@@ -34,6 +35,7 @@ from app.models.strategy import StrategyProfile, StrategyRecommendation
 __all__ = [
     "Asset",
     "Campaign",
+    "CampaignAvengerCell",
     "CampaignContentSource",
     "CampaignEvent",
     "CampaignObjectState",

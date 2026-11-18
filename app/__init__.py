@@ -49,6 +49,7 @@ def create_app(config_name: str | None = None, instance_path: str | None = None)
 
     register_cli(app)
 
+    from app.routes.avenger import avenger_bp
     from app.routes.campaigns import campaigns_bp
     from app.routes.catalog import catalog_bp
     from app.routes.content_sources import content_sources_bp
@@ -60,6 +61,7 @@ def create_app(config_name: str | None = None, instance_path: str | None = None)
     app.register_blueprint(catalog_bp)
     app.register_blueprint(content_sources_bp)
     app.register_blueprint(planning_bp)
+    app.register_blueprint(avenger_bp)
 
     @app.context_processor
     def inject_nav_context():

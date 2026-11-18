@@ -13,3 +13,18 @@
     </a>
   {% endif %}
 {% endmacro %}
+
+{% macro campaign_nav_link(endpoint, label, icon_svg, campaign) %}
+  {% if campaign %}
+    {% set is_active = request.endpoint and request.endpoint.startswith(endpoint.rsplit('.', 1)[0] ~ '.') %}
+    <a class="app-nav__link{{ ' is-active' if is_active else '' }}" href="{{ url_for(endpoint, campaign_id=campaign.id) }}">
+      <span class="app-nav__link-icon">{{ icon_svg | safe }}</span>
+      <span class="app-nav__link-text">{{ label }}</span>
+    </a>
+  {% else %}
+    <span class="app-nav__link is-disabled" title="{{ label }} -- select a campaign first">
+      <span class="app-nav__link-icon">{{ icon_svg | safe }}</span>
+      <span class="app-nav__link-text">{{ label }}</span>
+    </span>
+  {% endif %}
+{% endmacro %}

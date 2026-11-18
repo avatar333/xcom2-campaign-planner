@@ -90,6 +90,8 @@
     "description": "Non-facility Avenger grid room/environment states (Phase 4 brief): what a grid cell contains before/instead of a buildable facility. Distinct from catalog_object_types used for facilities.",
     "attributes": [
       {"key": "clearable", "data_type": "boolean", "default_value": true, "display_hint": "hidden"},
+      {"key": "blocks_construction", "data_type": "boolean", "default_value": false, "display_hint": "hidden"},
+      {"key": "is_default_empty", "data_type": "boolean", "default_value": false, "display_hint": "hidden"},
       {"key": "clear_reward", "data_type": "text", "display_hint": "paragraph"},
       {"key": "gameplay_effect", "data_type": "text", "display_hint": "paragraph"}
     ]

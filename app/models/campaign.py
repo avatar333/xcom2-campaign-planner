@@ -22,6 +22,7 @@ CAMPAIGN_DIFFICULTIES = ("rookie", "veteran", "commander", "legend")
 CAMPAIGN_STATUSES = ("active", "archived")
 OBJECT_STATE_STATUSES = ("unknown", "locked", "available", "in_progress", "completed", "owned")
 PLAN_ITEM_STATUSES = ("blocked", "ready", "done", "unknown")
+AVENGER_BUILD_STATES = ("none", "planned", "constructing", "built")
 SOLDIER_STATUSES = ("active", "wounded", "dead", "retired")
 
 
@@ -43,6 +44,9 @@ class Campaign(Model, TimestampMixin):
     effective_catalog_version: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
     content_sources: Mapped[list[CampaignContentSource]] = relationship(
+        back_populates="campaign", cascade="all, delete-orphan"
+    )
+    avenger_cells: Mapped[list[CampaignAvengerCell]] = relationship(
         back_populates="campaign", cascade="all, delete-orphan"
     )
     object_states: Mapped[list[CampaignObjectState]] = relationship(
@@ -80,6 +84,62 @@ class CampaignContentSource(Model, CreatedAtMixin):
 
     campaign: Mapped[Campaign] = relationship(back_populates="content_sources")
     content_source: Mapped[ContentSource] = relationship()
+
+
+class CampaignAvengerCell(Model, TimestampMixin):
+    """One of the 12 cells of a campaign's own Avenger construction grid
+    (ADR-0020). Three independent concepts live in three columns -- never
+    merged into one "facility name" field:
+
+    1. room / excavation state  -> `room_state_object_id` (NULL = not yet
+       configured by the player),
+    2. facility assignment      -> `facility_object_id`,
+    3. facility build state     -> `build_state` (lifecycle of the assignment).
+
+    Position is the stable `coordinate` (plus `grid_row`/`grid_column`), not an
+    ordering. All catalog references are RESTRICT: catalog data stays global
+    and is never rewritten by campaign planning (ADR-0002/0010).
+    """
+
+    __tablename__ = "campaign_avenger_cells"
+    __table_args__ = (
+        UniqueConstraint("campaign_id", "coordinate", name="uq_campaign_avenger_cells_coordinate"),
+        UniqueConstraint(
+            "campaign_id", "grid_row", "grid_column", name="uq_campaign_avenger_cells_position"
+        ),
+        CheckConstraint("grid_row BETWEEN 1 AND 4", name="ck_campaign_avenger_cells_row"),
+        CheckConstraint("grid_column BETWEEN 1 AND 3", name="ck_campaign_avenger_cells_column"),
+        CheckConstraint(
+            "coordinate = 'R' || grid_row || 'C' || grid_column",
+            name="ck_campaign_avenger_cells_coordinate",
+        ),
+        CheckConstraint(
+            f"build_state IN {AVENGER_BUILD_STATES}", name="ck_campaign_avenger_cells_build_state"
+        ),
+        CheckConstraint(
+            "(facility_object_id IS NULL AND build_state = 'none') "
+            "OR (facility_object_id IS NOT NULL AND build_state <> 'none')",
+            name="ck_campaign_avenger_cells_facility_state",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    campaign_id: Mapped[int] = mapped_column(
+        ForeignKey("campaigns.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    coordinate: Mapped[str] = mapped_column(String, nullable=False)
+    grid_row: Mapped[int] = mapped_column(Integer, nullable=False)
+    grid_column: Mapped[int] = mapped_column(Integer, nullable=False)
+    room_state_object_id: Mapped[int | None] = mapped_column(
+        ForeignKey("catalog_objects.id", ondelete="RESTRICT"), nullable=True, index=True
+    )
+    facility_object_id: Mapped[int | None] = mapped_column(
+        ForeignKey("catalog_objects.id", ondelete="RESTRICT"), nullable=True, index=True
+    )
+    build_state: Mapped[str] = mapped_column(String, nullable=False, default="none")
+    notes: Mapped[str | None] = mapped_column(String, nullable=True)
+
+    campaign: Mapped[Campaign] = relationship(back_populates="avenger_cells")
 
 
 class CampaignObjectState(Model, TimestampMixin):

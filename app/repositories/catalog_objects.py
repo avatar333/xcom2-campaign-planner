@@ -166,10 +166,12 @@ def set_tags(obj: CatalogObject, tags: list[str]) -> None:
 def is_referenced_by_campaign_state(obj: CatalogObject) -> bool:
     """Whether retiring (vs. hard-deleting) this object is required (FR-CAT-8)."""
     from app.models import CampaignObjectState, CampaignPlanItem, CampaignSoldierLoadout
+    from app.repositories.avenger_cells import is_object_used_by_any_cell
 
     return (
         db.session.query(CampaignObjectState.id).filter_by(catalog_object_id=obj.id).first()
         is not None
+        or is_object_used_by_any_cell(obj.id)
         or db.session.query(CampaignPlanItem.id).filter_by(catalog_object_id=obj.id).first()
         is not None
         or db.session.query(CampaignSoldierLoadout.id).filter_by(item_object_id=obj.id).first()

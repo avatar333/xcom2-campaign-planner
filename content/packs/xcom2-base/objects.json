@@ -5,7 +5,7 @@
     "name": "Empty / Cleared",
     "short_description": "A cleared Avenger grid cell, ready for a facility to be built on it.",
     "tags": ["avenger-grid", "room-state"],
-    "attributes": {"clearable": false, "gameplay_effect": "No facility built yet; any buildable facility can be constructed here."}
+    "attributes": {"clearable": false, "blocks_construction": false, "is_default_empty": true, "gameplay_effect": "No facility built yet; any buildable facility can be constructed here."}
   },
   {
     "template_key": "RoomState_AlienDebris",
@@ -15,6 +15,7 @@
     "tags": ["avenger-grid", "room-state"],
     "attributes": {
       "clearable": true,
+      "blocks_construction": true,
       "clear_reward": "Supplies only when cleared.",
       "gameplay_effect": "Blocks the cell from facility construction until cleared; can appear in any of the Avenger's four rows."
     }
@@ -27,6 +28,7 @@
     "tags": ["avenger-grid", "room-state"],
     "attributes": {
       "clearable": true,
+      "blocks_construction": true,
       "clear_reward": "Supplies and Alien Alloys when cleared.",
       "gameplay_effect": "Blocks the cell from facility construction until cleared; only appears in the bottom three rows of the Avenger grid."
     }
@@ -39,6 +41,7 @@
     "tags": ["avenger-grid", "room-state"],
     "attributes": {
       "clearable": true,
+      "blocks_construction": true,
       "clear_reward": "Elerium when cleared.",
       "gameplay_effect": "There are always exactly two Exposed Power Coil cells on the Avenger, both in the bottom two rows. A facility built on a cleared coil costs 0 power to operate; a Power Relay built on one provides substantially more power than normal."
     }

@@ -121,11 +121,20 @@ A campaign owns, exclusively:
 - `campaign_events` — append-only log: `event_type`, `catalog_object_id` (nullable), `summary`, `in_game_label` (free text, no simulated calendar — `PRODUCT_SPEC.md` A7), `occurred_at`.
 - `campaign_plans` / `campaign_plan_items` — `plan_items`: `catalog_object_id`, `action_hint` (free text, e.g. "equip on Sgt. Reyes"), `priority`, `sort_order`, `rationale`, `depends_on_plan_item_id` (nullable self-FK, manual dependency), `status` (derived `blocked`/`ready` cached + recomputed on demand).
 - `campaign_soldiers` / `campaign_soldier_loadouts` — soldier: `name`, `class_object_id` (nullable FK into catalog `soldier_class` objects), `rank`, `status`, `portrait_asset_id`. Loadout: `slot`, `item_object_id`, `is_planned` (true = future build, false = current).
+- `campaign_avenger_cells` — the campaign's own 12-cell Avenger construction grid (3 columns × 4 rows, stable coordinates `R1C1`…`R4C3`, `ADR-0020`). Each cell holds three **independent** facts: a *room state* (catalog `avenger_room_state`, e.g. cleared / Alien Debris / Alien Machinery / Exposed Power Coil; unset until the player records it), a *facility assignment* (catalog `facility`), and a *build state* (`none` → `planned` → `constructing` → `built`). "Available to build" and "Blocked" are derived for planned facilities, never stored.
 - `campaign_strategy_profiles` — which optional strategy profiles are enabled for this campaign (`ADR-0009`).
 
 ### 9.1 Availability (derived, never stored as fact)
 
 For a catalog object in a campaign: walk its inbound `prerequisite`/`requires_*` relationships (respecting AND/OR groups), resolve each referenced object's `campaign_object_state.status` (or `prerequisite_override`); classify as `locked` (unmet requirement exists), `available` (all requirements met, not yet acted on), `in_progress`/`completed`/`owned` (from the object's own state), `unknown` (no state row and no determinable requirements — e.g. newly imported object). This computation is the same one driving plan-item `blocked`/`ready` flags (`FR-PLN-3`) and the "what am I missing" explanation (`FR-PLN-2`).
+
+### 9.2 Avenger grid rules (`ADR-0020`)
+
+- A campaign has exactly 12 cells with unique coordinates; position is data, never display order.
+- A facility is offered in a campaign only if it is an effective-catalog `facility` whose `buildable_in_avenger_grid` is true under that campaign's sources/ruleset. Duplicates follow the facility's `allows_duplicates` attribute as resolved for the ruleset (default: unique).
+- Planning is never prevented by unmet prerequisites or an uncleared room; those are reported as blockers (`Blocker`). Invalid *identity* (not a buildable facility for the campaign, duplicate of a unique facility, invalid coordinate/state) is rejected.
+- A facility under construction or built is never reported as blocked (it exists in the player's game).
+- Prerequisites are read from catalog relationships (`prerequisite`, `unlocks`, `requires_research`, `requires_facility`, grouped by `group_key`) and compound groups (`ADR-0018`), including edges on objects the facility overrides; satisfied by `campaign_object_state.status ∈ {completed, owned}` / `prerequisite_override`, or a built cell for facility requirements.
 
 ## 10. Invariants (must hold for all time, tested explicitly)
 
@@ -136,3 +145,4 @@ For a catalog object in a campaign: walk its inbound `prerequisite`/`requires_*`
 5. An object with `overrides_object_id`/`replaces_object_id` set must point at an object belonging to a source listed in its own source's `requires`/`extends` declarations (validated at import, `ADR-0013`).
 6. Every `catalog_object_type` has exactly one `default_asset_id`; every rendered object resolves to a non-null image (primary asset or type default).
 7. Strategy recommendations never appear in the same code path that computes Availability (`ADR-0009`).
+8. Every campaign has exactly 12 `campaign_avenger_cells` with unique `(campaign_id, coordinate)`; a cell's facility is NULL if and only if its build state is `none`; no catalog table references the cell table (`ADR-0020`).

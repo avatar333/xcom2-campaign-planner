@@ -98,7 +98,17 @@ Priority: **M** = must (v1), **S** = should (v1 if capacity), **F** = future (da
 | FR-PLN-4 | "Next up" list: ready items ordered by user priority, optionally re-ranked by an enabled strategy profile. | S |
 | FR-PLN-5 | Strategy profiles/recommendations: optional, attributable, toggled per campaign, displayed visually distinct from facts. | S (model M) |
 | FR-PLN-6 | Soldiers per campaign with class, rank, status; per-soldier *current* and *planned* equipment/ability builds; class-can-equip validation as a warning (not a hard block). | S (model M) |
-| FR-PLN-7 | Facility layout planning (grid position on the Avenger). | F |
+| FR-PLN-7 | Facility layout planning (grid position on the Avenger). | M — **implemented** (Phase 5, promoted from F): `/campaigns/<id>/avenger/` — see FR-AVG-1…10 below. |
+| FR-AVG-1 | Each campaign owns an independent Avenger construction grid of exactly 3 columns × 4 rows (12 cells) with stable coordinates `R1C1`…`R4C3`; position is stored, not inferred from ordering. | M — **implemented**: `campaign_avenger_cells`, `app/domain/avenger_grid.py`. |
+| FR-AVG-2 | A new campaign's grid is unconfigured: 12 EMPTY placeholders with an unmistakable "not configured" treatment; no starting layout is assumed. | M — **implemented**. |
+| FR-AVG-3 | "Configure Starting Avenger" workflow: pick a room state per cell from visual cards (image + name), rapid click-through, Save Layout (atomic) / Cancel / Reset to EMPTY; nothing persists until Save. | M — **implemented**: `app/static/js/avenger.js`, `POST …/configure`. |
+| FR-AVG-4 | Room state, facility assignment and build state are separate fields; room states come from catalog data and are extensible by packs. | M — **implemented** (`ADR-0020`). |
+| FR-AVG-5 | Per-cell modal (CELL / CURRENT / PLAN / AVAILABLE FACILITIES) with a facility card gallery populated only from catalog facilities buildable in the grid under the campaign's sources/ruleset; secondary detail view (cost, power, build time, staffing, upgrades, prerequisites). | M — **implemented**. |
+| FR-AVG-6 | Build lifecycle `none/planned/constructing/built` per cell, visually distinct; "Available to build"/"Blocked" derived; actual and planned state coexist without destroying plans. | M — **implemented**. |
+| FR-AVG-7 | Prerequisites (research, facility, compound AND/OR groups, room clearing) are evaluated from catalog facts and displayed as blockers; they never prevent planning. | M — **implemented**: `app/domain/requirements.py`. Marking a prerequisite complete is recorded in `campaign_object_state` until the full state-tracking screens exist. |
+| FR-AVG-8 | Duplicate rules follow the catalog (`allows_duplicates`) under the active ruleset; invalid facility assignments are rejected. | M — **implemented**. |
+| FR-AVG-9 | Summary panel: built / constructing / planned / blocked / occupied / free / configured / needs-clearing counts, unresolved prerequisites, and catalog power figures — never fabricated totals. | M — **implemented**; power shows drawn/generated catalog figures only (no surplus/shortfall; base power, staffing and coil bonuses are not tracked). |
+| FR-AVG-10 | Strict campaign isolation: layouts, plans, build states and prerequisite progress are per campaign; deleting a campaign leaves other campaigns and the catalog intact; editing a catalog facility never overwrites a campaign's choices. | M — **implemented and tested** (`tests/test_avenger_isolation.py`). |
 
 ### 4.7 Platform
 

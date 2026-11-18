@@ -27,6 +27,7 @@ EXPECTED_TABLES = {
     "assets",
     "object_assets",
     "campaigns",
+    "campaign_avenger_cells",
     "campaign_content_sources",
     "campaign_object_state",
     "campaign_events",

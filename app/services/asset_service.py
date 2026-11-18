@@ -399,6 +399,11 @@ _GLYPHS_BY_TYPE_SLUG: dict[str, str] = {
         '<circle cx="7" cy="8" r="2.5"/><circle cx="17" cy="8" r="2.5"/><path d="M2 20c0-3 2.5-5 5-5s5 2 5 5M12 20c0-3 2.5-5 5-5s5 2 5 5"/>'
         "</svg>"
     ),
+    "avenger_room_state": (
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">'
+        '<rect x="3" y="3" width="18" height="18" rx="1"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>'
+        "</svg>"
+    ),
     "dark_event": (
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">'
         '<path d="M12 3v6l5 3-5 3v6"/><circle cx="12" cy="12" r="9"/>'

@@ -1,0 +1,40 @@
+{% set f = detail.option %}
+<div class="av-detail" style="--hue: {{ f.hue }};" data-testid="facility-detail">
+  <div class="av-detail__art">
+    {% if f.primary_asset_id %}<img src="{{ url_for('catalog.serve_asset', asset_id=f.primary_asset_id) }}" alt="{{ f.name }}">
+    {% else %}<span class="av-fcard__glyph">{{ f.glyph | safe }}</span>{% endif %}
+  </div>
+  <div class="av-detail__body">
+    <h4>{{ f.name }}{% if f.source_name %} <span class="text-muted text-small">&middot; {{ f.source_name }}</span>{% endif %}</h4>
+    {% if f.short_description %}<p>{{ f.short_description }}</p>{% endif %}
+    {% if f.long_description %}<p class="text-muted">{{ f.long_description }}</p>{% endif %}
+    <dl class="av-stats av-stats--two">
+      <div><dt>Build cost</dt><dd>{{ (f.build_cost_supplies ~ ' supplies') if f.build_cost_supplies is not none else 'Not recorded' }}</dd></div>
+      <div><dt>Build time</dt><dd>{{ (f.build_days ~ ' days') if f.build_days is not none else 'Not recorded' }}</dd></div>
+      <div><dt>Power</dt><dd>{{ f.power_label or 'Not recorded' }}</dd></div>
+      <div><dt>Staffing</dt><dd>{{ f.staffing or 'Not recorded' }}</dd></div>
+      <div><dt>Duplicates</dt><dd>{{ 'Can be built more than once' if f.allows_duplicates else 'Can only be built once' }}</dd></div>
+    </dl>
+    {% if f.ruleset_note %}<p class="text-small text-muted">{{ f.ruleset_note }}</p>{% endif %}
+
+    <h5>Upgrades</h5>
+    {% if detail.upgrades %}
+      <ul>{% for u in detail.upgrades %}<li>{{ u.name }}</li>{% endfor %}</ul>
+    {% else %}
+      <p class="text-small text-muted">No upgrades recorded in the catalog for this facility.</p>
+    {% endif %}
+
+    <h5>Prerequisites</h5>
+    {% if detail.prerequisite_leaves %}
+      <ul>{% for p in detail.prerequisite_leaves %}<li>{{ p.name }}</li>{% endfor %}</ul>
+      {% if f.blockers %}
+        <p class="text-small"><strong>Outstanding for this campaign:</strong></p>
+        <ul>{% for b in f.blockers %}<li>{{ b.text }}</li>{% endfor %}</ul>
+      {% else %}
+        <p class="text-small">All recorded prerequisites are met for this campaign.</p>
+      {% endif %}
+    {% else %}
+      <p class="text-small text-muted">No prerequisites recorded in the catalog.</p>
+    {% endif %}
+  </div>
+</div>

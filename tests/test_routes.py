@@ -28,7 +28,7 @@ def test_planning_placeholder_route(client):
     response = client.get("/planning/")
     assert response.status_code == 200
     assert b"Planning" in response.data
-    assert b"Phase 5" in response.data
+    assert b"Phase 7" in response.data
 
 
 def test_new_campaign_form_renders(client):

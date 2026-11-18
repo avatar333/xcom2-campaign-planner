@@ -1,4 +1,4 @@
-"""Planning -- Phase 5 implements this fully (IMPLEMENTATION_PLAN.md).
+"""Planning -- Phase 7 implements this fully (IMPLEMENTATION_PLAN.md).
 
 Placeholder screen only, same rationale as app/routes/catalog.py.
 """

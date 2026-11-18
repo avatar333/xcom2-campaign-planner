@@ -1,0 +1,151 @@
+{# Cell modal: CELL / CURRENT / PLAN / AVAILABLE FACILITIES (UI_UX_SPEC §3.10). #}
+{% import "_components/ui.html" as ui %}
+{% set current_id = cell.facility.object_id if cell.facility else none %}
+{% set start_id = selected_id if selected_id else current_id %}
+{% set start_state = cell.build_state if cell.build_state != 'none' else 'planned' %}
+<div class="modal-backdrop" data-modal-root data-testid="cell-modal">
+  <div class="modal av-modal" role="dialog" aria-modal="true" aria-labelledby="av-modal-title"
+       x-data="{ selected: {{ start_id if start_id else 'null' }}, state: '{{ start_state }}' }">
+    <div class="modal__header">
+      <h2 class="modal__title" id="av-modal-title">Cell {{ cell.coordinate }}
+        <span class="av-modal__sub">{{ cell.room.name if cell.room else 'Room not configured' }}</span></h2>
+      <button class="modal__close" type="button" onclick="this.closest('[data-modal-root]').remove()" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal__body av-modal__body">
+      {% if error %}{{ ui.alert(error, "danger") }}{% endif %}
+
+      <div class="av-modal__summary">
+        {# ---- CELL ---- #}
+        <section class="av-block">
+          <h3 class="av-block__title">Cell</h3>
+          <div class="av-kv"><span>Coordinate</span><strong>{{ cell.coordinate }}</strong></div>
+          <div class="av-kv"><span>Room state</span><strong>{{ cell.room.name if cell.room else 'Not configured' }}</strong></div>
+          {% if cell.room and cell.room.gameplay_effect %}<p class="text-small text-muted">{{ cell.room.gameplay_effect }}</p>{% endif %}
+          <form method="post" action="{{ url_for('avenger.set_room_state', campaign_id=campaign.id, coordinate=cell.coordinate) }}"
+                hx-post="{{ url_for('avenger.set_room_state', campaign_id=campaign.id, coordinate=cell.coordinate) }}" class="av-inline-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <label class="sr-only" for="room_state_id">Change room state</label>
+            <select name="room_state_id" id="room_state_id" class="form-control">
+              {% if not cell.room %}<option value="">Not configured</option>{% endif %}
+              {% for option in room_options %}
+                <option value="{{ option.object_id }}" {{ 'selected' if cell.room and cell.room.object_id == option.object_id else '' }}>{{ option.name }}</option>
+              {% endfor %}
+            </select>
+            <button class="btn btn--sm" type="submit">Set room</button>
+          </form>
+        </section>
+
+        {# ---- CURRENT ---- #}
+        <section class="av-block">
+          <h3 class="av-block__title">Current</h3>
+          {% if cell.facility and cell.build_state in ('constructing', 'built') %}
+            <div class="av-kv"><span>Facility</span><strong>{{ cell.facility.name }}</strong></div>
+            <div class="av-kv"><span>Build state</span><strong class="av-state av-state--{{ cell.build_state }}">{{ cell.build_state_label }}</strong></div>
+          {% else %}
+            <p class="text-muted">Nothing constructed here yet.</p>
+          {% endif %}
+        </section>
+
+        {# ---- PLAN ---- #}
+        <section class="av-block">
+          <h3 class="av-block__title">Plan</h3>
+          {% if cell.facility and cell.build_state == 'planned' %}
+            <div class="av-kv"><span>Planned facility</span><strong>{{ cell.facility.name }}</strong></div>
+            <div class="av-kv"><span>Status</span><strong class="av-state av-state--{{ cell.status }}">{{ cell.status_label }}</strong></div>
+            {% if cell.has_warning %}
+              <ul class="av-blockers" data-testid="cell-blockers">
+                {% for blocker in cell.blockers %}
+                  <li>
+                    <span>{{ blocker.text }}</span>
+                    {% for object_id, object_name in blocker.options %}
+                      <form method="post" action="{{ url_for('avenger.set_prerequisite', campaign_id=campaign.id, object_id=object_id) }}" hx-post="{{ url_for('avenger.set_prerequisite', campaign_id=campaign.id, object_id=object_id) }}" class="av-inline-form">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="completed" value="1">
+                        <input type="hidden" name="cell" value="{{ cell.coordinate }}">
+                        <button class="btn btn--sm" type="submit">Mark {{ object_name }} complete</button>
+                      </form>
+                    {% endfor %}
+                  </li>
+                {% endfor %}
+                {% if cell.room_blocker %}<li>{{ cell.room_blocker }}</li>{% endif %}
+              </ul>
+              <p class="text-small text-muted">The plan is kept. These only show what is still outstanding.</p>
+            {% endif %}
+          {% elif cell.facility %}
+            <p class="text-muted">{{ cell.facility.name }} is {{ cell.build_state_label | lower }}; no separate plan.</p>
+          {% else %}
+            <p class="text-muted">No facility planned. Choose one below.</p>
+          {% endif %}
+          {% if cell.facility %}
+          <div class="av-inline-form av-state-buttons">
+            {% for value, label in assignable_states %}
+              <form method="post" action="{{ url_for('avenger.set_build_state', campaign_id=campaign.id, coordinate=cell.coordinate) }}" hx-post="{{ url_for('avenger.set_build_state', campaign_id=campaign.id, coordinate=cell.coordinate) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="build_state" value="{{ value }}">
+                <button class="btn btn--sm {{ 'btn--primary' if cell.build_state == value else '' }}" type="submit" {{ 'disabled' if cell.build_state == value else '' }}>Mark {{ label }}</button>
+              </form>
+            {% endfor %}
+            <form method="post" action="{{ url_for('avenger.clear_facility', campaign_id=campaign.id, coordinate=cell.coordinate) }}" hx-post="{{ url_for('avenger.clear_facility', campaign_id=campaign.id, coordinate=cell.coordinate) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn--sm btn--danger" type="submit">Clear facility</button>
+            </form>
+          </div>
+          {% endif %}
+        </section>
+      </div>
+
+      {# ---- AVAILABLE FACILITIES ---- #}
+      <section class="av-block av-block--wide">
+        <h3 class="av-block__title">Available facilities <span class="text-muted">&middot; {{ facilities | length }} for this campaign's sources</span></h3>
+        {% if facilities %}
+        <div class="av-fgallery" data-testid="facility-gallery">
+          {% for f in facilities %}
+          <div class="av-fcard-wrap">
+            <button type="button" class="av-fcard {{ 'is-dup' if f.duplicate_blocked else '' }}"
+                    style="--hue: {{ f.hue }};" data-facility-id="{{ f.object_id }}"
+                    :class="{ 'is-selected': selected === {{ f.object_id }} }"
+                    {% if f.duplicate_blocked %}disabled title="Can only be built once; already placed at {{ f.placed_at | join(', ') }}"{% else %}@click="selected = {{ f.object_id }}"{% endif %}>
+              <span class="av-fcard__art">
+                {% if f.primary_asset_id %}<img src="{{ url_for('catalog.serve_asset', asset_id=f.primary_asset_id) }}" alt="{{ f.name }}">
+                {% else %}<span class="av-fcard__glyph">{{ f.glyph | safe }}</span>{% endif %}
+              </span>
+              <span class="av-fcard__name">{{ f.name }}</span>
+              <span class="av-fcard__purpose">{{ f.short_description or '' }}</span>
+              <span class="av-fcard__facts">
+                {% if f.power_label %}<span>{{ f.power_label }}</span>{% endif %}
+                {% if f.build_cost_supplies is not none %}<span>{{ f.build_cost_supplies }} supplies</span>{% endif %}
+                {% if f.build_days is not none %}<span>{{ f.build_days }} days</span>{% else %}<span class="text-muted">build time unknown</span>{% endif %}
+              </span>
+              <span class="av-fcard__prereq {{ 'is-blocked' if f.blockers else 'is-ok' }}">
+                {% if f.duplicate_blocked %}Already placed at {{ f.placed_at | join(', ') }}
+                {% elif f.blockers %}&#9888; {{ f.blockers | length }} prerequisite{{ 's' if f.blockers | length != 1 else '' }} outstanding
+                {% else %}&#10003; Prerequisites met{% endif %}
+              </span>
+              {% if not f.allows_duplicates %}<span class="av-fcard__tag">Unique</span>{% else %}<span class="av-fcard__tag av-fcard__tag--multi">Can duplicate</span>{% endif %}
+            </button>
+            <a class="av-fcard__details" href="{{ url_for('avenger.facility_detail', campaign_id=campaign.id, object_id=f.object_id, cell=cell.coordinate) }}"
+               hx-get="{{ url_for('avenger.facility_detail', campaign_id=campaign.id, object_id=f.object_id, cell=cell.coordinate) }}" hx-target="#av-detail-slot" hx-swap="innerHTML">Details</a>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+          {{ ui.empty_state("No buildable facilities", "This campaign's enabled content sources define no facilities that can be built in the Avenger grid.") }}
+        {% endif %}
+
+        <form method="post" action="{{ url_for('avenger.assign_facility', campaign_id=campaign.id, coordinate=cell.coordinate) }}"
+              hx-post="{{ url_for('avenger.assign_facility', campaign_id=campaign.id, coordinate=cell.coordinate) }}" class="av-assign-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="facility_id" :value="selected">
+          <label for="build_state">Save as</label>
+          <select name="build_state" id="build_state" class="form-control" x-model="state">
+            {% for value, label in assignable_states %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+          </select>
+          <button class="btn btn--primary" type="submit" :disabled="!selected" data-testid="save-facility">Save facility</button>
+          <button class="btn" type="button" onclick="this.closest('[data-modal-root]').remove()">Close</button>
+        </form>
+      </section>
+
+      <section id="av-detail-slot" class="av-detail-slot" aria-live="polite"></section>
+    </div>
+  </div>
+</div>

@@ -32,18 +32,21 @@ app/
   config.py               Config classes (Dev/Test/Prod), reads instance/config.py overrides
   extensions.py            db connection helper, migration runner hook
   domain/
-    requirements.py        pure graph-walk: availability + "what's missing" (ADR-0004, DOMAIN_MODEL §9.1)
+    requirements.py        pure requirement-tree evaluation (AND/OR, "why is this unmet"); Phase 5 implements the generic evaluator, availability walk-up arrives with state tracking (ADR-0004, ADR-0018, DOMAIN_MODEL §9.1)
+    avenger_grid.py        pure 3x4 grid geometry, coordinates, build-state vocabulary (ADR-0020)
     effective_catalog.py   source precedence resolution + caching (ADR-0013)
     attributes.py          validate JSON attributes against catalog_attribute_definitions (ADR-0012)
     plans.py                plan-item blocked/ready derivation
   repositories/
     content_sources.py, catalog_objects.py, catalog_relationships.py, assets.py
+    avenger_cells.py       campaign-scoped Avenger grid cells (Phase 5)
     campaigns.py, campaign_state.py, campaign_plans.py, campaign_soldiers.py, strategy.py
     (every campaign_* function signature starts with campaign_id; see ADR-0010)
   services/
     content_import.py      orchestrates importer/* + repositories, one DB transaction per pack
     campaign_lifecycle.py   create/duplicate/archive/delete campaign (service, not raw repo calls, to keep duplication/delete logic in one audited place)
     planning.py             plan CRUD + recompute-on-write of blocked/ready
+    avenger.py              Avenger Facility Planner: grid init, configure/reset, facility options (effective catalog), assignment, build lifecycle, prerequisite + duplicate evaluation, summary (ADR-0020)
   importer/
     schema.py               JSON Schema for pack.json/objects.json/relationships.json
     validator.py             dry-run diagnostics (FR-SRC-7)
@@ -52,7 +55,7 @@ app/
     storage.py               content-addressed filesystem store
     thumbnail.py              Pillow-based re-encode/resize (strip EXIF)
   routes/
-    catalog.py, content.py, campaigns.py, planning.py, soldiers.py, assets.py, api.py (JSON endpoints for progressive-enhancement JS)
+    catalog.py, content.py, campaigns.py, planning.py, avenger.py (/campaigns/<id>/avenger/*), soldiers.py, assets.py, api.py (JSON endpoints for progressive-enhancement JS)
   templates/            Jinja templates, see UI_UX_SPEC.md for structure
   static/               CSS (custom properties, dark theme), JS modules, SVG fallback glyphs
   cli.py                 flask db migrate / content import|validate|list / seed-dev commands

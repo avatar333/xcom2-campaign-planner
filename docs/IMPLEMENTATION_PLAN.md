@@ -53,34 +53,42 @@ Goal: import the `content/packs/<slug>/` curated pack format (`ARCHITECTURE.md` 
 
 **Definition of done**: Success criterion #1 from `PRODUCT_SPEC.md` §7 (two campaigns, different sources, independent state) passes against *real* imported catalog objects with at least one genuine cross-source override exercised by the effective-catalog resolver. **Met** — see `tests/test_phase4_acceptance.py` (imports the real `content/packs/` data, creates a WotC-standard and an LWotC campaign, asserts the WotC campaign resolves the base `PlasmaRifle` while the LWotC campaign resolves `PlasmaRifle_LWOTC` with its merged patch fields, and asserts fully independent `campaign_object_state` between two campaigns).
 
-## 5. Phase 5 — Campaign state & progression tracking
+## 5. Phase 5 — Avenger Facility Planner
+
+Goal: the campaign-specific **Avenger Facility Planner** (`FR-PLN-7`, promoted from a future `F` item to `M`; `FR-AVG-1…10`): each campaign records its real starting room layout (3 columns × 4 rows, stable coordinates `R1C1`…`R4C3`), plans facilities and tracks construction, with room state, facility assignment and build state kept as three independent fields (`ADR-0020`). Everything displayed is read from the effective catalog — facilities, room states, costs, duplicate rules, prerequisites — never hard-coded. No "what to build next" recommendations (deliberately deferred; the model is shaped so Phase 7 can answer them).
+
+**Status: done.** Delivered: `campaign_avenger_cells` (migration `447c666ac239`), `app/domain/avenger_grid.py` + `app/domain/requirements.py` (pure), `app/repositories/avenger_cells.py`, `app/services/avenger.py`, `app/routes/avenger.py`, `templates/avenger/*`, `static/css/avenger.css`, `static/js/avenger.js`, live "Avenger" nav entry, pack data additions (`blocks_construction`/`is_default_empty` room-state attributes; `wotc` patch override removing the vanilla Advanced Warfare Center), `ADR-0020`. Because the planner needs to read research progress to show blockers, it reads/writes `campaign_object_state` for the "Mark prerequisite complete" action; the full state-tracking screens remain Phase 6.
+
+**Definition of done**: a user can open a campaign, see the 3×4 EMPTY grid, configure their real starting layout, plan/construct/build catalog facilities in cells, see blocked prerequisites without losing the plan, switch campaigns to a completely separate grid, and reload with all data retained — covered by `tests/test_avenger_*.py`.
+
+## 6. Phase 6 — Campaign state & progression tracking
 
 Goal: `campaign_object_state`, `app/domain/requirements.py` (availability / "what's missing", `ARCHITECTURE.md` §6), campaign-state quick-edit on catalog object cards/detail, the object detail page's "what does this unlock" view.
 
 **Definition of done**: Success criterion #2 passes.
 
-## 6. Phase 6 — Planning
+## 7. Phase 7 — Planning
 
 Goal: replace the Planning nav placeholder with plans/plan items, blocked/ready derivation, requirement-tree drawer, dashboard priorities/blocked panels.
 
 **Definition of done**: Success criterion #3 passes.
 
-## 7. Phase 7 — Soldiers, events, strategy profiles
+## 8. Phase 8 — Soldiers, events, strategy profiles
 
 Goal: Soldiers/Loadouts nav sections gain real screens; Events log; strategy profiles end-to-end.
 
 **Definition of done**: all FR-* marked **M** are implemented and tested.
 
-## 8. Phase 8 — Platform hardening
+## 9. Phase 9 — Platform hardening
 
 Goal: backup/export, pack re-import regression, security/accessibility pass, coverage check.
 
 **Definition of done**: all 5 success criteria in `PRODUCT_SPEC.md` §7 pass as automated tests; NFR checklist signed off.
 
-## 9. Phase ordering rationale
+## 10. Phase ordering rationale
 
-Foundation (schema+campaigns+shell) before the catalog architecture keeps the highest-risk structural guarantee — campaign isolation — proven early and in front of a real UI, before any game-content complexity (content sources, relationships, precedence) is layered on top. The catalog/content-source architecture (Phase 3) comes before the curated importer (Phase 4) because the manual-authoring path (content sources, object CRUD, relationships, images, import/export) is what proves the schema and UI are genuinely data-driven — if a user can build an equivalent of curated content by hand through the UI alone, a future importer is just another producer of the same rows, not a new code path. State tracking (Phase 5) before planning (Phase 6) because plans need object state to derive blocked/ready against. Each phase's "Definition of done" stays independently testable so a new session can verify prior phases are genuinely complete before continuing.
+Foundation (schema+campaigns+shell) before the catalog architecture keeps the highest-risk structural guarantee — campaign isolation — proven early and in front of a real UI, before any game-content complexity (content sources, relationships, precedence) is layered on top. The catalog/content-source architecture (Phase 3) comes before the curated importer (Phase 4) because the manual-authoring path (content sources, object CRUD, relationships, images, import/export) is what proves the schema and UI are genuinely data-driven — if a user can build an equivalent of curated content by hand through the UI alone, a future importer is just another producer of the same rows, not a new code path. The Avenger Facility Planner (Phase 5) comes right after the curated data exists, because it is the first screen that exercises real catalog facilities, ruleset overrides, prerequisites and per-campaign isolation end to end and needs only a thin slice of state tracking. Full state tracking (Phase 6) before planning (Phase 7) because plans need object state to derive blocked/ready against. Each phase's "Definition of done" stays independently testable so a new session can verify prior phases are genuinely complete before continuing.
 
-## 10. Out of scope for all phases above (tracked as future `F`-priority items)
+## 11. Out of scope for all phases above (tracked as future `F`-priority items)
 
-Save-file parsing, local game-install extraction (`FR-SRC-9`), facility grid-layout planning (`FR-PLN-7`), online Workshop browsing, light theme, mobile navigation — see `PRODUCT_SPEC.md` §9 and the `F`-priority rows in §4.
+Save-file parsing, local game-install extraction (`FR-SRC-9`), online Workshop browsing, light theme, mobile navigation — see `PRODUCT_SPEC.md` §9 and the `F`-priority rows in §4.

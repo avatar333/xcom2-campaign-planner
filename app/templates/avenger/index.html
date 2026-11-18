@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+{% block title %}Avenger Facility Planner{% endblock %}
+{% block content %}
+{% import "_components/ui.html" as ui %}
+
+{% macro cell_art(cell) %}
+  {% if cell.facility %}
+    {% if cell.facility.primary_asset_id %}
+      <img class="av-cell__img" src="{{ url_for('catalog.serve_asset', asset_id=cell.facility.primary_asset_id) }}" alt="{{ cell.facility.name }}">
+    {% else %}
+      <span class="av-cell__glyph av-cell__glyph--facility">{{ cell.facility.glyph | safe }}</span>
+    {% endif %}
+  {% elif cell.room and cell.room.primary_asset_id %}
+    <img class="av-cell__img" src="{{ url_for('catalog.serve_asset', asset_id=cell.room.primary_asset_id) }}" alt="{{ cell.room.name }}">
+  {% else %}
+    <span class="av-cell__glyph av-cell__glyph--room">{{ (cell.room.glyph if cell.room else grid.room_options[0].glyph if grid.room_options else '') | safe }}</span>
+  {% endif %}
+{% endmacro %}
+
+<div class="page-header">
+  <div>
+    <div class="page-header__eyebrow">{{ campaign.name }} &middot; Avenger</div>
+    <h1 class="page-header__title">Avenger Facility Planner</h1>
+    <p class="page-header__subtitle">
+      Record the Avenger layout from your real playthrough, then plan and track what gets built where.
+      This grid belongs to <strong>{{ campaign.name }}</strong> only.
+    </p>
+  </div>
+  <div class="page-header__actions">
+    {% if mode == "configure" %}
+      <span class="text-small text-muted">Configuring starting layout</span>
+    {% else %}
+      <a class="btn {{ 'btn--primary' if not grid.is_configured else '' }}" href="{{ url_for('avenger.index', campaign_id=campaign.id, mode='configure') }}" data-testid="configure-link">Configure Starting Avenger</a>
+    {% endif %}
+  </div>
+</div>
+
+{% if page_error %}{{ ui.alert(page_error, "danger") }}{% endif %}
+
+{% if mode == "configure" %}
+{# ======================= Configure Starting Avenger ======================= #}
+<script type="application/json" id="av-layout-data">{{ config_data | tojson }}</script>
+<form method="post" action="{{ url_for('avenger.save_layout', campaign_id=campaign.id) }}" x-data="avengerLayoutDraft()" class="av-configure" data-testid="configure-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <template x-for="coordinate in coordinates" :key="coordinate">
+    <input type="hidden" :name="'room_' + coordinate" :value="draft[coordinate] || ''">
+  </template>
+
+  <div class="av-layout">
+    <section class="av-console" aria-label="Avenger layout draft">
+      <div class="av-console__bar">
+        <span class="av-console__title">Starting Layout</span>
+        <span class="av-console__meta"><span x-text="configuredCount"></span> / 12 cells set</span>
+      </div>
+      <div class="av-grid" role="grid" aria-label="Avenger construction grid, 3 columns by 4 rows">
+        {% for cell in grid.cells %}
+        <button type="button" class="av-cell av-cell--config" role="gridcell"
+                data-coordinate="{{ cell.coordinate }}"
+                :class="{ 'is-selected': selected === '{{ cell.coordinate }}', 'is-unset': !draft['{{ cell.coordinate }}'], 'is-hazard': room('{{ cell.coordinate }}') && room('{{ cell.coordinate }}').blocks }"
+                @click="select('{{ cell.coordinate }}')">
+          <span class="av-cell__scan"></span>
+          <span class="av-cell__art">
+            <template x-if="room('{{ cell.coordinate }}') && room('{{ cell.coordinate }}').image">
+              <img class="av-cell__img" :src="room('{{ cell.coordinate }}').image" :alt="room('{{ cell.coordinate }}').name">
+            </template>
+            <template x-if="!room('{{ cell.coordinate }}') || !room('{{ cell.coordinate }}').image">
+              <span class="av-cell__glyph av-cell__glyph--room" x-html="room('{{ cell.coordinate }}') ? room('{{ cell.coordinate }}').glyph : emptyGlyph"></span>
+            </template>
+          </span>
+          <span class="av-cell__coord">{{ cell.coordinate }}</span>
+          <span class="av-cell__footer">
+            <span class="av-cell__name" x-text="room('{{ cell.coordinate }}') ? room('{{ cell.coordinate }}').name : 'EMPTY'"></span>
+            <span class="av-cell__sub" x-show="!draft['{{ cell.coordinate }}']">Not configured</span>
+          </span>
+        </button>
+        {% endfor %}
+      </div>
+    </section>
+
+    <aside class="av-side">
+      <div class="av-panel">
+        <div class="av-panel__title">Room state for <span class="av-accent" x-text="selected"></span></div>
+        <p class="text-small text-muted">Pick what you see in this cell of your real Avenger. The next cell is selected automatically so you can click straight through all 12.</p>
+        <div class="av-room-gallery">
+          <template x-for="option in roomList" :key="option.id">
+            <button type="button" class="av-room-card" :class="{ 'is-active': draft[selected] === option.id, 'is-hazard': option.blocks }" @click="choose(option.id)" :data-room-id="option.id">
+              <span class="av-room-card__art">
+                <template x-if="option.image"><img :src="option.image" :alt="option.name"></template>
+                <template x-if="!option.image"><span class="av-room-card__glyph" x-html="option.glyph"></span></template>
+              </span>
+              <span class="av-room-card__name" x-text="option.name"></span>
+              <span class="av-room-card__effect" x-text="option.effect || ''"></span>
+            </button>
+          </template>
+        </div>
+      </div>
+      <div class="av-panel av-panel--actions">
+        <button class="btn btn--primary" type="submit" data-testid="save-layout">Save Layout</button>
+        <a class="btn" href="{{ url_for('avenger.index', campaign_id=campaign.id) }}" @click="confirmCancel($event)" data-testid="cancel-layout">Cancel</a>
+        <button class="btn btn--ghost" type="button" @click="resetToEmpty()" x-show="defaultEmptyId" data-testid="reset-empty">Reset to EMPTY</button>
+        <p class="text-small text-muted" x-show="dirty">You have unsaved changes. Nothing is saved until you choose Save Layout.</p>
+        <p class="text-small text-muted" x-show="!dirty">No unsaved changes.</p>
+      </div>
+    </aside>
+  </div>
+</form>
+
+{% else %}
+{# =============================== Planner view =============================== #}
+{% if not grid.is_configured %}
+  <div class="av-banner" data-testid="not-configured-banner">
+    <strong>Layout not configured yet.</strong>
+    The planner does not guess your starting Avenger. All 12 cells show as EMPTY placeholders until you record
+    what your own game shows.
+    <a class="btn btn--sm btn--primary" href="{{ url_for('avenger.index', campaign_id=campaign.id, mode='configure') }}">Configure Starting Avenger</a>
+  </div>
+{% elif not grid.is_fully_configured %}
+  <div class="av-banner av-banner--soft">
+    {{ grid.summary.unconfigured_cells }} of 12 cells are still unconfigured.
+    <a class="btn btn--sm" href="{{ url_for('avenger.index', campaign_id=campaign.id, mode='configure') }}">Continue configuring</a>
+  </div>
+{% endif %}
+
+<div class="av-layout">
+  <section class="av-console" aria-label="Avenger construction grid">
+    <div class="av-console__bar">
+      <span class="av-console__title">Avenger Construction Grid</span>
+      <span class="av-console__meta">3 &times; 4 &middot; {{ grid.summary.occupied_cells }} occupied</span>
+    </div>
+    <div class="av-grid" role="grid" aria-label="Avenger construction grid, 3 columns by 4 rows" data-testid="avenger-grid">
+      {% for cell in grid.cells %}
+      <a class="av-cell av-cell--{{ cell.status }}{{ ' is-unset' if not cell.is_configured else '' }}{{ ' is-hazard' if cell.room and cell.room.blocks_construction else '' }}{{ ' has-warning' if cell.has_warning else '' }}"
+         role="gridcell" data-coordinate="{{ cell.coordinate }}" data-status="{{ cell.status }}"
+         style="--hue: {{ cell.facility.hue if cell.facility else 190 }};"
+         href="{{ url_for('avenger.index', campaign_id=campaign.id, cell=cell.coordinate) }}"
+         hx-get="{{ url_for('avenger.cell_modal', campaign_id=campaign.id, coordinate=cell.coordinate) }}" hx-target="body" hx-swap="beforeend">
+        <span class="av-cell__scan"></span>
+        <span class="av-cell__art">{{ cell_art(cell) }}</span>
+        <span class="av-cell__coord">{{ cell.coordinate }}</span>
+        <span class="av-cell__room" title="Room state">
+          {% if cell.room %}{{ cell.room.name }}{% else %}Not configured{% endif %}
+        </span>
+        {% if cell.facility %}
+          <span class="av-cell__status av-cell__status--{{ cell.status }}">{{ cell.status_label }}</span>
+        {% endif %}
+        {% if cell.has_warning %}
+          <span class="av-cell__warn" title="{{ cell.all_warnings | join('; ') }}" aria-label="Blocked: {{ cell.all_warnings | join('; ') }}">&#9888;</span>
+        {% endif %}
+        <span class="av-cell__footer">
+          {% if cell.facility %}
+            <span class="av-cell__name">{{ cell.facility.name }}</span>
+            <span class="av-cell__sub">{{ cell.build_state_label }}{% if cell.facility.power_label %} &middot; {{ cell.facility.power_label }}{% endif %}</span>
+          {% else %}
+            <span class="av-cell__name av-cell__name--muted">{{ 'EMPTY' if cell.is_configured else 'EMPTY (unconfigured)' }}</span>
+          {% endif %}
+        </span>
+      </a>
+      {% endfor %}
+    </div>
+    <div class="av-legend">
+      <span><i class="av-dot av-dot--planned"></i>Planned</span>
+      <span><i class="av-dot av-dot--blocked"></i>Planned &middot; blocked</span>
+      <span><i class="av-dot av-dot--constructing"></i>Constructing</span>
+      <span><i class="av-dot av-dot--built"></i>Built</span>
+      <span><i class="av-dot av-dot--hazard"></i>Needs clearing</span>
+    </div>
+  </section>
+
+  <aside class="av-side">
+    {% set s = grid.summary %}
+    <div class="av-panel" data-testid="avenger-summary">
+      <div class="av-panel__title">Campaign Summary</div>
+      <dl class="av-stats">
+        <div><dt>Built</dt><dd data-stat="built">{{ s.built }}</dd></div>
+        <div><dt>Constructing</dt><dd data-stat="constructing">{{ s.constructing }}</dd></div>
+        <div><dt>Planned</dt><dd data-stat="planned">{{ s.planned }}</dd></div>
+        <div><dt>Plans blocked</dt><dd data-stat="blocked">{{ s.planned_blocked }}</dd></div>
+        <div><dt>Occupied cells</dt><dd data-stat="occupied">{{ s.occupied_cells }} / 12</dd></div>
+        <div><dt>Free cells</dt><dd data-stat="free">{{ s.free_cells }}</dd></div>
+        <div><dt>Cells configured</dt><dd data-stat="configured">{{ s.configured_cells }} / 12</dd></div>
+        <div><dt>Need clearing</dt><dd data-stat="hazards">{{ s.hazard_cells }}</dd></div>
+      </dl>
+    </div>
+
+    <div class="av-panel">
+      <div class="av-panel__title">Power (catalog figures)</div>
+      {% if s.power.built_draw or s.power.built_generated or s.power.pending_draw or s.power.pending_generated %}
+      <dl class="av-stats av-stats--two">
+        <div><dt>Built: drawn</dt><dd>{{ s.power.built_draw }}</dd></div>
+        <div><dt>Built: generated</dt><dd>{{ s.power.built_generated }}</dd></div>
+        <div><dt>Planned/building: drawn</dt><dd>{{ s.power.pending_draw }}</dd></div>
+        <div><dt>Planned/building: generated</dt><dd>{{ s.power.pending_generated }}</dd></div>
+      </dl>
+      {% else %}
+        <p class="text-small text-muted">No facilities with power data placed yet.</p>
+      {% endif %}
+      <p class="text-small text-muted">Base facility figures only. Your Avenger's total power, engineer staffing and power-coil bonuses are not tracked, so no surplus/shortfall is calculated.
+      {% if s.power.facilities_without_power_data %}{{ s.power.facilities_without_power_data }} placed facility(ies) have no power data.{% endif %}</p>
+    </div>
+
+    <div class="av-panel">
+      <div class="av-panel__title">Unresolved prerequisites</div>
+      {% if s.blocked_plans %}
+        <ul class="av-blocked-list" data-testid="blocked-plans">
+          {% for coordinate, name, reasons in s.blocked_plans %}
+            <li><a href="{{ url_for('avenger.index', campaign_id=campaign.id, cell=coordinate) }}"><strong>{{ name }}</strong> <span class="text-muted">({{ coordinate }})</span></a>
+              <ul>{% for reason in reasons %}<li>{{ reason }}</li>{% endfor %}</ul></li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-small text-muted">None. Planned facilities are either unblocked or not yet chosen.</p>
+      {% endif %}
+    </div>
+  </aside>
+</div>
+{% endif %}
+
+{% if modal %}
+  {% with campaign=modal.campaign, cell=modal.cell, facilities=modal.facilities, room_options=modal.room_options, assignable_states=modal.assignable_states, error=modal.error, selected_id=modal.selected_id %}
+    {% include "avenger/_cell_modal.html" %}
+  {% endwith %}
+{% endif %}
+{% endblock %}

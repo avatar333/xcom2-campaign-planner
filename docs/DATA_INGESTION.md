@@ -94,3 +94,12 @@ Packs that cite a pinned upstream revision (`ADR-0019`: `source_repository`/`sou
 
 - **Curated-pack export** (the reverse of `flask content import`, i.e. turning a running database's state for a source back into a `content/packs/<slug>/` directory) is not implemented. The Phase 3 ad hoc interchange format already covers "export my data to share it" (`GET /catalog/export`); a curated-pack-shaped export is lower priority since curated packs are meant to be hand-authored and reviewed, not round-tripped. Tracked as a `FR-SRC-8` follow-up.
 - **Automated extraction from a local game/mod install** (`FR-SRC-9`) remains future work; every pack shipped in this repository was hand-authored from the authoritative sources listed in `docs/DATA_SOURCING.md`, not parsed from a user's local files.
+
+## 9. Data conventions consumed by the Avenger Facility Planner (Phase 5, `ADR-0020`)
+
+The planner reads catalog data only; these conventions let a pack drive it with no code change:
+
+- **Facilities**: objects of type `facility` with attribute `buildable_in_avenger_grid` (default true) are offered in the grid. `allows_duplicates` (default false) controls whether a campaign may place the facility in more than one cell. `power_cost` (negative = generates power), `build_cost_supplies`, `build_days`, `staffing_slots` are shown when present and reported as "Not recorded" when absent — never guessed.
+- **Removing a facility for a ruleset**: author an override object (`overrides` → the base facility) whose `patch.attributes` sets `buildable_in_avenger_grid: false`. The `wotc` pack does this for the vanilla-only Advanced Warfare Center (`AdvancedWarfareCenter_NotInWotC`); vanilla campaigns still see the original.
+- **Room states**: objects of type `avenger_room_state`. Attributes: `clearable`, `blocks_construction` (a planned facility on this room is shown blocked until cleared; falls back to `clearable` when absent), `is_default_empty` (the state "Reset to EMPTY" applies), `gameplay_effect`, `clear_reward`. A pack may add new room states.
+- **Facility prerequisites**: inbound `prerequisite` / `unlocks` / `requires_research` / `requires_facility` relationships on the facility (flat `group_key` OR/AND groups) or a compound group in `prerequisite_groups.json` (`ADR-0018`). In the shipped packs `requires_facility` and `unlocks` are authored with the *requirement as source and the dependent object as target*.
