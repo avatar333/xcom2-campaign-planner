@@ -37,9 +37,14 @@
       <td>{{ ui.status_badge(campaign.status) }}</td>
       <td>{{ campaign.updated_at[:10] }}</td>
       <td class="list-row-actions">
-        <form method="post" action="{{ url_for('campaigns.select_campaign', campaign_id=campaign.id) }}">
-          <button class="btn btn--sm" type="submit">Select</button>
-        </form>
+        {% if campaign.id == active_campaign_id %}
+          <button class="btn btn--sm" type="button" disabled title="This campaign is already active">Active</button>
+        {% else %}
+          <form method="post" action="{{ url_for('campaigns.select_campaign', campaign_id=campaign.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn--sm" type="submit">Select</button>
+          </form>
+        {% endif %}
         <a class="btn btn--sm" href="{{ url_for('campaigns.manage_sources', campaign_id=campaign.id) }}">Sources</a>
         <a class="btn btn--sm" hx-get="{{ url_for('campaigns.edit_campaign', campaign_id=campaign.id) }}" hx-target="body" hx-swap="beforeend" href="{{ url_for('campaigns.edit_campaign', campaign_id=campaign.id) }}">Edit</a>
         <a class="btn btn--sm btn--danger" hx-get="{{ url_for('campaigns.delete_campaign', campaign_id=campaign.id) }}" hx-target="body" hx-swap="beforeend" href="{{ url_for('campaigns.delete_campaign', campaign_id=campaign.id) }}">Delete</a>
