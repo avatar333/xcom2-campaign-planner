@@ -67,9 +67,11 @@
           <td>{{ ui.badge("Enabled" if assoc.enabled else "Disabled", "ready" if assoc.enabled else "unknown") }}</td>
           <td class="list-row-actions">
             <form method="post" action="{{ url_for('campaigns.toggle_source', campaign_id=campaign.id, source_id=assoc.content_source_id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <button class="btn btn--sm" type="submit">{{ "Disable" if assoc.enabled else "Enable" }}</button>
             </form>
             <form method="post" action="{{ url_for('campaigns.remove_source', campaign_id=campaign.id, source_id=assoc.content_source_id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <button class="btn btn--sm btn--danger" type="submit">Remove</button>
             </form>
           </td>
@@ -95,6 +97,7 @@
       </div>
       {% if source.description %}<p class="card__meta">{{ source.description }}</p>{% endif %}
       <form method="post" action="{{ url_for('campaigns.add_source', campaign_id=campaign.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="content_source_id" value="{{ source.id }}">
         <button class="btn btn--primary btn--sm" type="submit">+ Attach</button>
       </form>

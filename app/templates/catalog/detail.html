@@ -20,10 +20,12 @@
     {% if obj.is_user_authored %}
       <a class="btn" href="{{ url_for('catalog.edit_object', object_id=obj.id) }}">Edit</a>
       <form method="post" action="{{ url_for('catalog.delete_object', object_id=obj.id) }}" style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button class="btn btn--danger" type="submit">Delete</button>
       </form>
     {% else %}
       <form method="post" action="{{ url_for('catalog.create_overlay', object_id=obj.id) }}" style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button class="btn btn--primary" type="submit" title="Built-in/imported objects are read-only; this creates an editable copy in your Custom source.">Edit (creates overlay)</button>
       </form>
     {% endif %}
@@ -174,6 +176,7 @@
                   {% if rel.group_key %}{{ ui.badge("OR: " ~ rel.group_key, "warning") }}{% endif %}
                 </span>
                 <form method="post" action="{{ url_for('catalog.delete_relationship', relationship_id=rel.id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                   <button class="btn btn--sm btn--ghost" type="submit">Remove</button>
                 </form>
               </li>
@@ -196,6 +199,7 @@
                   {% if rel.amount %}<span class="text-small text-muted">({{ rel.amount }} {{ rel.unit or '' }})</span>{% endif %}
                 </span>
                 <form method="post" action="{{ url_for('catalog.delete_relationship', relationship_id=rel.id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                   <button class="btn btn--sm btn--ghost" type="submit">Remove</button>
                 </form>
               </li>
