@@ -11,21 +11,12 @@
 </div>
 {% if error %}{{ ui.alert(error, "danger") }}{% endif %}
 
-<form method="post" class="bw-form" data-testid="build-editor"
-      x-data="{
-        step: {{ 3 if selected_base_id else 1 }},
-        baseId: {{ selected_base_id or 'null' }},
-        attachments: {{ (attachments.items() | map('list') | list) | tojson }},
-        get(slotType, idx) { const hit = this.attachments.find(([k]) => k[0] === slotType && k[1] === idx); return hit ? hit[1] : null; },
-        choose(slotType, idx, id) {
-          this.attachments = this.attachments.filter(([k]) => !(k[0] === slotType && k[1] === idx));
-          if (id) this.attachments.push([[slotType, idx], id]);
-        },
-      }">
+<script type="application/json" id="bw-editor-state">{{ editor_state | tojson }}</script>
+<form method="post" class="bw-form" data-testid="build-editor" x-data="buildEditor">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <input type="hidden" name="base_object_id" :value="baseId">
-  <template x-for="[key, id] in attachments" :key="key[0] + '-' + key[1]">
-    <input type="hidden" :name="'slot__' + key[0] + '__' + key[1]" :value="id">
+  <template x-for="a in attachments" :key="a.slotType + '-' + a.index">
+    <input type="hidden" :name="'slot__' + a.slotType + '__' + a.index" :value="a.objectId">
   </template>
 
   <nav class="bw-steps">
@@ -77,19 +68,22 @@
     <div class="bw-slot-section">
       <h3 class="bw-slot-section__title">{{ slot.label }}</h3>
       <div class="bw-gallery">
-        <label class="bw-card bw-card--empty" :class="{ 'is-selected': get('{{ slot.slot_type }}', {{ slot.index }}) === null }">
-          <input type="radio" name="_display_{{ slot.slot_type }}_{{ slot.index }}" x-on:change="choose('{{ slot.slot_type }}', {{ slot.index }}, null)" :checked="get('{{ slot.slot_type }}', {{ slot.index }}) === null" class="sr-only">
+        <label class="bw-card bw-card--empty" data-slot-type="{{ slot.slot_type }}" data-slot-index="{{ slot.index }}" data-object-id=""
+               :class="{ 'is-selected': isSelected($el) }">
+          <input type="radio" name="_display_{{ slot.slot_type }}_{{ slot.index }}" @change="pick($el.closest('label'))" :checked="isSelected($el.closest('label'))" class="sr-only">
           <span class="bw-card__name">None</span>
         </label>
         {% for option in options.get(slot.slot_type, []) %}
-        <label class="bw-card bw-card--{{ option.compatibility.state }}" :class="{ 'is-selected': get('{{ slot.slot_type }}', {{ slot.index }}) === {{ option.ref.object_id }} }" title="{{ option.compatibility.reason }}">
-          <input type="radio" name="_display_{{ slot.slot_type }}_{{ slot.index }}" x-on:change="choose('{{ slot.slot_type }}', {{ slot.index }}, {{ option.ref.object_id }})"
-                 :checked="get('{{ slot.slot_type }}', {{ slot.index }}) === {{ option.ref.object_id }}" class="sr-only">
+        <label class="bw-card bw-card--{{ option.compatibility.state }}" title="{{ option.compatibility.reason }}"
+               data-slot-type="{{ slot.slot_type }}" data-slot-index="{{ slot.index }}" data-object-id="{{ option.ref.object_id }}"
+               :class="{ 'is-selected': isSelected($el) }">
+          <input type="radio" name="_display_{{ slot.slot_type }}_{{ slot.index }}" @change="pick($el.closest('label'))"
+                 :checked="isSelected($el.closest('label'))" class="sr-only">
           {{ rs.art(option.ref, "md") }}
           <span class="bw-card__name">{{ option.ref.name }}{% if option.quality %} <span class="text-muted">({{ option.quality }})</span>{% endif %}</span>
           {% if option.compatibility.state == "incompatible" %}
             <span class="bw-compat bw-compat--bad">&#10005; Not compatible</span>
-            <label class="bw-override"><input type="checkbox" name="override__{{ slot.slot_type }}__{{ slot.index }}" value="1" :disabled="get('{{ slot.slot_type }}', {{ slot.index }}) !== {{ option.ref.object_id }}"> Allow anyway (manual override)</label>
+            <label class="bw-override"><input type="checkbox" name="override__{{ slot.slot_type }}__{{ slot.index }}" value="1" {{ 'checked' if (slot.slot_type, slot.index) in overrides and attachments.get((slot.slot_type, slot.index)) == option.ref.object_id else '' }} :disabled="!isSelected($el.closest('.bw-card'))"> Allow anyway (manual override)</label>
           {% elif option.compatibility.state == "unverified" %}
             <span class="bw-compat bw-compat--unknown">? Unverified</span>
           {% else %}
@@ -112,15 +106,15 @@
     <h2 class="rs-panel__title">Name &amp; Purpose</h2>
     <div class="form-field">
       <label for="name">Build name <span class="text-muted">(required)</span></label>
-      <input type="text" id="name" name="name" class="form-control" value="{{ request.form.get('name', build.name if build else '') }}" required>
+      <input type="text" id="name" name="name" class="form-control" value="{{ request.form.get('name', (build.name or '') if build else '') }}" required>
     </div>
     <div class="form-field">
       <label for="purpose">Purpose / role</label>
-      <input type="text" id="purpose" name="purpose" class="form-control" value="{{ request.form.get('purpose', build.purpose if build else '') }}" placeholder="e.g. Maximum close-range critical damage">
+      <input type="text" id="purpose" name="purpose" class="form-control" value="{{ request.form.get('purpose', (build.purpose or '') if build else '') }}" placeholder="e.g. Maximum close-range critical damage">
     </div>
     <div class="form-field">
       <label for="notes">Notes</label>
-      <textarea id="notes" name="notes" class="form-control" rows="3">{{ request.form.get('notes', build.notes if build else '') }}</textarea>
+      <textarea id="notes" name="notes" class="form-control" rows="3">{{ request.form.get('notes', (build.notes or '') if build else '') }}</textarea>
     </div>
     <div class="form-actions">
       <button type="button" class="btn" @click="step = 3">Back</button>

@@ -20,3 +20,9 @@ Both libraries are used strictly as progressive enhancement: every screen built 
 - CDN-hosted htmx/Alpine (`<script src="https://unpkg.com/...">`): rejected outright — violates `NFR-4` (fully offline) and the CSP's `script-src 'self'`.
 - A full SPA framework (React/Vue): rejected per the brief's explicit preference and `ADR-0011`'s existing rejection of a client-side build pipeline.
 - No JS at all (pure server-rendered, full page reloads only): considered; rejected as insufficiently "polished" for modal/drawer workflows explicitly requested, when htmx achieves this with negligible added complexity and no business-logic duplication.
+
+## Amendment (19/11/2026, bug fix 01): passing server data to Alpine components
+Any component more than a trivial toggle is a named component registered in `app/static/js/*.js` with `Alpine.data("name", ...)` and referenced as `x-data="name"` / `x-data="name()"`. Server-side state reaches it **only as data**: serialised once with Jinja's `tojson` inside `<script type="application/json" id="...">`, and read with `JSON.parse(el.textContent)`. Per-element identity (slot type, index, object id) travels in `data-*` attributes and is read via `el.dataset`. Server values are never spliced into JavaScript source or into an `x-data`/`x-on`/`:attr` expression.
+
+Why: `tojson` escapes `<`, `>`, `&` and `'` but **not `"`**, so it is only safe inside a `<script>` element. Used inside a double-quoted attribute (`x-data="{ items: {{ items | tojson }} }"`) the first `"` ends the attribute and the remainder of the component source is rendered as page text (this is exactly how the Edit Build page broke). `tests/test_bugfix_20261119_01_build_editor.py::test_no_template_puts_tojson_outside_a_script_element` fails the build if any template does this. The established examples are `avenger-layout` (`avengerLayoutDraft`), the research graph, and the build editor (`buildEditor`).
+

@@ -181,6 +181,20 @@ def index(campaign_id: int):
     )
 
 
+def _editor_state(base_id, attachments) -> dict:
+    """The single, JSON-serialisable initial state of the build editor's Alpine
+    component -- the same shape for Create and Edit (and for a re-render after a
+    validation error). Sorted so the output is deterministic."""
+    return {
+        "step": 3 if base_id else 1,
+        "baseId": base_id,
+        "attachments": [
+            {"slotType": slot_type, "index": index, "objectId": object_id}
+            for (slot_type, index), object_id in sorted((attachments or {}).items())
+        ],
+    }
+
+
 def _editor_context(campaign, build_type, ctx, *, base_id=None, attachments=None, overrides=None):
     specs, options = ([], {})
     if base_id:
@@ -195,6 +209,7 @@ def _editor_context(campaign, build_type, ctx, *, base_id=None, attachments=None
         "options": options,
         "attachments": attachments or {},
         "overrides": overrides or set(),
+        "editor_state": _editor_state(base_id, attachments),
     }
 
 
