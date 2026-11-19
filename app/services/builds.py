@@ -403,6 +403,49 @@ def update_build(
 
 
 @dataclass(frozen=True)
+class FittedComponents:
+    """Result of moving a build's components onto a different base object."""
+
+    attachments: dict[SlotKey, int]
+    dropped: tuple[str, ...]  # names of components that have no matching slot on the new base
+
+    @property
+    def overrides(self) -> set[SlotKey]:
+        """Manual compatibility overrides are never carried across a base change:
+        an override accepted for one base says nothing about another, so the
+        player is asked again if the new base makes a component incompatible."""
+        return set()
+
+
+def fit_attachments_to_base(
+    campaign: Campaign,
+    build_type: str,
+    base_object_id: int,
+    attachments: dict[SlotKey, int],
+    *,
+    ctx: BuildContext | None = None,
+) -> FittedComponents:
+    """Keep each component whose slot (type and index) still exists on the new
+    base and accepts that kind of component; report the rest by name. Nothing is
+    judged for compatibility here -- a kept component that the new base makes
+    incompatible is shown as such in the editor and rejected on save unless the
+    player explicitly overrides it. Raises `BuildError` for an invalid base."""
+    ctx = ctx or BuildContext(campaign)
+    base = _require_base(ctx, build_type, base_object_id)
+    slots = {slot.key: slot for slot in slot_specs(ctx, build_type, base)}
+    kept: dict[SlotKey, int] = {}
+    dropped: list[str] = []
+    for key, object_id in sorted(attachments.items()):
+        winner = ctx.winner_of(object_id)
+        slot = slots.get(key)
+        if slot is not None and winner is not None and ctx.type_slug(winner) in slot.accepts:
+            kept[key] = winner
+        else:
+            dropped.append(ctx.effective[winner]["name"] if winner in ctx.effective else _stored_name(object_id))
+    return FittedComponents(kept, tuple(dropped))
+
+
+@dataclass(frozen=True)
 class BuildPreview:
     validation: ValidationResult
     summary: BuildSummary

@@ -12,20 +12,20 @@
 </div>
 {% if error %}{{ ui.alert(error, "danger") }}{% endif %}
 
-<form method="post" enctype="multipart/form-data" class="sd-form" x-data="{ classId: {{ (soldier.class_object_id if soldier else form.get('class_object_id')) or 'null' }} }" data-testid="soldier-form">
+<form method="post" enctype="multipart/form-data" class="sd-form" x-data="soldierForm" data-class-id="{{ selected_class_id or '' }}" data-testid="soldier-form">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <div class="sd-form__grid">
     <div class="form-field">
       <label for="name">Name <span class="text-muted">(required)</span></label>
-      <input type="text" id="name" name="name" class="form-control" value="{{ form.get('name', soldier.name if soldier else '') }}" required>
+      <input type="text" id="name" name="name" class="form-control" value="{{ form.get('name', (soldier.name or '') if soldier else '') }}" required>
     </div>
     <div class="form-field">
       <label for="surname">Surname</label>
-      <input type="text" id="surname" name="surname" class="form-control" value="{{ form.get('surname', soldier.surname if soldier else '') }}">
+      <input type="text" id="surname" name="surname" class="form-control" value="{{ form.get('surname', (soldier.surname or '') if soldier else '') }}">
     </div>
     <div class="form-field">
       <label for="callsign">Callsign</label>
-      <input type="text" id="callsign" name="callsign" class="form-control" value="{{ form.get('callsign', soldier.callsign if soldier else '') }}">
+      <input type="text" id="callsign" name="callsign" class="form-control" value="{{ form.get('callsign', (soldier.callsign or '') if soldier else '') }}">
     </div>
     <div class="form-field">
       <label for="status">Status</label>
@@ -50,8 +50,8 @@
     {% if classes %}
     <div class="sd-pick-gallery" data-testid="class-gallery">
       {% for c in classes %}
-      <label class="sd-pick-card {{ 'is-selected' if (soldier.class_object_id if soldier else form.get('class_object_id') | int(0)) == c.object_id else '' }}">
-        <input type="radio" name="class_object_id" value="{{ c.object_id }}" x-model="classId" {{ 'checked' if (soldier.class_object_id if soldier else form.get('class_object_id') | int(0)) == c.object_id }}>
+      <label class="sd-pick-card {{ 'is-selected' if selected_class_id == c.object_id else '' }}" :class="{ 'is-selected': classId === {{ c.object_id }} }">
+        <input type="radio" name="class_object_id" value="{{ c.object_id }}" x-model.number="classId" {{ 'checked' if selected_class_id == c.object_id }}>
         {{ rs.art(c, "md") }}
         <span class="sd-pick-card__name">{{ c.name }}</span>
       </label>
@@ -66,13 +66,13 @@
     <label for="rank_object_id">Rank</label>
     <select id="rank_object_id" name="rank_object_id" class="form-control">
       <option value="">No rank</option>
-      {% for r in ranks %}<option value="{{ r.object_id }}" {{ 'selected' if (soldier.rank_object_id if soldier else form.get('rank_object_id') | int(0)) == r.object_id }}>{{ r.name }}</option>{% endfor %}
+      {% for r in ranks %}<option value="{{ r.object_id }}" {{ 'selected' if selected_rank_id == r.object_id }}>{{ r.name }}</option>{% endfor %}
     </select>
   </div>
 
   <div class="form-field">
     <label for="notes">Notes</label>
-    <textarea id="notes" name="notes" class="form-control" rows="3">{{ form.get('notes', soldier.notes if soldier else '') }}</textarea>
+    <textarea id="notes" name="notes" class="form-control" rows="3">{{ form.get('notes', (soldier.notes or '') if soldier else '') }}</textarea>
   </div>
 
   <div class="form-actions">

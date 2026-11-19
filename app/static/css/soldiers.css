@@ -85,3 +85,6 @@
 .bw-compat--good { color: var(--status-success); } .bw-compat--bad { color: var(--status-danger); } .bw-compat--unknown { color: var(--text-2); } .bw-compat--override { color: var(--status-warning); }
 .bw-override { font-size: 0.68rem; display: flex; gap: 0.3rem; align-items: center; color: var(--status-warning); }
 .bw-slotlist { margin: 0; padding-left: 1.2rem; } .bw-slot-section { margin-bottom: 1rem; } .bw-slot-section__title { font-size: 0.82rem; margin: 0 0 0.4rem; color: var(--text-1); }
+
+/* Base cards in step 1 are submit buttons (so a base change keeps the user's draft). */
+button.bw-card { font: inherit; width: 100%; }

@@ -67,7 +67,19 @@ def new_soldier(campaign_id: int):
     return _render_soldier_form(campaign, ctx)
 
 
+def _selected_id(form, field: str, saved: int | None) -> int | None:
+    """The id to show as selected: what the user just submitted (re-render after
+    a validation error), else the saved value. Always an int or None -- raw
+    request text never reaches a template."""
+    if form and field in form:
+        try:
+            return int(form.get(field, ""))
+        except (TypeError, ValueError):
+            return None
+    return saved
+
 def _render_soldier_form(campaign, ctx, *, soldier=None, error=None, form=None):
+    form = form or {}
     return render_template(
         "soldiers/form.html",
         campaign=campaign,
@@ -75,9 +87,10 @@ def _render_soldier_form(campaign, ctx, *, soldier=None, error=None, form=None):
         classes=soldiers_service.list_class_options(campaign, ctx=ctx),
         ranks=soldiers_service.list_rank_options(campaign, ctx=ctx),
         error=error,
-        form=form or {},
+        form=form,
+        selected_class_id=_selected_id(form, "class_object_id", soldier.class_object_id if soldier else None),
+        selected_rank_id=_selected_id(form, "rank_object_id", soldier.rank_object_id if soldier else None),
     )
-
 
 @soldiers_bp.route("/<int:soldier_id>")
 def soldier_detail(campaign_id: int, soldier_id: int):
@@ -195,7 +208,21 @@ def _editor_state(base_id, attachments) -> dict:
     }
 
 
-def _editor_context(campaign, build_type, ctx, *, base_id=None, attachments=None, overrides=None):
+def _rebase(campaign, build_type, ctx, new_base_id, attachments):
+    """Move the editor onto another base object: keep the components that still
+    fit, drop (and tell the user about) the rest. Returns
+    `(attachments, overrides, notice)`; raises BuildError for an invalid base."""
+    fitted = builds_service.fit_attachments_to_base(campaign, build_type, new_base_id, attachments, ctx=ctx)
+    notice = None
+    if fitted.dropped:
+        notice = (
+            "Base changed. These components have no matching slot on the new base and were removed from "
+            "this draft: " + ", ".join(fitted.dropped) + ". Nothing is saved until you press Save Build."
+        )
+    return fitted.attachments, fitted.overrides, notice
+
+
+def _editor_context(campaign, build_type, ctx, *, base_id=None, attachments=None, overrides=None, notice=None):
     specs, options = ([], {})
     if base_id:
         specs, options = builds_service.list_component_options(campaign, build_type, base_id, ctx=ctx)
@@ -210,6 +237,7 @@ def _editor_context(campaign, build_type, ctx, *, base_id=None, attachments=None
         "attachments": attachments or {},
         "overrides": overrides or set(),
         "editor_state": _editor_state(base_id, attachments),
+        "notice": notice,
     }
 
 
@@ -223,8 +251,17 @@ def new_build(campaign_id: int, build_type: str):
     ctx = BuildContext(campaign)
     base_id = request.values.get("base_object_id", type=int)
     attachments, overrides = _parse_build_form(request.form) if request.method == "POST" else ({}, set())
+    notice = None
 
-    if request.method == "POST" and request.form.get("step") == "save":
+    if request.method == "POST" and request.form.get("rebase_to", type=int) is not None:
+        try:
+            attachments, overrides, notice = _rebase(campaign, build_type, ctx, request.form.get("rebase_to", type=int), attachments)
+            base_id = request.form.get("rebase_to", type=int)
+        except BuildError as exc:
+            context = _editor_context(campaign, build_type, ctx, base_id=base_id, attachments=attachments, overrides=overrides)
+            return render_template("builds/editor.html", error=str(exc), build=None, **context), 400
+
+    elif request.method == "POST" and request.form.get("step") == "save":
         try:
             build = builds_service.create_build(
                 campaign, build_type, base_object_id=base_id, name=request.form.get("name", ""),
@@ -235,7 +272,7 @@ def new_build(campaign_id: int, build_type: str):
             return render_template("builds/editor.html", error=str(exc), build=None, **context), 400
         return redirect(url_for("builds.build_detail", campaign_id=campaign.id, build_id=build.id))
 
-    context = _editor_context(campaign, build_type, ctx, base_id=base_id, attachments=attachments, overrides=overrides)
+    context = _editor_context(campaign, build_type, ctx, base_id=base_id, attachments=attachments, overrides=overrides, notice=notice)
     return render_template("builds/editor.html", build=None, error=request.args.get("error"), **context)
 
 
@@ -272,6 +309,18 @@ def edit_build(campaign_id: int, build_id: int):
     if request.method == "POST":
         base_id = request.form.get("base_object_id", type=int)
         attachments, overrides = _parse_build_form(request.form)
+        if request.form.get("rebase_to", type=int) is not None:
+            # Base chosen in step 1: re-render on the new base, keeping everything
+            # the user has typed or picked so far (name/purpose/notes come back
+            # from request.form, components are fitted to the new slots).
+            try:
+                attachments, overrides, notice = _rebase(campaign, build.build_type, ctx, request.form.get("rebase_to", type=int), attachments)
+                base_id = request.form.get("rebase_to", type=int)
+            except BuildError as exc:
+                context = _editor_context(campaign, build.build_type, ctx, base_id=base_id, attachments=attachments, overrides=overrides)
+                return render_template("builds/editor.html", error=str(exc), build=build, **context), 400
+            context = _editor_context(campaign, build.build_type, ctx, base_id=base_id, attachments=attachments, overrides=overrides, notice=notice)
+            return render_template("builds/editor.html", build=build, **context)
         if request.form.get("step") == "save":
             try:
                 builds_service.update_build(
@@ -288,7 +337,15 @@ def edit_build(campaign_id: int, build_id: int):
     view = builds_service.build_view(campaign, build, ctx=ctx)
     attachments = {c.slot.key: c.ref.object_id for c in view.components}
     overrides = {c.slot.key for c in view.components if c.is_override}
-    context = _editor_context(campaign, build.build_type, ctx, base_id=view.base.object_id, attachments=attachments, overrides=overrides)
+    base_id, notice = view.base.object_id, None
+    requested_base = request.args.get("base_object_id", type=int)
+    if requested_base is not None and requested_base != base_id:  # deep link / bookmark to a different base
+        try:
+            attachments, overrides, notice = _rebase(campaign, build.build_type, ctx, requested_base, attachments)
+            base_id = requested_base
+        except BuildError as exc:
+            notice = str(exc)
+    context = _editor_context(campaign, build.build_type, ctx, base_id=base_id, attachments=attachments, overrides=overrides, notice=notice)
     return render_template("builds/editor.html", build=build, **context)
 
 

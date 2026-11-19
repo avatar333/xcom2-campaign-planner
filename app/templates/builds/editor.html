@@ -10,6 +10,7 @@
   </div>
 </div>
 {% if error %}{{ ui.alert(error, "danger") }}{% endif %}
+{% if notice %}{{ ui.alert(notice, "warning") }}{% endif %}
 
 <script type="application/json" id="bw-editor-state">{{ editor_state | tojson }}</script>
 <form method="post" class="bw-form" data-testid="build-editor" x-data="buildEditor">
@@ -31,12 +32,13 @@
     {% if bases %}
     <div class="bw-gallery">
       {% for b in bases %}
-      <a class="bw-card bw-card--{{ b.status }} {{ 'is-selected' if selected_base_id == b.object_id else '' }}"
-         href="?base_object_id={{ b.object_id }}">
+      <button type="submit" name="rebase_to" value="{{ b.object_id }}" formnovalidate
+              class="bw-card bw-card--{{ b.status }} {{ 'is-selected' if selected_base_id == b.object_id else '' }}"
+              title="Use {{ b.name }} as the base. Everything you have entered is kept; components that do not fit are removed.">
         {{ rs.art(b, "md") }}
         <span class="bw-card__name">{{ b.name }}</span>
         {{ rs.status_pill(b) }}
-      </a>
+      </button>
       {% endfor %}
     </div>
     {% else %}
