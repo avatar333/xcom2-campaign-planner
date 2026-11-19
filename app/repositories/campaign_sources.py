@@ -11,9 +11,11 @@ from app.models import Campaign, CampaignContentSource, ContentSource
 
 
 def list_for_campaign(campaign_id: int) -> list[CampaignContentSource]:
+    """Every association (enabled or not) in precedence order. The association
+    id is a tie-break so equal precedences never come back in arbitrary order."""
     return (
         CampaignContentSource.query.filter_by(campaign_id=campaign_id)
-        .order_by(CampaignContentSource.precedence.asc())
+        .order_by(CampaignContentSource.precedence.asc(), CampaignContentSource.id.asc())
         .all()
     )
 

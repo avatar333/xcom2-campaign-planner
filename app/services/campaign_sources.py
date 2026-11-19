@@ -8,9 +8,58 @@ layer so every mutation path goes through it.
 """
 from __future__ import annotations
 
-from app.models import Campaign, ContentSource
+from dataclasses import dataclass
+
+from sqlalchemy.orm import joinedload
+
+from app.models import Campaign, CampaignContentSource, ContentSource
 from app.repositories import campaign_sources as repo
 from app.repositories import content_sources as sources_repo
+
+
+@dataclass(frozen=True)
+class CampaignSourceView:
+    """One content source as attached to one campaign: the persisted
+    association (precedence, enabled) together with the real source (name,
+    kind). Every screen that displays a campaign's sources uses this, so they
+    can never disagree about which sources a campaign has."""
+
+    association: CampaignContentSource
+    source: ContentSource
+
+    @property
+    def name(self) -> str:
+        return self.source.name
+
+    @property
+    def slug(self) -> str:
+        return self.source.slug
+
+    @property
+    def kind(self) -> str:
+        return self.source.kind
+
+    @property
+    def precedence(self) -> int:
+        return self.association.precedence
+
+    @property
+    def enabled(self) -> bool:
+        return bool(self.association.enabled)
+
+
+def list_campaign_sources(campaign_id: int) -> list[CampaignSourceView]:
+    """The campaign's actual persisted source associations -- the single source
+    of truth -- in the explicit precedence order, with the source names
+    resolved. Nothing is derived from the campaign's game profile: the profile
+    only seeded these rows at creation, and the user may have changed them."""
+    associations = (
+        CampaignContentSource.query.options(joinedload(CampaignContentSource.content_source))
+        .filter_by(campaign_id=campaign_id)
+        .order_by(CampaignContentSource.precedence.asc(), CampaignContentSource.id.asc())
+        .all()
+    )
+    return [CampaignSourceView(a, a.content_source) for a in associations]
 
 
 class CampaignSourceError(ValueError):

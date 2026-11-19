@@ -168,10 +168,7 @@ def manage_sources(campaign_id: int):
     campaign = campaigns_repo.get_campaign(campaign_id)
     if campaign is None:
         abort(404)
-    associations = campaign_sources_repo.list_for_campaign(campaign_id)
-    attached_sources = [
-        (assoc, sources_repo.get_content_source(assoc.content_source_id)) for assoc in associations
-    ]
+    attached_sources = [(v.association, v.source) for v in campaign_sources_service.list_campaign_sources(campaign_id)]
     available_sources = campaign_sources_repo.available_sources_to_add(campaign_id)
     return render_template(
         "campaigns/sources.html",

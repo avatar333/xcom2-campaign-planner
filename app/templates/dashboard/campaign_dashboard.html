@@ -25,22 +25,24 @@
   </div>
 {% endif %}
 
-{{ ui.section_header("Enabled Content Sources") }}
-{% if campaign.content_sources %}
-  <table class="data-table" style="margin-bottom:1.5rem;">
-    <thead><tr><th>Source</th><th>Precedence</th><th>Status</th></tr></thead>
+{{ ui.section_header("Content Sources", (sources | selectattr("enabled") | list | length) ~ " enabled of " ~ (sources | length) ~ " attached" if sources else none) }}
+{% if sources %}
+  <table class="data-table" style="margin-bottom:1.5rem;" data-testid="campaign-sources">
+    <thead><tr><th>Source</th><th>Kind</th><th>Precedence</th><th>Status</th></tr></thead>
     <tbody>
-    {% for cs in campaign.content_sources | sort(attribute="precedence") %}
+    {% for source in sources %}
       <tr>
-        <td>Source #{{ cs.content_source_id }}</td>
-        <td>{{ cs.precedence }}</td>
-        <td>{{ ui.badge("Enabled" if cs.enabled else "Disabled", "ready" if cs.enabled else "unknown") }}</td>
+        <td><a href="{{ url_for('content_sources.detail', source_id=source.source.id) }}">{{ source.name }}</a></td>
+        <td>{{ source.kind | replace("_", " ") | title }}</td>
+        <td>{{ source.precedence }}</td>
+        <td>{{ ui.badge("Enabled" if source.enabled else "Disabled", "ready" if source.enabled else "unknown") }}</td>
       </tr>
     {% endfor %}
     </tbody>
   </table>
+  <p class="text-small text-muted" style="margin-bottom:1.5rem;"><a href="{{ url_for('campaigns.manage_sources', campaign_id=campaign.id) }}">Manage sources</a></p>
 {% else %}
-  {{ ui.empty_state("No content sources enabled", "This campaign has no content sources selected yet. Full source management arrives in Phase 3.") }}
+  {{ ui.empty_state("No content sources configured", "This campaign has no content sources attached, so its catalog is empty.", action_label="Manage sources", action_url=url_for('campaigns.manage_sources', campaign_id=campaign.id)) }}
 {% endif %}
 
 {{ ui.section_header("Progression") }}

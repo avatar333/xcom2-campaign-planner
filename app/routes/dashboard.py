@@ -8,6 +8,7 @@ from __future__ import annotations
 from flask import Blueprint, abort, render_template
 
 from app.repositories import campaigns as campaigns_repo
+from app.services import campaign_sources as campaign_sources_service
 from app.services.campaign_context import set_active_campaign
 
 dashboard_bp = Blueprint("dashboard", __name__)
@@ -25,4 +26,8 @@ def campaign_dashboard(campaign_id: int):
     if campaign is None:
         abort(404)
     set_active_campaign(campaign.id)
-    return render_template("dashboard/campaign_dashboard.html", campaign=campaign)
+    return render_template(
+        "dashboard/campaign_dashboard.html",
+        campaign=campaign,
+        sources=campaign_sources_service.list_campaign_sources(campaign.id),
+    )
