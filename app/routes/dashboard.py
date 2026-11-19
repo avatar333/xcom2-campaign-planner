@@ -1,13 +1,15 @@
 """Dashboard routes. Global landing page + campaign-specific dashboard
 (UI_UX_SPEC.md §3.1). Full dashboard widgets (priorities/blocked/events)
-arrive with Planning (Phase 8); this phase renders the campaign header,
-enabled-sources summary and empty states.
+arrive with Planning (Phase 8); until then the dashboard shows the campaign
+header, its real content sources, and a progression summary linking to the
+Research, Avenger, Soldiers and Build Library planners.
 """
 from __future__ import annotations
 
 from flask import Blueprint, abort, render_template
 
 from app.repositories import campaigns as campaigns_repo
+from app.services import campaign_overview
 from app.services import campaign_sources as campaign_sources_service
 from app.services.campaign_context import set_active_campaign
 
@@ -30,4 +32,5 @@ def campaign_dashboard(campaign_id: int):
         "dashboard/campaign_dashboard.html",
         campaign=campaign,
         sources=campaign_sources_service.list_campaign_sources(campaign.id),
+        progression=campaign_overview.progression_summary(campaign),
     )

@@ -21,7 +21,7 @@
     <a class="card card--interactive" href="{{ url_for('content_sources.detail', source_id=source.id) }}" style="display:block;">
       <h3 class="card__title">{{ source.name }}</h3>
       <div class="cluster" style="margin-bottom:0.5rem;">
-        {{ ui.badge(source.kind | replace("_", " ") | title, "neutral") }}
+        {{ ui.badge(source.kind | source_kind, "neutral") }}
         {% if source.is_builtin %}{{ ui.badge("Built-in", "ready") }}{% endif %}
         {% if source.steam_workshop_id %}{{ ui.badge("Workshop", "warning") }}{% endif %}
       </div>

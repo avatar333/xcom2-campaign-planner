@@ -68,6 +68,10 @@ def create_app(config_name: str | None = None, instance_path: str | None = None)
     app.register_blueprint(soldiers_bp)
     app.register_blueprint(builds_bp)
 
+    from app.models.catalog import content_source_kind_label
+
+    app.add_template_filter(content_source_kind_label, "source_kind")
+
     @app.context_processor
     def inject_nav_context():
         from app.services.campaign_context import get_active_campaign

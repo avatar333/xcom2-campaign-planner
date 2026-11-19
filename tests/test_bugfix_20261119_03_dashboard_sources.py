@@ -106,7 +106,7 @@ def test_dashboard_shows_kind_precedence_and_status_alongside_the_name(app, clie
     campaign = new_campaign("Detail", "wotc-standard")
     html = client.get(dashboard_url(campaign)).get_data(as_text=True)
     rows = re.findall(r"<tr>\s*<td><a [^>]*>([^<]+)</a></td>\s*<td>([^<]*)</td>\s*<td>(\d+)</td>\s*<td>.*?(Enabled|Disabled).*?</td>", sources_table(html), re.DOTALL)
-    assert rows == [("XCOM 2", "Base", "0", "Enabled"), ("War of the Chosen", "Dlc", "1", "Enabled")]
+    assert rows == [("XCOM 2", "Base game", "0", "Enabled"), ("War of the Chosen", "DLC", "1", "Enabled")]
 
 
 # --------------------------------------------------------- shared source of truth

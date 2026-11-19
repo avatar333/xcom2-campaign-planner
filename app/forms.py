@@ -14,7 +14,7 @@ from wtforms import (
 from wtforms.validators import DataRequired, Length, Optional
 
 from app.models.campaign import CAMPAIGN_DIFFICULTIES
-from app.models.catalog import CONTENT_SOURCE_KINDS
+from app.models.catalog import CONTENT_SOURCE_KINDS, content_source_kind_label
 
 
 class CampaignForm(FlaskForm):
@@ -35,7 +35,7 @@ class ContentSourceForm(FlaskForm):
     name = StringField("Name", validators=[DataRequired(), Length(max=200)])
     kind = SelectField(
         "Kind",
-        choices=[(k, k.replace("_", " ").title()) for k in CONTENT_SOURCE_KINDS],
+        choices=[(k, content_source_kind_label(k)) for k in CONTENT_SOURCE_KINDS],
         default="workshop_mod",
     )
     version = StringField("Version", validators=[Optional(), Length(max=50)], default="1.0.0")

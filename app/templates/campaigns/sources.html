@@ -63,7 +63,7 @@
             {{ source.name if source else "Unknown source" }}
             {% if source and source.is_builtin %}{{ ui.badge("Built-in", "neutral") }}{% endif %}
           </td>
-          <td>{{ (source.kind if source else "") | replace("_", " ") | title }}</td>
+          <td>{{ (source.kind if source else "") | source_kind }}</td>
           <td>{{ ui.badge("Enabled" if assoc.enabled else "Disabled", "ready" if assoc.enabled else "unknown") }}</td>
           <td class="list-row-actions">
             <form method="post" action="{{ url_for('campaigns.toggle_source', campaign_id=campaign.id, source_id=assoc.content_source_id) }}">
@@ -92,7 +92,7 @@
     <div class="card">
       <h3 class="card__title">{{ source.name }}</h3>
       <div class="cluster" style="margin-bottom:0.5rem;">
-        {{ ui.badge(source.kind | replace("_", " ") | title, "neutral") }}
+        {{ ui.badge(source.kind | source_kind, "neutral") }}
         {% if source.is_builtin %}{{ ui.badge("Built-in", "ready") }}{% endif %}
       </div>
       {% if source.description %}<p class="card__meta">{{ source.description }}</p>{% endif %}

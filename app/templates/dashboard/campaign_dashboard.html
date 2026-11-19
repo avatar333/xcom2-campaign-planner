@@ -33,7 +33,7 @@
     {% for source in sources %}
       <tr>
         <td><a href="{{ url_for('content_sources.detail', source_id=source.source.id) }}">{{ source.name }}</a></td>
-        <td>{{ source.kind | replace("_", " ") | title }}</td>
+        <td>{{ source.kind | source_kind }}</td>
         <td>{{ source.precedence }}</td>
         <td>{{ ui.badge("Enabled" if source.enabled else "Disabled", "ready" if source.enabled else "unknown") }}</td>
       </tr>
@@ -46,10 +46,24 @@
 {% endif %}
 
 {{ ui.section_header("Progression") }}
-{{ ui.empty_state(
-  "Catalog and planning are coming in Phase 3-5",
-  "Research progress, engineering projects, the Avenger, your roster and plans will appear here once the catalog importer and planning engine are implemented.",
-  action_label="Preview Catalog",
-  action_url=url_for('catalog.index')
-) }}
+<div class="card-grid" data-testid="progression" style="margin-bottom:1.5rem;">
+  <a class="card card--interactive" href="{{ url_for('research.index', campaign_id=campaign.id) }}" style="display:block;" data-card="research">
+    <h3 class="card__title">Research</h3>
+    <div class="card__meta"><strong data-stat="research_completed">{{ progression.research_completed }}</strong> of {{ progression.research_total }} completed</div>
+    <div class="card__meta">{{ progression.research_in_progress }} in progress &middot; {{ progression.research_planned }} planned &middot; {{ progression.research_available }} available</div>
+  </a>
+  <a class="card card--interactive" href="{{ url_for('avenger.index', campaign_id=campaign.id) }}" style="display:block;" data-card="avenger">
+    <h3 class="card__title">Avenger</h3>
+    <div class="card__meta"><strong data-stat="facilities_built">{{ progression.facilities_built }}</strong> {{ 'facility' if progression.facilities_built == 1 else 'facilities' }} built</div>
+    <div class="card__meta">{{ progression.facilities_constructing }} constructing &middot; {{ progression.facilities_planned }} planned</div>
+  </a>
+  <a class="card card--interactive" href="{{ url_for('soldiers.index', campaign_id=campaign.id) }}" style="display:block;" data-card="soldiers">
+    <h3 class="card__title">Soldiers</h3>
+    <div class="card__meta"><strong data-stat="soldiers">{{ progression.soldiers }}</strong> on the roster</div>
+  </a>
+  <a class="card card--interactive" href="{{ url_for('builds.index', campaign_id=campaign.id) }}" style="display:block;" data-card="builds">
+    <h3 class="card__title">Build Library</h3>
+    <div class="card__meta"><strong data-stat="builds">{{ progression.builds }}</strong> saved {{ 'build' if progression.builds == 1 else 'builds' }}</div>
+  </a>
+</div>
 {% endblock %}

@@ -20,6 +20,22 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.models.base import CreatedAtMixin, Model, TimestampMixin
 
 CONTENT_SOURCE_KINDS = ("base", "dlc", "total_conversion", "workshop_mod", "user")
+# Human-readable names for the kinds above. Plain `.title()` renders "dlc" as
+# "Dlc", so labels are explicit; any kind added later falls back to title-case.
+CONTENT_SOURCE_KIND_LABELS = {
+    "base": "Base game",
+    "dlc": "DLC",
+    "total_conversion": "Total conversion",
+    "workshop_mod": "Workshop mod",
+    "user": "Custom",
+}
+
+
+def content_source_kind_label(kind: str | None) -> str:
+    if not kind:
+        return ""
+    return CONTENT_SOURCE_KIND_LABELS.get(kind, kind.replace("_", " ").title())
+
 CONTENT_SOURCE_RELATIONS = ("requires", "conflicts", "extends")
 ATTRIBUTE_DATA_TYPES = ("string", "integer", "number", "boolean", "enum", "text")
 ATTRIBUTE_DISPLAY_HINTS = ("badge", "stat_block", "paragraph", "hidden")

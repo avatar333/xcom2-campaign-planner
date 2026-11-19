@@ -7,7 +7,7 @@
     <div class="page-header__eyebrow">Content Source</div>
     <h1 class="page-header__title">{{ source.name }}</h1>
     <div class="cluster" style="margin-top:0.5rem;">
-      {{ ui.badge(source.kind | replace("_", " ") | title, "neutral") }}
+      {{ ui.badge(source.kind | source_kind, "neutral") }}
       {% if source.is_builtin %}{{ ui.badge("Built-in", "ready") }}{% endif %}
       {{ ui.badge("v" ~ source.version, "neutral") }}
     </div>
